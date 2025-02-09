@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 import subprocess
-import argparse
-from typing import List
 from pathlib import Path
+from typing import List
 
 
 def export_html_wasm(notebook_path: str, output_dir: str, as_app: bool = False) -> bool:
@@ -59,7 +59,7 @@ def generate_index(all_notebooks: List[str], output_dir: str) -> None:
   </head>
   <body class="font-sans max-w-2xl mx-auto p-8 leading-relaxed">
     <div class="mb-8">
-      <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/marimo-logotype-thick.svg" alt="marimo" class="h-20" />
+      <img src="https://www.lukeschiefelbein.com/img/frontpage-wobble.png" alt="marimo" class="h-20" />
     </div>
     <div class="grid gap-4">
 """
@@ -87,9 +87,7 @@ def generate_index(all_notebooks: List[str], output_dir: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build marimo notebooks")
-    parser.add_argument(
-        "--output-dir", default="_site", help="Output directory for built files"
-    )
+    parser.add_argument("--output-dir", default="_site", help="Output directory for built files")
     args = parser.parse_args()
 
     all_notebooks: List[str] = []

@@ -1,3 +1,6 @@
+# TODO:
+- convert other notebook cells using few-shot prompts
+
 # marimo WebAssembly + GitHub Pages Template
 
 This template repository demonstrates how to export [marimo](https://marimo.io) notebooks to WebAssembly and deploy them to GitHub Pages.

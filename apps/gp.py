@@ -488,7 +488,45 @@ def _(mo):
 
         In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
 
+        In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single valueWhat about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
+
+        So while a single Gaussian is this:
+
+        $$
+        Y \sim N(\mu, \sigma^2)
+        $$
+
+        Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
+
+        $$
+        \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
+        $$
+
+        Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
+
+        $$
+        \boldsymbol{\mu} = \begin{bmatrix}
+        \mu_1 \\
+        \mu_2 \\
+        \vdots \\
+        \mu_n
+        \end{bmatrix},
+        $$
+
+        $$
+        \qquad
+        \Sigma = \begin{bmatrix}
+        \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
+        \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
+        \end{bmatrix}.
+        $$
+
+        In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
+
         In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value
+
         """
     )
     return

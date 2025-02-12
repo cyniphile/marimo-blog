@@ -1,8 +1,13 @@
 # TODO:
 - make mobile optimized
-  - make legend better
+  - make legends better
+  - stack some charts
+  - make blue colored font better
 - make this work: https://marimo.io/p/@marimo/interactive-matrices
 - latex matrices fucking up
+- blog integration
+  - port other posts
+- caching to make better load time
 
 
 ## 📚 Included Examples

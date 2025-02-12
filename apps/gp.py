@@ -6,31 +6,36 @@ app = marimo.App()
 
 @app.cell
 def _():
-    #@title
+    # @title
+    import altair as alt
+    import marimo as mo
     import numpy as np
-    from plotly.subplots import make_subplots
-    import plotly.graph_objs as go
+    import pandas as pd
     import plotly.express as px
-    from IPython.display import display
-    from IPython.core.display import HTML
+    import plotly.graph_objs as go
     import scipy as sp
     import seaborn as sns
-    import pandas as pd
+    from IPython.core.display import HTML
+    from IPython.display import display
     from matplotlib import pyplot as plt
-    import wigglystuff
+    from plotly.subplots import make_subplots
+    from wigglystuff import Matrix
+
     np.random.seed(42)
     return (
         HTML,
+        Matrix,
+        alt,
         display,
         go,
         make_subplots,
+        mo,
         np,
         pd,
         plt,
         px,
         sns,
         sp,
-        wigglystuff,
     )
 
 
@@ -124,8 +129,8 @@ def _(np, plt, sns):
     y_noise = x_reg + np.random.normal(0, NOISE_VARIANCE, 10)
     LOW_NOISE_VARIANCE = 0.1
     y_low_noise = x_reg + np.random.normal(0, LOW_NOISE_VARIANCE, 10)
-    sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None).set_title('a')
-    sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title('b')
+    sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None).set_title("a")
+    sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title("b")
     return (
         LOW_NOISE_VARIANCE,
         NOISE_VARIANCE,
@@ -145,7 +150,7 @@ def _(mo):
 
         What if (just for fun) we assumed $\beta_0$ and $\beta_1$ were actually random variables, and that they are normally distributed with variance equal to the variance in the data? Then our linear regression equation would look like this:
 
-        y=B0+B1xy = B_0 + B_1 x
+        $y = B_0 + B_1 x$
 
         where we've converted our betas to random variables as follows:
 
@@ -197,15 +202,8 @@ def _(
     y_low_noise,
     y_noise,
 ):
-    # Example data and parameters (replace with your actual data/values)
-    _x_reg = np.linspace(-3, 3, 50)
-    _NOISE_VARIANCE = 0.2
-    _LOW_NOISE_VARIANCE = 0.05
-
     # Synthetic data for demonstration
     np.random.seed(42)
-    _y_noise = 2*x_reg + np.random.normal(0, 1, len(x_reg))
-    _y_low_noise = 2*x_reg + np.random.normal(0, 0.2, len(x_reg))
 
     # Initial parameters
     beta_0 = 0
@@ -213,7 +211,7 @@ def _(
     beta_1_1 = np.corrcoef(x_reg, y_noise)[0, 1] * np.std(y_noise) / np.std(x_reg)
 
     # Prepare figure and traces
-    _fig = make_subplots(rows=1, cols=2, subplot_titles=('a', 'b'))
+    _fig = make_subplots(rows=1, cols=2, subplot_titles=("a", "b"))
     _fig.update_yaxes(range=[-5, 5], fixedrange=True)
     _fig.update_xaxes(range=[-3, 3], fixedrange=True)
 
@@ -222,76 +220,75 @@ def _(
     line_2 = x_reg * beta_1 + beta_0
 
     # Create scatter/line plots for first column
-    scatter_fig = go.Scatter(x=x_reg, y=y_noise, mode='markers', marker=dict(size=10), name="Noisy Data")
-    line_fig = go.Scatter(x=x_reg, y=line_1, mode='lines', name="Inital Fit Noisy")
+    scatter_fig = go.Scatter(
+        x=x_reg, y=y_noise, mode="markers", marker=dict(size=10), name="Noisy Data"
+    )
+    line_fig = go.Scatter(x=x_reg, y=line_1, mode="lines", name="Initial Fit Noisy")
     _fig.add_trace(scatter_fig, row=1, col=1)
-    _fig.add_trace(line_fig,   row=1, col=1)
+    _fig.add_trace(line_fig, row=1, col=1)
 
     # Create scatter/line plots for second column
-    scatter_fig2 = go.Scatter(x=x_reg, y=y_low_noise, mode='markers', marker=dict(size=10), name="Low Noise Data")
-    line_fig2 = go.Scatter(x=x_reg, y=line_2, mode='lines', name="Initial Fit Low Noise")
+    scatter_fig2 = go.Scatter(
+        x=x_reg, y=y_low_noise, mode="markers", marker=dict(size=10), name="Low Noise Data"
+    )
+    line_fig2 = go.Scatter(x=x_reg, y=line_2, mode="lines", name="Initial Fit Low Noise")
     _fig.add_trace(scatter_fig2, row=1, col=2)
-    _fig.add_trace(line_fig2,   row=1, col=2)
+    _fig.add_trace(line_fig2, row=1, col=2)
 
     # Adjust margins to make them smaller
     # _fig.update_layout(
     #     margin=dict(l=10, r=10, t=40, b=40),  # Adjust these values to reduce margins
     # )
 
-
     get_fig, set_fig = mo.state(_fig)
 
     def add_plot_to_fig(_):
         fig = get_fig()
-        beta_0_rand  = np.random.normal(beta_0,   NOISE_VARIANCE,     1)
-        beta_1_rand  = np.random.normal(beta_1_1, NOISE_VARIANCE,     1)
-        beta_0_rand2 = np.random.normal(beta_0,   LOW_NOISE_VARIANCE, 1)
-        beta_1_rand2 = np.random.normal(beta_1,   LOW_NOISE_VARIANCE, 1)
+        beta_0_rand = np.random.normal(beta_0, NOISE_VARIANCE, 1)
+        beta_1_rand = np.random.normal(beta_1_1, NOISE_VARIANCE, 1)
+        beta_0_rand2 = np.random.normal(beta_0, LOW_NOISE_VARIANCE, 1)
+        beta_1_rand2 = np.random.normal(beta_1, LOW_NOISE_VARIANCE, 1)
 
-        line_data  = x_reg * beta_1_rand  + beta_0_rand
+        line_data = x_reg * beta_1_rand + beta_0_rand
         line_data2 = x_reg * beta_1_rand2 + beta_0_rand2
 
         new_data = {
-            'type': 'scatter',
-            'x': x_reg,
-            'y': line_data,
-            'mode': 'lines',
-            'xaxis': 'x',
-            'yaxis': 'y',
-            'name': f'$B_0a: {beta_0_rand[0]:.2f}, B_1a: {beta_1_rand[0]:.2f}$'
+            "type": "scatter",
+            "x": x_reg,
+            "y": line_data,
+            "mode": "lines",
+            "xaxis": "x",
+            "yaxis": "y",
+            "name": f"$B_0a: {beta_0_rand[0]:.2f}, B_1a: {beta_1_rand[0]:.2f}$",
         }
         fig.add_trace(new_data, row=1, col=1)
 
         # Append new line to the right subplot (col=2)
-        fig.add_trace({
-            'type': 'scatter',
-            'x': x_reg,
-            'y': line_data2,
-            'mode': 'lines',
-            'xaxis': 'x2',
-            'yaxis': 'y2',
-            'name': f'$B_0b: {beta_0_rand2[0]:.2f}, B_1b: {beta_1_rand2[0]:.2f}$'
-        }, row=1, col=2)
+        fig.add_trace(
+            {
+                "type": "scatter",
+                "x": x_reg,
+                "y": line_data2,
+                "mode": "lines",
+                "xaxis": "x2",
+                "yaxis": "y2",
+                "name": f"$B_0b: {beta_0_rand2[0]:.2f}, B_1b: {beta_1_rand2[0]:.2f}$",
+            },
+            row=1,
+            col=2,
+        )
         set_fig(fig)
         return
 
-    button = mo.ui.button(
-        value=0, on_click=add_plot_to_fig, label="New Sample", kind="neutral"
-    )
-
-
+    button = mo.ui.button(value=0, on_click=add_plot_to_fig, label="New Sample", kind="neutral")
 
     def reset(_):
         fig = get_fig()
-        fig['data'] = fig['data'][:4]
+        fig["data"] = fig["data"][:4]
         set_fig(fig)
 
-    clear_button = mo.ui.button(
-        value=0, on_click=reset, label="Reset", kind="danger"
-    )
+    clear_button = mo.ui.button(value=0, on_click=reset, label="Reset", kind="danger")
     clear_button
-
-
 
     mo.hstack([button, clear_button])
     return (
@@ -365,16 +362,14 @@ def _(go, mo, np):
     START = -10
     END = 10
     x = np.random.normal(0, 1, size=SIZE)
-    hist_trace = go.Histogram(x=x, xbins=dict(
-            start=START,
-            end=END,
-            size=0.1  # whatever bin width you want
-        ))
+    hist_trace = go.Histogram(
+        x=x, xbins=dict(start=START, end=END, size=0.1)  # whatever bin width you want
+    )
     fig_hist = go.Figure(hist_trace)
     fig_hist.update_layout(
         title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
         xaxis=dict(title="Value", range=[START, END], fixedrange=True),
-        yaxis=dict(title="Count")
+        yaxis=dict(title="Count"),
     )
 
     # 2. Store the figure and the slider states
@@ -382,7 +377,9 @@ def _(go, mo, np):
     fig_hist.update_layout(
         title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
         xaxis=dict(title="Value", range=[START, END], fixedrange=True),
-        yaxis=dict(title="Count", range=[0, int(SIZE * .1)], fixedrange=True)  # Adjust the y-axis range as needed
+        yaxis=dict(
+            title="Count", range=[0, int(SIZE * 0.1)], fixedrange=True
+        ),  # Adjust the y-axis range as needed
     )
     mean_state, set_mean_state = mo.state(0.0)
     variance_state, set_variance_state = mo.state(1.0)
@@ -411,18 +408,16 @@ def _(go, mo, np):
 
     # 5. Create the sliders
     mean_slider = mo.ui.slider(
-        value=mean_state(),
-        start=-5, stop=5, step=0.1,
-        on_change=on_mean_change,
-        label="Mean"
+        value=mean_state(), start=-5, stop=5, step=0.1, on_change=on_mean_change, label="Mean"
     )
     variance_slider = mo.ui.slider(
         value=variance_state(),
-        start=0.1, stop=5, step=0.1,
+        start=0.1,
+        stop=5,
+        step=0.1,
         on_change=on_variance_change,
-        label="Variance"
+        label="Variance",
     )
-
 
     # 6. Lay out sliders and the figure
     mo.hstack([mean_slider, variance_slider])
@@ -452,6 +447,7 @@ def _(mo):
     mo.md(
         r"""
         What about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
+
 
         So while a single Gaussian is this:
 
@@ -526,7 +522,6 @@ def _(mo):
         In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
 
         In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value
-
         """
     )
     return
@@ -536,40 +531,30 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        Nothing too crazy right? The biggest difference is that the multivariate normal distribution has a covariance matrix. 
+        Nothing too crazy right? Well, except that the multivariate normal distribution has a covariance _matrix_, not just a variance.
 
-        In the covariance matrix we specify not only the variance of each variable, but also the covariance between each variable and every other. So each of the $n$ variables in a multivariate Gaussian can be correlated with each other. Below is an overhead view of a bunch of samples for a 2D multivariate Gaussian distribution. You can interactively change the covariance matrix to see how it affects the distribution.
+        In the covariance matrix we specify not only the variance of each variable, but also the covariance between each variable and every other. Each of the $n$ variables in a multivariate Gaussian can be correlated with each other. Below is an overhead view of a bunch of samples for a 2D multivariate Gaussian distribution. You can interactively change the covariance matrix to see how it affects the distribution.
         """
     )
     return
 
 
 @app.cell
-def _(mo, np, pd):
-    from wigglystuff import Matrix
-    import altair as alt
-
+def _(Matrix, alt, mo, np, pd):
     x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
     df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
 
     mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
     arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))
     x_sim = np.random.multivariate_normal(
-        np.array(arr.matrix).reshape(-1), 
-        np.array(mat.matrix), 
-        2500
+        np.array(arr.matrix).reshape(-1), np.array(mat.matrix), 2500
     )
     df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
-    chart_sim = (
-        alt.Chart(df_sim).mark_point().encode(x="x", y="y")
-    )
+    chart_sim = alt.Chart(df_sim).mark_point().encode(x="x", y="y")
 
-
-    mo.vstack([
-        mo.hstack([arr, mat, chart_sim])
-    ])
-    return Matrix, alt, arr, chart_sim, df_orig, df_sim, mat, x_orig, x_sim
+    mo.vstack([mo.hstack([arr, mat, chart_sim])])
+    return arr, chart_sim, df_orig, df_sim, mat, x_orig, x_sim
 
 
 @app.cell(hide_code=True)
@@ -601,27 +586,68 @@ def _(mo):
 
 
 @app.cell
-def _(Input, JupyterDash, Output, State, dash, dcc, go, html, np):
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    layout = go.Layout(title='Samples from a 1-D Gaussian Distribution')
-    _fig_1d = go.FigureWidget(go.Figure(data=[_scatter], layout=layout))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+def _(get_fig2):
+    get_fig2()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            x = ['1']
-            y = np.random.normal(size=1)
-            _scatter = go.Scatter(x=x, y=y, mode='markers', name=f'Sample {new_clicks}')
-            return _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = []
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8053')
-    return (layout,)
+
+@app.cell
+def _(go, mo, np):
+    # 1) Create and store an initial figure in Marimo state
+    initial_fig = go.Figure(
+        data=[go.Scatter(mode="markers")],
+        layout=go.Layout(title="Samples from a 1-D Gaussian Distribution"),
+    )
+    get_fig2, set_fig2 = mo.state(initial_fig)
+    get_clicks2, set_clicks2 = mo.state(0)
+
+    # 2) Define the callbacks that change the figure
+    def add_sample(_):
+        """Add a new random sample (1 point) to the figure."""
+        fig = get_fig2()
+        # We just stack data on top of the existing figure
+        x = ["1"]
+        y = np.random.normal(size=1)
+        scatter = go.Scatter(x=x, y=y, mode="markers", name=f"Sample {get_clicks2()}")
+        fig.add_trace(scatter)
+        set_fig2(fig)  # update our global figure state
+        set_clicks2(get_clicks2()+1)
+        
+    def clear_data(_):
+        """Clear all the data from the figure."""
+        fig = get_fig2()
+        fig.data = []
+        set_fig2(fig)
+        set_clicks2(0)
+
+    # 3) Create the UI buttons, each calling its respective callback
+    btn_new_sample = mo.ui.button(
+        value=0, 
+        on_click=add_sample, 
+        label="New Sample", 
+        kind="neutral"
+    )
+    btn_clear = mo.ui.button(
+        value=get_clicks2(), 
+        on_click=clear_data, 
+        label="Clear", 
+        kind="danger"
+    )
+
+    # 4) Lay out the two buttons and the figure
+    mo.hstack([btn_new_sample, btn_clear])
+
+    return (
+        add_sample,
+        btn_clear,
+        btn_new_sample,
+        clear_data,
+        get_clicks2,
+        get_fig2,
+        initial_fig,
+        set_clicks2,
+        set_fig2,
+    )
 
 
 @app.cell(hide_code=True)
@@ -637,27 +663,69 @@ def _(mo):
 
 
 @app.cell
-def _(Input, JupyterDash, Output, State, dash, dcc, go, html, np):
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    layout_1 = go.Layout(title='Samples from a 2-D Gaussian Distribution')
-    _fig_1d = go.FigureWidget(go.Figure(data=[_scatter], layout=layout_1))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+def _(get_fig_2d):
+    get_fig_2d()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            x = ['1', '2']
-            y = np.random.normal(size=2)
-            _scatter = go.Scatter(x=x, y=y, mode='markers', name=f'Sample {new_clicks}')
-            return _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = []
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8054')
-    return (layout_1,)
+
+@app.cell
+def _(go, mo, np):
+    # 2D Figure: "Samples from a 2-D Gaussian Distribution"
+    init_scatter_2d = go.Scatter(mode="markers")
+    init_layout_2d = go.Layout(title="Samples from a 2-D Gaussian Distribution")
+    init_fig_2d = go.Figure(data=[init_scatter_2d], layout=init_layout_2d)
+
+    get_fig_2d, set_fig_2d = mo.state(init_fig_2d)
+    get_clicks_2d, set_clicks_2d = mo.state(0)
+
+    def add_sample_2d(_):
+        fig_2d = get_fig_2d()
+        x_2d = ["1", "2"]
+        y_2d = np.random.normal(size=2)
+        new_scatter_2d = go.Scatter(
+            x=x_2d,
+            y=y_2d,
+            mode="markers",
+            name=f"Sample {get_clicks_2d()}"
+        )
+        fig_2d.add_trace(new_scatter_2d)
+        set_fig_2d(fig_2d)
+        set_clicks_2d(get_clicks_2d() + 1)
+
+    def clear_data_2d(_):
+        fig_2d = get_fig_2d()
+        fig_2d.data = []
+        set_fig_2d(fig_2d)
+        set_clicks_2d(0)
+
+    btn_new_sample_2d = mo.ui.button(
+        value=0,
+        on_click=add_sample_2d,
+        label="New Sample",
+        kind="neutral"
+    )
+    btn_clear_2d = mo.ui.button(
+        value=get_clicks_2d(),
+        on_click=clear_data_2d,
+        label="Clear",
+        kind="danger"
+    )
+
+    mo.hstack([btn_new_sample_2d, btn_clear_2d])
+
+    return (
+        add_sample_2d,
+        btn_clear_2d,
+        btn_new_sample_2d,
+        clear_data_2d,
+        get_clicks_2d,
+        get_fig_2d,
+        init_fig_2d,
+        init_layout_2d,
+        init_scatter_2d,
+        set_clicks_2d,
+        set_fig_2d,
+    )
 
 
 @app.cell(hide_code=True)
@@ -667,27 +735,69 @@ def _(mo):
 
 
 @app.cell
-def _(Input, JupyterDash, Output, State, dash, dcc, go, html, np):
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    layout_2 = go.Layout(title='Samples from a 3-D Gaussian Distribution')
-    _fig_1d = go.FigureWidget(go.Figure(data=[_scatter], layout=layout_2))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+def _(get_fig_3d):
+    get_fig_3d()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            x = ['1', '2', '3']
-            y = np.random.normal(size=3)
-            _scatter = go.Scatter(x=x, y=y, mode='markers', name=f'Sample {new_clicks}')
-            return _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = []
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8055')
-    return (layout_2,)
+
+@app.cell
+def _(go, mo, np):
+    # 3D Figure: "Samples from a 3-D Gaussian Distribution"
+    init_scatter_3d = go.Scatter(mode="markers")
+    init_layout_3d = go.Layout(title="Samples from a 3-D Gaussian Distribution")
+    init_fig_3d = go.Figure(data=[init_scatter_3d], layout=init_layout_3d)
+
+    get_fig_3d, set_fig_3d = mo.state(init_fig_3d)
+    get_clicks_3d, set_clicks_3d = mo.state(0)
+
+    def add_sample_3d(_):
+        fig_3d = get_fig_3d()
+        x_3d = ["1", "2", "3"]
+        y_3d = np.random.normal(size=3)
+        new_scatter_3d = go.Scatter(
+            x=x_3d,
+            y=y_3d,
+            mode="markers",
+            name=f"Sample {get_clicks_3d()}"
+        )
+        fig_3d.add_trace(new_scatter_3d)
+        set_fig_3d(fig_3d)
+        set_clicks_3d(get_clicks_3d() + 1)
+
+    def clear_data_3d(_):
+        fig_3d = get_fig_3d()
+        fig_3d.data = []
+        set_fig_3d(fig_3d)
+        set_clicks_3d(0)
+
+    btn_new_sample_3d = mo.ui.button(
+        value=0,
+        on_click=add_sample_3d,
+        label="New Sample",
+        kind="neutral"
+    )
+    btn_clear_3d = mo.ui.button(
+        value=get_clicks_3d(),
+        on_click=clear_data_3d,
+        label="Clear",
+        kind="danger"
+    )
+
+    mo.hstack([btn_new_sample_3d, btn_clear_3d])
+
+    return (
+        add_sample_3d,
+        btn_clear_3d,
+        btn_new_sample_3d,
+        clear_data_3d,
+        get_clicks_3d,
+        get_fig_3d,
+        init_fig_3d,
+        init_layout_3d,
+        init_scatter_3d,
+        set_clicks_3d,
+        set_fig_3d,
+    )
 
 
 @app.cell(hide_code=True)
@@ -697,30 +807,82 @@ def _(mo):
 
 
 @app.cell
-def _(Input, JupyterDash, Output, State, dash, dcc, go, html, np):
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    layout_3 = go.Layout(title='Samples from a 100-D Gaussian Distribution')
-    _fig_1d = go.FigureWidget(go.Figure(data=[_scatter], layout=layout_3))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Connect Samples', id='connect-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+def _(get_fig_100d):
+    get_fig_100d()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('connect-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, connect_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            x = np.arange(100)
-            y = np.random.normal(size=100)
-            _scatter = go.Scatter(x=x, y=y, mode='markers', name=f'Sample {new_clicks}')
-            return _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = []
-        elif 'connect-btn' in dash.callback_context.triggered[0]['prop_id']:
-            for f in _fig.data:
-                f['mode'] = 'lines+markers'
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8056')
-    return (layout_3,)
+
+@app.cell
+def _(go, mo, np):
+    # 100D Figure: "Samples from a 100-D Gaussian Distribution"
+    init_scatter_100d = go.Scatter(mode="markers")
+    init_layout_100d = go.Layout(title="Samples from a 100-D Gaussian Distribution")
+    init_fig_100d = go.Figure(data=[init_scatter_100d], layout=init_layout_100d)
+
+    get_fig_100d, set_fig_100d = mo.state(init_fig_100d)
+    get_clicks_100d, set_clicks_100d = mo.state(0)
+
+    def add_sample_100d(_):
+        fig_100d = get_fig_100d()
+        x_vals_100d = np.arange(100)
+        y_vals_100d = np.random.normal(size=100)
+        new_scatter_100d = go.Scatter(
+            x=x_vals_100d,
+            y=y_vals_100d,
+            mode="markers",
+            name=f"Sample {get_clicks_100d()}"
+        )
+        fig_100d.add_trace(new_scatter_100d)
+        set_fig_100d(fig_100d)
+        set_clicks_100d(get_clicks_100d() + 1)
+
+    def connect_samples_100d(_):
+        fig_100d = get_fig_100d()
+        for trace in fig_100d.data:
+            trace["mode"] = "lines+markers"
+        set_fig_100d(fig_100d)
+
+    def clear_data_100d(_):
+        fig_100d = get_fig_100d()
+        fig_100d.data = []
+        set_fig_100d(fig_100d)
+        set_clicks_100d(0)
+
+    btn_new_sample_100d = mo.ui.button(
+        value=0,
+        on_click=add_sample_100d,
+        label="New Sample",
+        kind="neutral"
+    )
+    btn_connect_100d = mo.ui.button(
+        label="Connect Samples",
+        on_click=connect_samples_100d,
+        kind="neutral"
+    )
+    btn_clear_100d = mo.ui.button(
+        value=get_clicks_100d(),
+        on_click=clear_data_100d,
+        label="Clear",
+        kind="danger"
+    )
+
+    mo.hstack([btn_new_sample_100d, btn_connect_100d, btn_clear_100d])
+
+    return (
+        add_sample_100d,
+        btn_clear_100d,
+        btn_connect_100d,
+        btn_new_sample_100d,
+        clear_data_100d,
+        connect_samples_100d,
+        get_clicks_100d,
+        get_fig_100d,
+        init_fig_100d,
+        init_layout_100d,
+        init_scatter_100d,
+        set_clicks_100d,
+        set_fig_100d,
+    )
 
 
 @app.cell(hide_code=True)
@@ -779,7 +941,7 @@ def _(mo):
 
 @app.cell
 def _(np, plt, sns):
-    #@title
+    # @title
     sns.heatmap(np.identity(100))
     plt.show()
     return
@@ -793,8 +955,9 @@ def _(mo):
 
 @app.cell
 def _(HTML):
-    #@title
-    HTML('''
+    # @title
+    HTML(
+        """
     <span class="hover-text">Hover for answer</span>:
 
     <span class="hidden-text">INDEPENDENT!</span>
@@ -809,7 +972,8 @@ def _(HTML):
         font: 50px;
       }
     </style>
-    ''')
+    """
+    )
     return
 
 
@@ -832,18 +996,25 @@ def _(mo):
 @app.cell
 def _(np, sp):
     def pairwise_rbf(xa, xb, l=5):
-        sq_norm = -0.5 / l ** 2 * sp.spatial.distance.cdist(_xa, xb, 'sqeuclidean')
+        sq_norm = -0.5 / l**2 * sp.spatial.distance.cdist(xa, xb, "sqeuclidean")
         return np.exp(sq_norm)
     return (pairwise_rbf,)
 
 
 @app.cell
-def _(np, pairwise_rbf, pd, sns):
+def _(np, pairwise_rbf, pd, slider_l, sns):
     _xa = np.arange(0, 100, 1).reshape(1, -1).T
-    xb = np.arange(0, 100, 1).reshape(1, -1).T
-    _C = pd.DataFrame(pairwise_rbf(_xa, xb))
-    _ = sns.heatmap(_C)
-    return (xb,)
+    _xb = np.arange(0, 100, 1).reshape(1, -1).T
+    C = pd.DataFrame(pairwise_rbf(_xa, _xb, slider_l.value))
+    sns.heatmap(C).set_title(f"$l$={slider_l.value}")
+    return (C,)
+
+
+@app.cell
+def _(mo):
+    slider_l = mo.ui.slider(start=1, stop=10)
+    slider_l
+    return (slider_l,)
 
 
 @app.cell(hide_code=True)
@@ -852,6 +1023,8 @@ def _(mo):
         r"""
         It looks very similar, but it's "fuzzier" around the diagonal. Think about what type of values you would expect from a Gaussian with this covariance matrix.
 
+        Try playing around with the l slider TODO:
+
         It's saying that variables near each other are more correlated than variables far away. For example variable 1 is more correlated with variable 2 than it is with variable 100. Let visualize some samples from a 100-d Gaussian with this new covariance matrix. But before you hit the "sample" button, what do you think these new curves will look like?
         """
     )
@@ -859,39 +1032,76 @@ def _(mo):
 
 
 @app.cell
-def _(
-    Input,
-    JupyterDash,
-    Output,
-    State,
-    dash,
-    dcc,
-    go,
-    html,
-    np,
-    pairwise_rbf,
-):
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    layout_4 = go.Layout(title='Samples from a 100-D Gaussian Distribution with "Fuzzy" Covariance')
-    _fig_1d = go.FigureWidget(go.Figure(data=[_scatter], layout=layout_4))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+def _(get_fig_fuzzy):
+    get_fig_fuzzy()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            x = np.linspace(0, 100, 100)
-            cov = pairwise_rbf(x.reshape(-1, 1), x.reshape(-1, 1))
-            y = np.random.multivariate_normal(mean=np.zeros(100), cov=cov, size=1)[0]
-            _scatter = go.Scatter(x=x, y=y, mode='lines+markers', name=f'Sample {new_clicks}')
-            return _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = []
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8057')
-    return (layout_4,)
+
+@app.cell
+def _(go, mo, np, pairwise_rbf, slider_l):
+    # 1) Create an initial figure
+    init_scatter_fuzzy = go.Scatter(mode="markers")
+    init_layout_fuzzy = go.Layout(
+        title='Samples from a 100-D Gaussian Distribution with "Fuzzy" Covariance'
+    )
+    init_fig_fuzzy = go.Figure(data=[init_scatter_fuzzy], layout=init_layout_fuzzy)
+
+    # 2) Store the figure in Marimo's state, plus a sample-count state
+    get_fig_fuzzy, set_fig_fuzzy = mo.state(init_fig_fuzzy)
+    get_clicks_fuzzy, set_clicks_fuzzy = mo.state(0)
+
+    def add_sample_fuzzy(_):
+        """Add a new random sample using a 'fuzzy' covariance matrix."""
+        fig_fuzzy = get_fig_fuzzy()
+        x = np.linspace(0, 100, 100)
+        cov = pairwise_rbf(x.reshape(-1, 1), x.reshape(-1, 1), l=slider_l.value)
+        y = np.random.multivariate_normal(mean=np.zeros(100), cov=cov, size=1)[0]
+        sample_num = get_clicks_fuzzy()
+        new_scatter_fuzzy = go.Scatter(
+            x=x,
+            y=y,
+            mode="lines+markers",
+            name=f"Sample {sample_num}",
+        )
+        fig_fuzzy.add_trace(new_scatter_fuzzy)
+        set_fig_fuzzy(fig_fuzzy)
+        set_clicks_fuzzy(sample_num + 1)
+
+    def clear_data_fuzzy(_):
+        """Clear all data from the fuzzy-covariance figure."""
+        fig_fuzzy = get_fig_fuzzy()
+        fig_fuzzy.data = []
+        set_fig_fuzzy(fig_fuzzy)
+        set_clicks_fuzzy(0)
+
+    # 3) Create the UI buttons
+    btn_new_sample_fuzzy = mo.ui.button(
+        label="New Sample",
+        on_click=add_sample_fuzzy,
+        kind="neutral"
+    )
+    btn_clear_fuzzy = mo.ui.button(
+        value=get_clicks_fuzzy(),
+        on_click=clear_data_fuzzy,
+        label="Clear",
+        kind="danger"
+    )
+
+    # 4) Layout: Place the buttons side-by-side and display the figure
+    mo.hstack([btn_new_sample_fuzzy, btn_clear_fuzzy])
+    return (
+        add_sample_fuzzy,
+        btn_clear_fuzzy,
+        btn_new_sample_fuzzy,
+        clear_data_fuzzy,
+        get_clicks_fuzzy,
+        get_fig_fuzzy,
+        init_fig_fuzzy,
+        init_layout_fuzzy,
+        init_scatter_fuzzy,
+        set_clicks_fuzzy,
+        set_fig_fuzzy,
+    )
 
 
 @app.cell(hide_code=True)
@@ -915,6 +1125,7 @@ def _(mo):
         The answer lies in how we define the covariance and mean of our multivariate Gaussian. So far we've been manually inputting some mean vector and covariance matrix. Since these are objects with discrete, finite elements, we can't really think of the distributions they define as functions. But what if we could redefine these objects (the mean and covariance) as functions? 
 
         Mathematically:
+
         $$
         \boldsymbol{\mu} = m(\textbf{x}) \\
         \Sigma = k(\textbf{x, x})
@@ -933,6 +1144,7 @@ def _(mo):
         $$
         \boldsymbol{\mu} = m(\textbf{x}) = \textbf{x} = [-\pi, \pi, 2\pi]^T\\
         $$
+
         $$
         \Sigma = k(\textbf{x}, \textbf{x}) = \operatorname{diag}(\textbf{x}\odot\textbf{x}) = \begin{bmatrix}
         (-\pi)^2 & 0 & 0 \\
@@ -941,6 +1153,8 @@ def _(mo):
         \end{bmatrix}
         $$
 
+        TODO: explain the circle dot symbol
+
         Now we can sample from a multivariate Gaussian at these specific values of $x$:
         """
     )
@@ -948,44 +1162,83 @@ def _(mo):
 
 
 @app.cell
-def _(
-    Input,
-    JupyterDash,
-    Output,
-    State,
-    dash,
-    dcc,
-    go,
-    html,
-    layout_4,
-    np,
-):
+def _(get_fig_real):
+    get_fig_real()
+    return
+
+
+@app.cell
+def _(go, mo, np):
+    # Define the index points, mean function, and covariance function
     x_specific = np.array([-np.pi, np.pi, 2 * np.pi])
     _m = lambda x: x
-    _k = lambda x: np.diag(x ** 2)
-    _scatter = go.Scatter(mode='markers')
-    fig_real = go.FigureWidget(go.Figure(data=[_scatter], layout=layout_4))
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    layout_5 = go.Layout(title='Samples from a Multivariate Gaussian at Real-Valued Indices')
-    _fig_1d = go.FigureWidget(go.Figure(data=[_scatter], layout=layout_5))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+    _k = lambda x: np.diag(x**2)
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            cov = _k(x_specific)
-            mean = _m(x_specific)
-            y = np.random.multivariate_normal(mean=mean, cov=cov, size=1)[0]
-            _scatter = go.Scatter(x=x_specific, y=y, mode='lines+markers', name=f'Sample {new_clicks}')
-            _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = []
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8058')
-    return fig_real, layout_5, x_specific
+    # 1) Create a figure with an initial (empty) scatter trace
+    init_scatter_real = go.Scatter(mode="markers")
+    init_layout_real = go.Layout(title="Samples from a Multivariate Gaussian at Real-Valued Indices")
+    init_fig_real = go.Figure(data=[init_scatter_real], layout=init_layout_real)
+
+    # 2) Use Marimo state to keep track of the figure and click count
+    get_fig_real, set_fig_real = mo.state(init_fig_real)
+    get_clicks_real, set_clicks_real = mo.state(0)
+
+    # 3) Define the callbacks
+    def add_sample_real(_):
+        fig_real = get_fig_real()
+        # Build covariance and mean
+        cov = _k(x_specific)
+        mean = _m(x_specific)
+        # Draw one sample from the multivariate normal
+        y = np.random.multivariate_normal(mean=mean, cov=cov, size=1)[0]
+        
+        sample_num = get_clicks_real()
+        new_scatter_real = go.Scatter(
+            x=x_specific,
+            y=y,
+            mode="lines+markers",
+            name=f"Sample {sample_num}",
+        )
+        fig_real.add_trace(new_scatter_real)
+        
+        set_fig_real(fig_real)
+        set_clicks_real(sample_num + 1)
+
+    def clear_data_real(_):
+        fig_real = get_fig_real()
+        fig_real.data = []
+        set_fig_real(fig_real)
+        set_clicks_real(0)
+
+    # 4) Build UI: two buttons + the figure
+    btn_new_sample_real = mo.ui.button(
+        label="New Sample",
+        on_click=add_sample_real,
+        kind="neutral"
+    )
+    btn_clear_real = mo.ui.button(
+        value=get_clicks_real(),
+        on_click=clear_data_real,
+        label="Clear",
+        kind="danger"
+    )
+
+    mo.hstack([btn_new_sample_real, btn_clear_real])
+
+    return (
+        add_sample_real,
+        btn_clear_real,
+        btn_new_sample_real,
+        clear_data_real,
+        get_clicks_real,
+        get_fig_real,
+        init_fig_real,
+        init_layout_real,
+        init_scatter_real,
+        set_clicks_real,
+        set_fig_real,
+        x_specific,
+    )
 
 
 @app.cell(hide_code=True)
@@ -995,31 +1248,14 @@ def _(mo):
 
 
 @app.cell
-def _(Input, JupyterDash, Output, State, dash, dcc, go, html, np):
-    x_real_big = np.linspace(-1, 1, 100)
-    _m = lambda x: x
-    _k = lambda x: np.diag(x ** 2)
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    layout_6 = go.Layout(title='Samples from a 100-D Multivariate Gaussian at Real-Valued Indices')
-    _fig_1d = go.FigureWidget(go.Figure(data=[_scatter], layout=layout_6))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+def _(get_fig_real):
+    get_fig_real()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            cov = _k(x_real_big)
-            mean = _m(x_real_big)
-            y = np.random.multivariate_normal(mean=mean, cov=cov, size=1)[0]
-            _scatter = go.Scatter(x=x_real_big, y=y, mode='lines+markers', name=f'Sample {new_clicks}')
-            _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = []
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8059')
-    return layout_6, x_real_big
+
+@app.cell
+def _():
+    return
 
 
 @app.cell(hide_code=True)
@@ -1037,10 +1273,8 @@ def _(mo):
 
 
 @app.cell
-def _(np, pairwise_rbf, pd, sns):
-    _xa = np.arange(0, 100, 1).reshape(1, -1).T
-    _C = pd.DataFrame(pairwise_rbf(_xa, _xa))
-    _ = sns.heatmap(_C)
+def _(C, sns):
+    sns.heatmap(C)
     return
 
 
@@ -1065,14 +1299,12 @@ def _(mo):
 
 
 @app.cell
-def _(np, sns, sp):
-    def pairwise_rbf_1(xa, xb, l=5.0):
-        sq_norm = -0.5 / l ** 2 * sp.spatial.distance.cdist(_xa, xb, 'sqeuclidean')
-        return np.exp(sq_norm)
+def _(np, pairwise_rbf, sns):
     x_test = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
-    rbf_output = pairwise_rbf_1(x_test, x_test, l=1)
-    _ = sns.heatmap(rbf_output)
-    return pairwise_rbf_1, rbf_output, x_test
+    rbf_output = pairwise_rbf(x_test, x_test, l=1)
+    sns.heatmap(rbf_output)
+    # TODO: what is this agin?
+    return rbf_output, x_test
 
 
 @app.cell(hide_code=True)
@@ -1082,47 +1314,159 @@ def _(mo):
 
 
 @app.cell
-def _(
-    Input,
-    JupyterDash,
-    Output,
-    State,
-    dash,
-    dcc,
-    go,
-    html,
-    make_subplots,
-    np,
-    pairwise_rbf_1,
-    pd,
-):
-    fig_double = go.FigureWidget(make_subplots(rows=1, cols=2, subplot_titles=('Function Samples', 'Covariance Matrix')))
-    _xa = np.linspace(-1, 1, 100).reshape(1, -1).T
-    cov = pd.DataFrame(pairwise_rbf_1(_xa, _xa, l=0.5))
-    cov_map = go.Heatmap(z=np.rot90(cov), showscale=False)
-    fig_double.add_trace(cov_map, row=1, col=2)
-    _app = JupyterDash(__name__)
-    _scatter = go.Scatter(mode='markers')
-    fig_double.add_trace(_scatter, row=1, col=1)
-    fig_double.update_yaxes(range=[-5, 5], fixedrange=True, row=1, col=1)
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), html.Div([html.Div('RBF Kernel Parameter ℓ'), dcc.Slider(id='slider-width', min=0.01, max=1, value=0.5, marks=None, tooltip={'placement': 'bottom', 'always_visible': True})], style={'margin': '10px', 'background': 'white', 'width': '40%'}), dcc.Graph(id='plot', figure=fig_double)])
+def _(get_fig_double):
+    get_fig_double()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), Input('slider-width', 'value'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, l, fig):
-        global cov
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            y = np.random.multivariate_normal(mean=np.zeros(100), cov=cov, size=100)[0]
-            _fig['data'] = _fig['data'] + [{'type': 'scatter', 'x': _xa.T[0], 'y': y, 'mode': 'lines', 'xaxis': 'x', 'yaxis': 'y', 'name': f'ℓ = {l}'}]
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig['data'] = _fig['data'][:1]
-            _fig['data'] = _fig['data'] + [{'type': 'scatter', 'mode': 'lines', 'xaxis': 'x', 'yaxis': 'y'}]
-        elif 'slider-width' in dash.callback_context.triggered[0]['prop_id']:
-            cov = pairwise_rbf_1(_xa, _xa, l=l)
-            _fig['data'][0] = {'z': np.rot90(cov), 'type': 'heatmap', 'xaxis': 'x2', 'yaxis': 'y2', 'showscale': False}
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8062')
-    return cov, cov_map, fig_double
+
+@app.cell
+def _(go, make_subplots, mo, np, pairwise_rbf):
+    # --- Setup the subplot figure with two columns ---
+    # (Left: "Function Samples", Right: "Covariance Matrix")
+    fig_double_subplots = make_subplots(
+        rows=1, 
+        cols=2, 
+        subplot_titles=("Function Samples", "Covariance Matrix")
+    )
+
+    # 1) Prepare our initial data: an RBF covariance heatmap in col=2, an empty scatter in col=1
+    _xa = np.linspace(-1, 1, 100).reshape(-1, 1)
+    init_cov = pairwise_rbf(_xa, _xa, l=0.5)  # initial value of l=0.5
+    heatmap_init = go.Heatmap(z=np.rot90(init_cov), showscale=False)
+    scatter_init2 = go.Scatter(mode="lines", x=[], y=[])
+
+    fig_double_subplots.add_trace(heatmap_init, row=1, col=2)
+    fig_double_subplots.add_trace(scatter_init2, row=1, col=1)
+    fig_double_subplots.update_yaxes(range=[-5, 5], fixedrange=True, row=1, col=1)
+
+    # Convert subplots to a final figure
+    init_fig_double = go.Figure(fig_double_subplots)
+
+    # 2) Store the figure and relevant parameters in Marimo's state
+    get_fig_double, set_fig_double = mo.state(init_fig_double)
+    # Keep track of the RBF parameter l, the covariance matrix, and a sample counter
+    get_l_param, set_l_param = mo.state(0.5)
+    get_cov_double, set_cov_double = mo.state(init_cov)
+    get_sample_count_double, set_sample_count_double = mo.state(0)
+
+    # 3) Define the callback functions
+    def on_slider_change(new_l):
+        """
+        When the slider for 'l' changes, update the covariance heatmap
+        in the right subplot and store the new matrix for future samples.
+        """
+        fig_d = get_fig_double()
+        set_l_param(new_l)
+        # Recompute covariance
+        new_cov = pairwise_rbf(_xa, _xa, l=new_l)
+        set_cov_double(new_cov)
+        # Update the heatmap trace (which should be the first data item)
+        # We keep it in row=1, col=2, so that is data[0].
+        fig_d.data[0].z = np.rot90(new_cov)
+        set_fig_double(fig_d)
+
+    def add_new_sample(_):
+        """
+        Generate a new random function sample from the current covariance
+        and plot it in the left subplot (row=1, col=1).
+        """
+        fig_d = get_fig_double()
+        sample_num = get_sample_count_double()
+        current_cov = get_cov_double()
+
+        # Draw one random sample from the current covariance
+        y_samp = np.random.multivariate_normal(
+            mean=np.zeros(len(_xa)), 
+            cov=current_cov, 
+            size=1
+        )[0]
+
+        # Append a new trace on the left
+        new_trace = go.Scatter(
+            x=_xa.ravel(),
+            y=y_samp,
+            mode="lines",
+            name=f"ℓ={get_l_param():.2f}",
+            xaxis="x", 
+            yaxis="y"
+        )
+        fig_d.add_trace(new_trace, row=1, col=1)
+
+        set_fig_double(fig_d)
+        set_sample_count_double(sample_num + 1)
+
+    def clear_figure(_):
+        """
+        Reset the figure to just the heatmap (data[0]) and 
+        one empty scatter (data[1]) on the left subplot.
+        Also reset the sample counter.
+        """
+        fig_d = get_fig_double()
+        # Keep only the first two traces:
+        #  - data[0] is the heatmap
+        #  - data[1] is the empty scatter
+        fig_d.data = fig_d.data[:2]
+
+        # Optionally re-initialize the second trace to be truly empty
+        fig_d.data[1] = go.Scatter(mode="lines", x=[], y=[])
+
+        set_fig_double(fig_d)
+        set_sample_count_double(0)
+
+    # 4) Build the UI: slider + two buttons + the figure
+
+    # -- Slider for the RBF kernel parameter 'l' --
+    slider_l2 = mo.ui.slider(
+        value=get_l_param(),
+        start=0.01,
+        stop=1.0,
+        step=0.01,
+        on_change=on_slider_change,
+        label="RBF Kernel Parameter (ℓ)"
+    )
+
+    # -- "New Sample" button --
+    btn_new_sample_double = mo.ui.button(
+        label="New Sample",
+        on_click=add_new_sample,
+        kind="neutral"
+    )
+
+    # -- "Clear" button --
+    btn_clear_double = mo.ui.button(
+        label="Clear",
+        on_click=clear_figure,
+        kind="danger"
+    )
+
+    # Display them: 
+    #   1) The slider
+    #   2) The buttons in a horizontal row
+    #   3) The figure
+
+    mo.hstack([btn_new_sample_double, slider_l2, btn_clear_double])
+
+    return (
+        add_new_sample,
+        btn_clear_double,
+        btn_new_sample_double,
+        clear_figure,
+        fig_double_subplots,
+        get_cov_double,
+        get_fig_double,
+        get_l_param,
+        get_sample_count_double,
+        heatmap_init,
+        init_cov,
+        init_fig_double,
+        on_slider_change,
+        scatter_init2,
+        set_cov_double,
+        set_fig_double,
+        set_l_param,
+        set_sample_count_double,
+        slider_l2,
+    )
 
 
 @app.cell(hide_code=True)
@@ -1157,45 +1501,53 @@ def _(mo):
 
 @app.cell
 def _(np, pd):
-    #@title
-    X = np.array([[9.34825241e+00],
-           [9.67438030e+00],
-           [1.17250505e+01],
-           [5.99427279e+00],
-           [1.07375146e+01],
-           [3.87950162e+00],
-           [2.71045131e+00],
-           [7.35740185e+00],
-           [9.13638194e+00],
-           [1.05863164e+01],
-           [7.42074188e+00],
-           [1.20328572e+01],
-           [5.15531137e+00],
-           [3.24806136e-01],
-           [1.32962952e-03]])
-    y = np.array([[295011.54177245],
-           [291803.4301587 ],
-           [302340.03191297],
-           [254244.52812629],
-           [288037.40660445],
-           [225340.17067212],
-           [235462.67258466],
-           [291158.36183822],
-           [297052.11645609],
-           [287514.83630223],
-           [292359.62730391],
-           [310157.34073017],
-           [233483.05286424],
-           [209630.56264745],
-           [200039.88887763]])
-    DOMAIN = (0, 4*np.pi)
+    # @title
+    X = np.array(
+        [
+            [9.34825241e00],
+            [9.67438030e00],
+            [1.17250505e01],
+            [5.99427279e00],
+            [1.07375146e01],
+            [3.87950162e00],
+            [2.71045131e00],
+            [7.35740185e00],
+            [9.13638194e00],
+            [1.05863164e01],
+            [7.42074188e00],
+            [1.20328572e01],
+            [5.15531137e00],
+            [3.24806136e-01],
+            [1.32962952e-03],
+        ]
+    )
+    y = np.array(
+        [
+            [295011.54177245],
+            [291803.4301587],
+            [302340.03191297],
+            [254244.52812629],
+            [288037.40660445],
+            [225340.17067212],
+            [235462.67258466],
+            [291158.36183822],
+            [297052.11645609],
+            [287514.83630223],
+            [292359.62730391],
+            [310157.34073017],
+            [233483.05286424],
+            [209630.56264745],
+            [200039.88887763],
+        ]
+    )
+    DOMAIN = (0, 4 * np.pi)
     X_axis = np.linspace(DOMAIN[0], DOMAIN[1], 100).reshape(1, -1).T
-    y_true = (.1 * np.sin(X_axis) + 1) * 200000 + X_axis * 10000
+    y_true = (0.1 * np.sin(X_axis) + 1) * 200000 + X_axis * 10000
     X_test = np.linspace(DOMAIN[0], DOMAIN[1], 100).reshape(1, -1).T
     df = pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Cost of a house"]).sort_index()
     df.index.name = "Distance from the Nuclear Power Plant (miles)"
-    df_ax = df.plot(style="o", color="red" )
-    return DOMAIN, X, X_axis, X_test, df, df_ax, y, y_true
+    df.plot(style="o", color="red")
+    return DOMAIN, X, X_axis, X_test, df, y, y_true
 
 
 @app.cell(hide_code=True)
@@ -1281,7 +1633,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## Actually Fitting a Regression Model
+        # Actually Fitting a Regression Model
 
         Using our conditional distribution above, we can plug in our known house costs to create a conditional distribution of functions. Then we can sample from this distribution at, say, 100 evenly spaced distance from 0 to 12 miles away from the nuclear plant.
 
@@ -1296,16 +1648,16 @@ def _(mo):
 
 
 @app.cell
-def _(pairwise_rbf_1, sp):
+def _(pairwise_rbf, sp):
     def gp_posterior(y_train, X_train, X_test, l=1.0):
         """
         Given known data (y_train, X_train), and some unknown input values(X_test)
         calculate the conditional mean vector (mu_2__1) and conditional covariance matrix
         (sigma_2__1) of a Gaussian process with RBF kernel.
         """
-        sigma_11 = pairwise_rbf_1(X_train, X_train, l=l)
-        sigma_21 = pairwise_rbf_1(X_train, X_test, l=l).T
-        sigma_22 = pairwise_rbf_1(X_test, X_test, l=l)
+        sigma_11 = pairwise_rbf(X_train, X_train, l=l)
+        sigma_21 = pairwise_rbf(X_train, X_test, l=l).T
+        sigma_22 = pairwise_rbf(X_test, X_test, l=l)
         sigma_12 = sigma_21.T
         mu_2__1 = (sigma_21 @ sp.linalg.inv(sigma_11) @ y_train).flatten()
         sigma_2__1 = sigma_22 - sigma_21 @ sp.linalg.inv(sigma_11) @ sigma_12
@@ -1314,42 +1666,105 @@ def _(pairwise_rbf_1, sp):
 
 
 @app.cell
-def _(
-    Input,
-    JupyterDash,
-    Output,
-    State,
-    X,
-    X_test,
-    dash,
-    dcc,
-    go,
-    gp_posterior,
-    html,
-    np,
-    y,
-):
-    _app = JupyterDash(__name__)
-    _y_norm = (y - y.mean()) / y.std()
-    mu, sigma = gp_posterior(_y_norm, X, X_test, l=1)
-    scatter_init = go.Scatter(x=X.T[0], y=y.T[0], mode='markers', marker=dict(color='red', size=12), name='Known Data')
-    layout_7 = go.Layout(title='Samples from a Gaussian Process Conditioned on Known Housing Data', xaxis_title='Distance from the Nuclear Power Plant (miles)', yaxis_title='Cost of a house ($)')
-    _fig_1d = go.FigureWidget(go.Figure(data=[scatter_init], layout=layout_7))
-    _app.layout = html.Div([html.Button('New Sample', id='new-sample-btn', n_clicks=0, className='btn btn-success'), html.Button('Clear', id='clear-btn', n_clicks=0, className='btn btn-danger'), dcc.Graph(id='plot', figure=_fig_1d)])
+def _(get_fig_housing):
+    get_fig_housing()
+    return
 
-    @_app.callback(Output('plot', 'figure'), Input('new-sample-btn', 'n_clicks'), Input('clear-btn', 'n_clicks'), State('plot', 'figure'))
-    def _update_figure(new_clicks, clear_clicks, fig):
-        _fig = go.FigureWidget(_fig)
-        if 'new-sample-btn' in dash.callback_context.triggered[0]['prop_id']:
-            yp = np.random.multivariate_normal(mean=mu, cov=sigma, size=100)[0] * y.std() + y.mean()
-            _scatter = go.Scatter(x=X_test.T[0], y=yp, mode='lines+markers', name=f'Sample {new_clicks}')
-            _fig.add_trace(_scatter)
-        elif 'clear-btn' in dash.callback_context.triggered[0]['prop_id']:
-            _fig.data = _fig['data'][:1]
-        return _fig
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8063')
-    return layout_7, mu, scatter_init, sigma
+
+@app.cell
+def _(X, X_test, go, gp_posterior, mo, np, y):
+    # We'll assume y, X, X_test, and gp_posterior(...) are already defined above.
+    # y is the original housing data, X the known inputs, X_test the test inputs.
+
+    # Normalize y
+    _y_norm = (y - y.mean()) / y.std()
+    mu, sigma = gp_posterior(_y_norm, X, X_test, l=1)  # gp_posterior returns mean & covariance
+
+    # 1) Create initial figure with known housing data
+    scatter_known = go.Scatter(
+        x=X.T[0],
+        y=y.T[0],
+        mode="markers",
+        marker=dict(color="red", size=12),
+        name="Known Data"
+    )
+    layout_housing = go.Layout(
+        title="Samples from a Gaussian Process Conditioned on Known Housing Data",
+        xaxis_title="Distance from the Nuclear Power Plant (miles)",
+        yaxis_title="Cost of a house ($)",
+    )
+    init_fig_housing = go.Figure(data=[scatter_known], layout=layout_housing)
+
+    # 2) Wrap the figure and a sample counter in Marimo's state
+    get_fig_housing, set_fig_housing = mo.state(init_fig_housing)
+    get_clicks_housing, set_clicks_housing = mo.state(0)
+
+    def add_sample_housing(_):
+        """
+        Draw a random sample from the GP posterior (mu, sigma),
+        un-normalize it, and add it to the figure as a new trace.
+        """
+        fig_housing = get_fig_housing()
+        current_clicks = get_clicks_housing()
+
+        # Draw a single sample from the posterior (100D)
+        # Then "un-normalize" it back to actual scale
+        yp = (
+            np.random.multivariate_normal(mean=mu, cov=sigma, size=1)[0] * y.std() 
+            + y.mean()
+        )
+        new_scatter = go.Scatter(
+            x=X_test.T[0], 
+            y=yp, 
+            mode="lines+markers",
+            name=f"Sample {current_clicks}"
+        )
+        fig_housing.add_trace(new_scatter)
+
+        set_fig_housing(fig_housing)
+        set_clicks_housing(current_clicks + 1)
+
+    def clear_data_housing(_):
+        """
+        Reset the figure to only contain the original known data trace.
+        Reset the sample counter to zero.
+        """
+        fig_housing = get_fig_housing()
+        # Keep only the first trace (the known data)
+        fig_housing.data = fig_housing.data[:1]
+        set_fig_housing(fig_housing)
+        set_clicks_housing(0)
+
+    # 3) Create the UI: two buttons + the figure
+    btn_new_sample_housing = mo.ui.button(
+        label="New Sample",
+        on_click=add_sample_housing,
+        kind="neutral"
+    )
+    btn_clear_housing = mo.ui.button(
+        label="Clear",
+        on_click=clear_data_housing,
+        kind="danger"
+    )
+
+    # 4) Display everything
+    mo.hstack([btn_new_sample_housing, btn_clear_housing])
+
+    return (
+        add_sample_housing,
+        btn_clear_housing,
+        btn_new_sample_housing,
+        clear_data_housing,
+        get_clicks_housing,
+        get_fig_housing,
+        init_fig_housing,
+        layout_housing,
+        mu,
+        scatter_known,
+        set_clicks_housing,
+        set_fig_housing,
+        sigma,
+    )
 
 
 @app.cell(hide_code=True)
@@ -1369,11 +1784,21 @@ def _(X, X_axis, X_test, gp_posterior, np, pd, y, y_true):
     _y_norm = (y - y.mean()) / y.std()
     mu_1, sigma_1 = gp_posterior(_y_norm, X, X_test, l=1)
     y_hat = np.random.multivariate_normal(mu_1, sigma_1, size=1000) * y.std() + y.mean()
-    df_1 = pd.DataFrame(y_hat.T, index=X_test.flatten()).sort_index().plot(alpha=0.01, legend=False, color='blue')
-    df_1.set_ylabel('Price')
-    df_1.set_xlabel('Blocks away from the Nuclear Power Plant')
-    pd.DataFrame(y_true.flatten(), index=X_axis.flatten(), columns=['Underlying Function']).sort_index().plot(ax=df_1, color='black', linewidth=2)
-    _ = pd.DataFrame(y.flatten(), index=X.flatten(), columns=['Known Data']).sort_index().plot(ax=df_1, style='o', color='red')
+    df_1 = (
+        pd.DataFrame(y_hat.T, index=X_test.flatten())
+        .sort_index()
+        .plot(alpha=0.01, legend=False, color="blue")
+    )
+    df_1.set_ylabel("Price")
+    df_1.set_xlabel("Blocks away from the Nuclear Power Plant")
+    pd.DataFrame(
+        y_true.flatten(), index=X_axis.flatten(), columns=["Underlying Function"]
+    ).sort_index().plot(ax=df_1, color="black", linewidth=2)
+    (
+        pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Known Data"])
+        .sort_index()
+        .plot(ax=df_1, style="o", color="red")
+    )
     return df_1, mu_1, sigma_1, y_hat
 
 
@@ -1394,9 +1819,13 @@ def _(mo):
 @app.cell
 def _(X_test, mu_1, pd, plt, sigma_1, sns, y):
     ix = X_test.flatten().round(2)
-    sns.heatmap(pd.DataFrame(sigma_1, index=ix, columns=ix)).set_title('Conditional Covariance Matrix')
+    sns.heatmap(pd.DataFrame(sigma_1, index=ix, columns=ix)).set_title(
+        "Conditional Covariance Matrix"
+    )
     plt.show()
-    _ = sns.heatmap(pd.DataFrame((mu_1 * y.std() + y.mean()).reshape(-1, 1), index=ix)).set_title('Conditional Mean Vector')
+    _ = sns.heatmap(pd.DataFrame((mu_1 * y.std() + y.mean()).reshape(-1, 1), index=ix)).set_title(
+        "Conditional Mean Vector"
+    )
     return (ix,)
 
 
@@ -1438,12 +1867,6 @@ def _(mo):
         """
     )
     return
-
-
-@app.cell
-def _():
-    import marimo as mo
-    return (mo,)
 
 
 if __name__ == "__main__":

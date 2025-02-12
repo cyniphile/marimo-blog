@@ -1,14 +1,13 @@
 # TODO:
-- make venv work with marimo
-- convert other notebook cells using few-shot prompts
-  - https://chatgpt.com/c/67abfc55-16d4-800e-93ea-b05a27d068dd
 - make mobile optimized
   - make legend better
-- flickering bins on hist
 - make this work: https://marimo.io/p/@marimo/interactive-matrices
+- latex matrices fucking up
 
 
 ## 📚 Included Examples
+
+- `uv run marimo edit`
 
 - `notebooks/penguins.py`: Interactive data analysis with Polars and marimo
 

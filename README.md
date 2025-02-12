@@ -1,14 +1,15 @@
 # TODO:
+- make venv work with marimo
 - convert other notebook cells using few-shot prompts
+  - https://chatgpt.com/c/67abfc55-16d4-800e-93ea-b05a27d068dd
+- make mobile optimized
+  - make legend better
+- flickering bins on hist
+- make this work: https://marimo.io/p/@marimo/interactive-matrices
 
-# marimo WebAssembly + GitHub Pages Template
-
-This template repository demonstrates how to export [marimo](https://marimo.io) notebooks to WebAssembly and deploy them to GitHub Pages.
 
 ## 📚 Included Examples
 
-- `apps/charts.py`: Interactive data visualization with Altair
-- `notebooks/fibonacci.py`: Interactive Fibonacci sequence calculator
 - `notebooks/penguins.py`: Interactive data analysis with Polars and marimo
 
 ## 🚀 Usage
@@ -17,7 +18,6 @@ This template repository demonstrates how to export [marimo](https://marimo.io) 
 2. Add your marimo files to the `notebooks/` or `apps/` directory
    1. `notebooks/` notebooks are exported with `--mode edit`
    2. `apps/` notebooks are exported with `--mode run`
-3. Push to main branch
 4. Go to repository **Settings > Pages** and change the "Source" dropdown to "GitHub Actions"
 5. GitHub Actions will automatically build and deploy to Pages
 

@@ -19,6 +19,7 @@ def _():
     from matplotlib import pyplot as plt
     import dash
     from dash.dependencies import Input, Output, State
+    import wigglystuff
     from dash import dcc, html
     np.random.seed(42)
     return (
@@ -38,6 +39,7 @@ def _():
         px,
         sns,
         sp,
+        wigglystuff,
     )
 
 
@@ -152,20 +154,28 @@ def _(mo):
 
         What if (just for fun) we assumed $\beta_0$ and $\beta_1$ were actually random variables, and that they are normally distributed with variance equal to the variance in the data? Then our linear regression equation would look like this:
 
-        $$y=B0+B1xy = B_0 + B_1 x$$
+        $$y = B_0 + B_1 x$$
 
         where we've converted our betas to random variables as follows:
 
-        $$B0∼N(β0,σ2)B_0 \sim N(\beta_0, \sigma^2)$$
+        $$
+        B_0 \sim N(\beta_0, \sigma^2)
+        $$
 
-        $$B1∼N(β1,σ2)B_1 \sim N(\beta_1, \sigma^2)$$
+        $$
+        B_1 \sim N(\beta_1, \sigma^2)
+        $$
 
         This reads "$B_0$ is a random variable distributed according to a Gaussian with mean $\beta_0$ and variance $\sigma^2$".
         We'll set $\sigma^2$ to be the variance of the data about the best fit line (the variance of the residuals). For the plots a and b above, then we'd have:
 
-        $$ya=B0a+B1axy_a = B_{0a} + B_{1a} x$$
+        $$
+        y_a = B_{0a} + B_{1a} x
+        $$
 
-        $$yb=B0b+B1bxy_b = B_{0b} + B_{1b} x$$
+        $$
+        y_b = B_{0b} + B_{1b} x
+        $$
 
         where $B_0$ and $B_1$ are gaussians with variance equal to the variance of the residuals in each case: $\sigma^2_a$ and $\sigma^2_b$
 
@@ -246,7 +256,7 @@ def _(
         beta_1_rand  = np.random.normal(beta_1_1, NOISE_VARIANCE,     1)
         beta_0_rand2 = np.random.normal(beta_0,   LOW_NOISE_VARIANCE, 1)
         beta_1_rand2 = np.random.normal(beta_1,   LOW_NOISE_VARIANCE, 1)
-        
+
         line_data  = x_reg * beta_1_rand  + beta_0_rand
         line_data2 = x_reg * beta_1_rand2 + beta_0_rand2
 
@@ -260,7 +270,7 @@ def _(
             'name': f'$B_0a: {beta_0_rand[0]:.2f}, B_1a: {beta_1_rand[0]:.2f}$'
         }
         fig.add_trace(new_data, row=1, col=1)
-        
+
         # Append new line to the right subplot (col=2)
         fig.add_trace({
             'type': 'scatter',
@@ -289,7 +299,7 @@ def _(
         value=0, on_click=reset, label="Reset", kind="danger"
     )
     clear_button
-        
+
 
 
     mo.hstack([button, clear_button])
@@ -312,11 +322,6 @@ def _(
     )
 
 
-@app.cell
-def _():
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
@@ -334,12 +339,6 @@ def _(mo):
         What if we want to model a non-linear relationship? Now we're getting closer to the core idea of GPs. But of course, before we get to Gaussian processes, we have to talk about Gaussians.
         """
     )
-    return
-
-
-@app.cell
-def _():
-    (1,) + (2,)
     return
 
 
@@ -362,26 +361,89 @@ def _(mo):
 
 
 @app.cell
-def _(Input, JupyterDash, Output, dcc, go, html, np):
-    x = np.random.normal(0, 1, size=10000)
+def _(get_fig_hist):
+    get_fig_hist()
+    return
+
+
+@app.cell
+def _(go, mo, np):
+    # 1. Create the initial figure
+    x = np.random.normal(0, 1, size=10_000)
+
     hist_trace = go.Histogram(x=x, nbinsx=50)
     fig_hist = go.Figure(hist_trace)
-    fig_hist.update_layout(title='Normal Distribution Histogram', xaxis=dict(title='Value', range=[-10, 10], fixedrange=True), yaxis=dict(title='Count'))
+    fig_hist.update_layout(
+        title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
+        xaxis=dict(title="Value", range=[-10, 10], fixedrange=True),
+        yaxis=dict(title="Count")
+    )
 
-    def update_histogram(mean, variance):
-        x_new = np.random.normal(mean, variance, size=10000)
-        fig_hist.data[0].x = x_new
-        fig_hist.update_layout(title=f'Normal Distribution Histogram (µ={np.round(mean, 2)}, σ={np.round(variance, 2)})')
-    _app = JupyterDash(__name__)
-    _app.layout = html.Div([html.Div([html.Label('Mean'), dcc.Slider(value=0, min=-5, max=5, step=0.1, id='mean-slider', marks=None, tooltip={'placement': 'bottom', 'always_visible': True}), html.Label('Variance'), dcc.Slider(value=1, min=0.1, max=5, step=0.1, id='variance-slider', marks=None, tooltip={'placement': 'bottom', 'always_visible': True})], style={'margin': '10px', 'background': 'white', 'width': '40%'}), dcc.Graph(figure=fig_hist, id='histogram')])
+    # 2. Store the figure and the slider states
+    get_fig_hist, set_fig_hist = mo.state(fig_hist)
+    fig_hist.update_layout(
+        title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
+        xaxis=dict(title="Value", range=[-10, 10], fixedrange=True),
+        yaxis=dict(title="Count", range=[0, 1200], fixedrange=True)  # Adjust the y-axis range as needed
+    )
+    mean_state, set_mean_state = mo.state(0.0)
+    variance_state, set_variance_state = mo.state(1.0)
 
-    @_app.callback(Output('histogram', 'figure'), [Input('mean-slider', 'value'), Input('variance-slider', 'value')])
-    def _update_figure(mean, variance):
-        update_histogram(mean, variance)
-        return fig_hist
-    if __name__ == '__main__':
-        _app.run_server(mode='inline')
-    return fig_hist, hist_trace, update_histogram, x
+    # 3. Function that updates the figure
+    def update_histogram():
+        fig = get_fig_hist()  # retrieve current figure from state
+        x_new = np.random.normal(mean_state(), variance_state(), size=10_000)
+        fig.data[0].x = x_new
+        fig.update_layout(
+            title=(
+                f"Normal Distribution Histogram (µ={mean_state():.2f}, "
+                f"σ={variance_state():.2f})"
+            )
+        )
+        set_fig_hist(fig)  # store the updated figure
+
+    # 4. Handlers for slider changes
+    def on_mean_change(m):
+        set_mean_state(m)
+        update_histogram()
+
+    def on_variance_change(v):
+        set_variance_state(v)
+        update_histogram()
+
+    # 5. Create the sliders
+    mean_slider = mo.ui.slider(
+        value=mean_state(),
+        start=-5, stop=5, step=0.1,
+        on_change=on_mean_change,
+        label="Mean"
+    )
+    variance_slider = mo.ui.slider(
+        value=variance_state(),
+        start=0.1, stop=5, step=0.1,
+        on_change=on_variance_change,
+        label="Variance"
+    )
+
+
+    # 6. Lay out sliders and the figure
+    mo.hstack([mean_slider, variance_slider])
+    return (
+        fig_hist,
+        get_fig_hist,
+        hist_trace,
+        mean_slider,
+        mean_state,
+        on_mean_change,
+        on_variance_change,
+        set_fig_hist,
+        set_mean_state,
+        set_variance_state,
+        update_histogram,
+        variance_slider,
+        variance_state,
+        x,
+    )
 
 
 @app.cell(hide_code=True)
@@ -412,6 +474,7 @@ def _(mo):
         \mu_n
         \end{bmatrix},
         $$
+
         $$
         \qquad
         \Sigma = \begin{bmatrix}
@@ -443,31 +506,31 @@ def _(mo):
 
 
 @app.cell
-def _(Input, JupyterDash, Output, State, dcc, html, np, px):
-    import warnings
-    warnings.filterwarnings('ignore')
+def _(mo, np, pd):
+    from wigglystuff import Matrix
+    import altair as alt
 
-    def create_gaussian_plot(cov_matrix):
-        x, y = np.random.multivariate_normal([0, 0], cov_matrix, 1000).T
-        mv_fig = px.scatter(x=x, y=y, labels={'x': 'Y1', 'y': 'Y2'}, opacity=0.1, marginal_x='histogram', marginal_y='histogram')
-        mv_fig.update_layout(title='2D Multivariate Gaussian Distribution')
-        return mv_fig
-    _app = JupyterDash(__name__)
-    _app.layout = html.Div([html.Div([html.Label('Cov(Y1, Y1)', style={'grid-row': '1', 'grid-column': '1'}), html.Label('Cov(Y2, Y1)', style={'grid-row': '1', 'grid-column': '2'}), dcc.Input(id='cov_00', type='number', value=1, step=0.1, style={'grid-row': '2', 'grid-column': '1'}), dcc.Input(id='cov_01', type='number', value=0, step=0.1, style={'grid-row': '3', 'grid-column': '1'}), dcc.Input(id='cov_10', type='number', value=0, step=0.1, style={'grid-row': '2', 'grid-column': '2'}), dcc.Input(id='cov_11', type='number', value=1, step=0.1, style={'grid-row': '3', 'grid-column': '2'}), html.Label('Cov(Y1, Y2)', style={'grid-row': '4', 'grid-column': '1'}), html.Label('Cov(Y2, Y2)', style={'grid-row': '4', 'grid-column': '2'}), html.Label(' = Σ', style={'grid-row': '3', 'grid-column': '3', 'padding': '0px 0px 0px 10px', 'margin': '-10px 10px 0px 0px'})], style={'display': 'grid', 'grid-template-columns': '1fr 1fr', 'grid-template-rows': '1fr 1fr', 'width': '30%'}), html.Div(id='valid', className='twelve columns', style={'color': 'red', 'margin': '10px'}), dcc.Graph(id='gaussian_plot')], style={'background': 'white'})
+    x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
+    df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
 
-    @_app.callback([Output('gaussian_plot', 'figure'), Output('valid', 'children')], [Input('cov_00', 'value'), Input('cov_01', 'value'), Input('cov_10', 'value'), Input('cov_11', 'value')], State('gaussian_plot', 'figure'))
-    def update_gaussian_plot(cov_00, cov_01, cov_10, cov_11, fig):
-        valid_message = ''
-        if cov_01 != cov_10 or min(cov_00, cov_11) < 0:
-            valid_message = 'Covariance is not symmetric positive-semidefinite'
-            return (_fig, valid_message)
-        else:
-            cov_matrix = np.array([[cov_00, cov_01], [cov_10, cov_11]])
-            mv_fig = create_gaussian_plot(cov_matrix)
-            return (mv_fig, valid_message)
-    if __name__ == '__main__':
-        _app.run_server(mode='inline', port='8051')
-    return create_gaussian_plot, update_gaussian_plot, warnings
+    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
+    arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))
+    x_sim = np.random.multivariate_normal(
+        np.array(arr.matrix).reshape(-1), 
+        np.array(mat.matrix), 
+        2500
+    )
+    df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
+
+    chart_sim = (
+        alt.Chart(df_sim).mark_point().encode(x="x", y="y")
+    )
+
+
+    mo.vstack([
+        mo.hstack([arr, mat, chart_sim])
+    ])
+    return Matrix, alt, arr, chart_sim, df_orig, df_sim, mat, x_orig, x_sim
 
 
 @app.cell(hide_code=True)

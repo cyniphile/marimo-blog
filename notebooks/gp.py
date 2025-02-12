@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.11.0"
+__generated_with = "0.11.2"
 app = marimo.App()
 
 
@@ -17,21 +17,12 @@ def _():
     import seaborn as sns
     import pandas as pd
     from matplotlib import pyplot as plt
-    import dash
-    from dash.dependencies import Input, Output, State
     import wigglystuff
-    from dash import dcc, html
     np.random.seed(42)
     return (
         HTML,
-        Input,
-        Output,
-        State,
-        dash,
-        dcc,
         display,
         go,
-        html,
         make_subplots,
         np,
         pd,
@@ -154,7 +145,7 @@ def _(mo):
 
         What if (just for fun) we assumed $\beta_0$ and $\beta_1$ were actually random variables, and that they are normally distributed with variance equal to the variance in the data? Then our linear regression equation would look like this:
 
-        $$y = B_0 + B_1 x$$
+        y=B0+B1xy = B_0 + B_1 x
 
         where we've converted our betas to random variables as follows:
 
@@ -369,13 +360,20 @@ def _(get_fig_hist):
 @app.cell
 def _(go, mo, np):
     # 1. Create the initial figure
-    x = np.random.normal(0, 1, size=10_000)
 
-    hist_trace = go.Histogram(x=x, nbinsx=50)
+    SIZE = 5000
+    START = -10
+    END = 10
+    x = np.random.normal(0, 1, size=SIZE)
+    hist_trace = go.Histogram(x=x, xbins=dict(
+            start=START,
+            end=END,
+            size=0.1  # whatever bin width you want
+        ))
     fig_hist = go.Figure(hist_trace)
     fig_hist.update_layout(
         title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
-        xaxis=dict(title="Value", range=[-10, 10], fixedrange=True),
+        xaxis=dict(title="Value", range=[START, END], fixedrange=True),
         yaxis=dict(title="Count")
     )
 
@@ -383,8 +381,8 @@ def _(go, mo, np):
     get_fig_hist, set_fig_hist = mo.state(fig_hist)
     fig_hist.update_layout(
         title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
-        xaxis=dict(title="Value", range=[-10, 10], fixedrange=True),
-        yaxis=dict(title="Count", range=[0, 1200], fixedrange=True)  # Adjust the y-axis range as needed
+        xaxis=dict(title="Value", range=[START, END], fixedrange=True),
+        yaxis=dict(title="Count", range=[0, int(SIZE * .1)], fixedrange=True)  # Adjust the y-axis range as needed
     )
     mean_state, set_mean_state = mo.state(0.0)
     variance_state, set_variance_state = mo.state(1.0)
@@ -392,7 +390,7 @@ def _(go, mo, np):
     # 3. Function that updates the figure
     def update_histogram():
         fig = get_fig_hist()  # retrieve current figure from state
-        x_new = np.random.normal(mean_state(), variance_state(), size=10_000)
+        x_new = np.random.normal(mean_state(), variance_state(), size=SIZE)
         fig.data[0].x = x_new
         fig.update_layout(
             title=(
@@ -429,6 +427,9 @@ def _(go, mo, np):
     # 6. Lay out sliders and the figure
     mo.hstack([mean_slider, variance_slider])
     return (
+        END,
+        SIZE,
+        START,
         fig_hist,
         get_fig_hist,
         hist_trace,

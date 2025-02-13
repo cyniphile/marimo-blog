@@ -1859,7 +1859,7 @@ def _(X, X_axis, X_test, gp_posterior, np, pd, y, y_true):
     df_1.set_xlabel("Blocks away from the Nuclear Power Plant")
     pd.DataFrame(
         y_true.flatten(), index=X_axis.flatten(), columns=["Underlying Function"]
-    ).sort_index().plot(ax=df_1, color="black", linewidth=2)
+    ).sort_index().plot(ax=df_1, color="#e802e4", linewidth=2)
     (
         pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Known Data"])
         .sort_index()

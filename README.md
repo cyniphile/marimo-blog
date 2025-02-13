@@ -5,7 +5,7 @@
   - make legends better
   - stack some charts
   - better button positioning, labels
-- caching to make better load time
+- caching, etc to make better load time
 - make a gpt conversion deriving some that conditional distribution
 - side by side comparison proofread
 - blog integration

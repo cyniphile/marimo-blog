@@ -1,18 +1,22 @@
 # TODO:
+- latex matrices fucking up
+- make this work: https://marimo.io/p/@marimo/interactive-matrices
 - make mobile optimized
   - make legends better
   - stack some charts
-  - make blue colored font better
-- make this work: https://marimo.io/p/@marimo/interactive-matrices
-- latex matrices fucking up
+  - better button positioning
+- make blue colored font better
+- caching to make better load time
+- side by side comparison proofread
+- title of post
 - blog integration
   - port other posts
-- caching to make better load time
 
 
-## 📚 Included Examples
 
 - `uv run marimo edit`
+## 📚 Included Examples
+
 
 - `notebooks/penguins.py`: Interactive data analysis with Polars and marimo
 

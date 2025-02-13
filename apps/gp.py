@@ -1248,14 +1248,91 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig_real):
-    get_fig_real()
+def _(get_fig_100real):
+    get_fig_100real()
     return
 
 
 @app.cell
-def _():
-    return
+def _(go, mo, np):
+    # We assume you've already defined:
+    x_real_big = np.linspace(-1, 1, 100)
+    # m = lambda x: x
+    # k = lambda x: np.diag(x**2)
+    m = lambda x: x
+    k = lambda x: np.diag(x**2)
+
+    # 1) Create the initial figure
+    init_scatter_100_real = go.Scatter(mode="markers")
+    init_layout_100_real = go.Layout(
+        title="Samples from a 100-D Multivariate Gaussian at Real-Valued Indices"
+    )
+    init_fig_100_real = go.Figure(data=[init_scatter_100_real], layout=init_layout_100_real)
+
+    # 2) Store the figure and a sample counter in Marimo's state
+    get_fig_100real, set_fig_100real = mo.state(init_fig_100_real)
+    get_clicks_100real, set_clicks_100real = mo.state(0)
+
+    def add_sample_100real(_):
+        """Draw one random sample from a 100-D Gaussian (diag covariance = x^2)."""
+        fig_100r = get_fig_100real()
+        sample_num = get_clicks_100real()
+
+        # Build covariance and mean from the user-defined functions
+        cov_100 = k(x_real_big)
+        mean_100 = m(x_real_big)
+        # Draw a single 100-D sample
+        y_samp = np.random.multivariate_normal(mean=mean_100, cov=cov_100, size=1)[0]
+
+        new_scatter_100r = go.Scatter(
+            x=x_real_big,
+            y=y_samp,
+            mode="lines+markers",
+            name=f"Sample {sample_num}",
+        )
+        fig_100r.add_trace(new_scatter_100r)
+
+        set_fig_100real(fig_100r)
+        set_clicks_100real(sample_num + 1)
+
+    def clear_data_100real(_):
+        """Remove all existing traces."""
+        fig_100r = get_fig_100real()
+        fig_100r.data = []
+        set_fig_100real(fig_100r)
+        set_clicks_100real(0)
+
+    # 3) Create the UI: Two buttons + the figure
+    btn_new_sample_100real = mo.ui.button(
+        label="New Sample",
+        on_click=add_sample_100real,
+        kind="neutral"
+    )
+
+    btn_clear_100real = mo.ui.button(
+        label="Clear",
+        on_click=clear_data_100real,
+        kind="danger"
+    )
+
+    mo.hstack([btn_new_sample_100real, btn_clear_100real])
+
+    return (
+        add_sample_100real,
+        btn_clear_100real,
+        btn_new_sample_100real,
+        clear_data_100real,
+        get_clicks_100real,
+        get_fig_100real,
+        init_fig_100_real,
+        init_layout_100_real,
+        init_scatter_100_real,
+        k,
+        m,
+        set_clicks_100real,
+        set_fig_100real,
+        x_real_big,
+    )
 
 
 @app.cell(hide_code=True)

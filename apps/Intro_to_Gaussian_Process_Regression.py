@@ -590,49 +590,72 @@ def _(get_fig2):
 
 
 @app.cell
-def _(go, mo, np):
-    # 1) Create and store an initial figure in Marimo state
-    initial_fig = go.Figure(
-        data=[go.Scatter(mode="markers")],
-        layout=go.Layout(title="Samples from a 1-D Gaussian Distribution"),
+def _(go, mo, np, px):
+    import plotly.express as pxx
+
+    # 1) Keep a global list of all sample points (instead of adding single traces).
+    samples_x, samples_y = [], []
+
+    # 2) Build an *empty* initial figure (no samples yet, but it has the margin set up).
+    px_fig_empty = pxx.scatter(
+        x=[0], 
+        y=[0], 
+        marginal_y="histogram",
+        title="Samples from a 1-D Gaussian Distribution",
     )
+    initial_fig = go.Figure(data=px_fig_empty.data, layout=px_fig_empty.layout)
+
+    # Store it in Marimo state
     get_fig2, set_fig2 = mo.state(initial_fig)
     get_clicks2, set_clicks2 = mo.state(0)
 
-    # 2) Define the callbacks that change the figure
     def add_sample(_):
-        """Add a new random sample (1 point) to the figure."""
-        fig = get_fig2()
-        # We just stack data on top of the existing figure
-        x = ["1"]
-        y = np.random.normal(size=1)
-        scatter = go.Scatter(x=x, y=y, mode="markers", name=f"Sample {get_clicks2()}")
-        fig.add_trace(scatter)
-        set_fig2(fig)  # update our global figure state
-        set_clicks2(get_clicks2()+1)
-        
+        """Add a random sample point and regenerate the entire figure with px.scatter."""
+        # 1) Add a new random sample point to our global list
+        samples_x.append(1)  # or something meaningful if you want varied x
+        samples_y.append(np.random.normal())
+
+        # 2) Rebuild the figure with Plotly Express so the histogram updates
+        px_fig = px.scatter(
+            x=samples_x,
+            y=samples_y,
+            marginal_y="histogram",
+            title="Samples from a 1-D Gaussian Distribution",
+        )
+        fig = go.Figure(data=px_fig.data, layout=px_fig.layout)
+
+        # 3) Save this new figure in Marimo state
+        set_fig2(fig)
+        set_clicks2(get_clicks2() + 1)
+
     def clear_data(_):
-        """Clear all the data from the figure."""
-        fig = get_fig2()
-        fig.data = []
+        """Clear the data and re-initialize the figure."""
+        samples_x.clear()
+        samples_y.clear()
+        px_fig_empty = px.scatter(
+            x=[0], 
+            y=[0], 
+            marginal_y="histogram",
+            title="Samples from a 1-D Gaussian Distribution",
+        )
+        fig = go.Figure(data=px_fig_empty.data, layout=px_fig_empty.layout)
         set_fig2(fig)
         set_clicks2(0)
 
-    # 3) Create the UI buttons, each calling its respective callback
     btn_new_sample = mo.ui.button(
-        value=0, 
-        on_click=add_sample, 
-        label="New Sample", 
+        value=0,
+        on_click=add_sample,
+        label="New Sample",
         kind="neutral"
     )
     btn_clear = mo.ui.button(
-        value=get_clicks2(), 
-        on_click=clear_data, 
-        label="Clear", 
+        value=get_clicks2(),
+        on_click=clear_data,
+        label="Clear",
         kind="danger"
     )
 
-    # 4) Lay out the two buttons and the figure
+    # Lay out the two buttons and the figure
     mo.hstack([btn_new_sample, btn_clear])
 
     return (
@@ -643,6 +666,10 @@ def _(go, mo, np):
         get_clicks2,
         get_fig2,
         initial_fig,
+        px_fig_empty,
+        pxx,
+        samples_x,
+        samples_y,
         set_clicks2,
         set_fig2,
     )
@@ -710,7 +737,6 @@ def _(go, mo, np):
     )
 
     mo.hstack([btn_new_sample_2d, btn_clear_2d])
-
     return (
         add_sample_2d,
         btn_clear_2d,
@@ -782,7 +808,6 @@ def _(go, mo, np):
     )
 
     mo.hstack([btn_new_sample_3d, btn_clear_3d])
-
     return (
         add_sample_3d,
         btn_clear_3d,
@@ -865,7 +890,6 @@ def _(go, mo, np):
     )
 
     mo.hstack([btn_new_sample_100d, btn_connect_100d, btn_clear_100d])
-
     return (
         add_sample_100d,
         btn_clear_100d,
@@ -889,7 +913,7 @@ def _(mo):
         r"""
         Cool, so now we can visualize samples from a 100-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
 
-        You'll notice the above plot has a "Connect points" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
+        You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
 
         Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
 
@@ -1110,7 +1134,8 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        We've been using the word "functions" a lot now, but we still never really resolved the problem that these samples are really just 100-D vectors. Sure we can connect the points with littles lines, but that's not really the same as a function. How do we get a distribution over true functions?
+        ### Making these "functions" into Functions
+        We've been throwing around the word "functions" a lot now, but we still never resolved the problem that these samples are really just 100-D vectors. Sure we can connect the points with little lines, but that's not the same as a function. How do we get a distribution over true functions?
 
         The answer lies in how we define the covariance and mean of our multivariate Gaussian. So far we've been manually inputting some mean vector and covariance matrix. Since these are objects with discrete, finite elements, we can't really think of the distributions they define as functions. But what if we could redefine these objects (the mean and covariance) as functions? 
 
@@ -1179,7 +1204,7 @@ def _(go, mo, np):
         mean = _m(x_specific)
         # Draw one sample from the multivariate normal
         y = np.random.multivariate_normal(mean=mean, cov=cov, size=1)[0]
-        
+
         sample_num = get_clicks_real()
         new_scatter_real = go.Scatter(
             x=x_specific,
@@ -1188,7 +1213,7 @@ def _(go, mo, np):
             name=f"Sample {sample_num}",
         )
         fig_real.add_trace(new_scatter_real)
-        
+
         set_fig_real(fig_real)
         set_clicks_real(sample_num + 1)
 
@@ -1212,7 +1237,6 @@ def _(go, mo, np):
     )
 
     mo.hstack([btn_new_sample_real, btn_clear_real])
-
     return (
         add_sample_real,
         btn_clear_real,
@@ -1304,7 +1328,6 @@ def _(go, mo, np):
     )
 
     mo.hstack([btn_new_sample_100real, btn_clear_100real])
-
     return (
         add_sample_100real,
         btn_clear_100real,
@@ -1338,8 +1361,9 @@ def _(mo):
 
 
 @app.cell
-def _(C, sns):
-    sns.heatmap(C)
+def _(C, slider_l, sns):
+    sns.heatmap(C).set_title(f"$ℓ$={slider_l.value}")
+
     return
 
 
@@ -1515,7 +1539,6 @@ def _(go, make_subplots, mo, np, pairwise_rbf):
     #   3) The figure
 
     mo.hstack([btn_new_sample_double, slider_l2, btn_clear_double])
-
     return (
         add_new_sample,
         btn_clear_double,
@@ -1819,7 +1842,6 @@ def _(X, X_test, go, gp_posterior, mo, np, y):
 
     # 4) Display everything
     mo.hstack([btn_new_sample_housing, btn_clear_housing])
-
     return (
         add_sample_housing,
         btn_clear_housing,
@@ -1923,7 +1945,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        # References
+        ## References
 
         ### Tutorials and Guides
         - **[Gaussian Process Tutorial](https://peterroelants.github.io/posts/gaussian-process-tutorial/)** - Really awesome set of blog posts that teaches GPs using Python. I basically took this post and made it more verbose. The other posts in the series go into more detail about the process of fitting a GP and optimizing the kernel and hyperparameters. 
@@ -1936,11 +1958,6 @@ def _(mo):
         - **[Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/)** - _The book_ on GPs, with probably all the detail you'll ever need.
         """
     )
-    return
-
-
-@app.cell
-def _():
     return
 
 

@@ -54,8 +54,6 @@ def _(mo):
         > To understand this post, you should have a basic understanding of linear algebra and statistics.
 
         > The code to generate this post is hidden, and not necessary for understanding the concepts. But if you know python/numpy you might find it helpful to look under the hood.
-
-        _Why not make things as easy as possible?_
         """
     )
     return
@@ -322,7 +320,7 @@ def _(mo):
 
         Returning to our original definition, we've checked off one core idea:
 
-        **GP Regression: A Multivariate Gaussian <font color="#0ff">Distribution over functions</font>, conditioned on some training data.**
+        **GP Regression: A Multivariate Gaussian <font color="#32a852">Distribution over functions</font>, conditioned on some training data.**
 
         What if we want to model a non-linear relationship? Now we're getting closer to the core idea of GPs. But of course, before we get to Gaussian processes, we have to talk about Gaussians.
         """
@@ -994,25 +992,17 @@ def _(mo):
 
 
 @app.cell
-def _(np, sp):
-    def pairwise_rbf(xa, xb, l=5):
-        sq_norm = -0.5 / l**2 * sp.spatial.distance.cdist(xa, xb, "sqeuclidean")
-        return np.exp(sq_norm)
-    return (pairwise_rbf,)
-
-
-@app.cell
 def _(np, pairwise_rbf, pd, slider_l, sns):
     _xa = np.arange(0, 100, 1).reshape(1, -1).T
     _xb = np.arange(0, 100, 1).reshape(1, -1).T
     C = pd.DataFrame(pairwise_rbf(_xa, _xb, slider_l.value))
-    sns.heatmap(C).set_title(f"$l$={slider_l.value}")
+    sns.heatmap(C).set_title(f"$ℓ$={slider_l.value}")
     return (C,)
 
 
 @app.cell
 def _(mo):
-    slider_l = mo.ui.slider(start=1, stop=10)
+    slider_l = mo.ui.slider(start=1, stop=10, value=5, label="Value of ℓ")
     slider_l
     return (slider_l,)
 
@@ -1152,8 +1142,6 @@ def _(mo):
         0 & 0 & (2\pi)^2
         \end{bmatrix}
         $$
-
-        TODO: explain the circle dot symbol
 
         Now we can sample from a multivariate Gaussian at these specific values of $x$:
         """
@@ -1376,12 +1364,17 @@ def _(mo):
 
 
 @app.cell
-def _(np, pairwise_rbf, sns):
+def _(mo, np, sns, sp):
+    # Example output for an RBF kernel, given a simple vector x_test
+    def pairwise_rbf(xa, xb, l=5.0):
+        sq_norm = (-0.5/l**2) * sp.spatial.distance.cdist(xa, xb, 'sqeuclidean')
+        return np.exp(sq_norm)
+
     x_test = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
     rbf_output = pairwise_rbf(x_test, x_test, l=1)
-    sns.heatmap(rbf_output)
-    # TODO: what is this agin?
-    return rbf_output, x_test
+
+    mo.show_code(sns.heatmap(rbf_output, annot=True))
+    return pairwise_rbf, rbf_output, x_test
 
 
 @app.cell(hide_code=True)
@@ -1554,7 +1547,7 @@ def _(mo):
 
         Wow, we've come a long way. Let's regroup here and remember our original definition of a Gaussian Process Regression.
 
-        **GP Regression: <font color="#0ff">A Multivariate Gaussian Distribution over functions</font>, conditioned on some training data.**
+        **GP Regression: <font color="#32a852">A Multivariate Gaussian Distribution over functions</font>, conditioned on some training data.**
 
         > In fact this highlighted part above is the definition of a Gaussian Process. But we want "Gaussian Process Regression". (People sometimes use the two to mean the same thing, but technically GP is the distribution and GPR is the regression problem.)
 
@@ -1698,7 +1691,7 @@ def _(mo):
 
         Wait, uh, so we're done? 
 
-        **GP Regression: <font color="#0ff">A Multivariate Gaussian Distribution over functions, conditioned on some training data.</font>**
+        **GP Regression: <font color="#32a852">A Multivariate Gaussian Distribution over functions, conditioned on some training data.</font>**
 
         We're done! We've got a nice closed form distribution over functions conditioned on some data.
         """
@@ -1930,19 +1923,24 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## References/Citations
+        # References
 
-        - https://peterroelants.github.io/posts/gaussian-process-tutorial/
-          - Really awesome set of blog posts that teaches GPs using Python. I basically took this post and made it more verbose. 
-          - The other posts in the series go into more detail about the process of fitting a GP and optimizing the kernel and hyperparameters. 
-        - https://distill.pub/2019/visual-exploration-gaussian-processes/
-          - Another good GP blog post with beautiful interactive visualizations: 
-        - https://www.dominodatalab.com/blog/fitting-gaussian-process-models-python
-          - A good guide on using existing python libraries (like scikit-learn) to fit GPs 
-        - http://gaussianprocess.org/gpml/chapters/
-          - _The book_ on GPs, with probably all the detail you'll ever need:
+        ### Tutorials and Guides
+        - **[Gaussian Process Tutorial](https://peterroelants.github.io/posts/gaussian-process-tutorial/)** - Really awesome set of blog posts that teaches GPs using Python. I basically took this post and made it more verbose. The other posts in the series go into more detail about the process of fitting a GP and optimizing the kernel and hyperparameters. 
+
+        - **[Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/)** - Another good GP blog post with beautiful interactive visualizations: 
+
+        - **[Fitting Gaussian Process Models in Python](https://www.dominodatalab.com/blog/fitting-gaussian-process-models-python)** - Practical guide focused on implementing GPs using scikit-learn and other Python libraries.
+
+        ### Advanced Reading
+        - **[Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/)** - _The book_ on GPs, with probably all the detail you'll ever need.
         """
     )
+    return
+
+
+@app.cell
+def _():
     return
 
 

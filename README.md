@@ -5,10 +5,9 @@
   - make legends better
   - stack some charts
   - better button positioning
-- make blue colored font better
 - caching to make better load time
+- make a gpt conversion deriving some that conditional distribution
 - side by side comparison proofread
-- title of post
 - blog integration
   - port other posts
 

@@ -1427,6 +1427,7 @@ def _(mo, np, sns, sp):
     x_test = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
     rbf_output = pairwise_rbf(x_test, x_test, l=1)
 
+    # TODO: made this an editable / run code cell
     mo.show_code(sns.heatmap(rbf_output, annot=True))
     return pairwise_rbf, rbf_output, x_test
 
@@ -1555,11 +1556,6 @@ def _(go, make_subplots, mo, np, pairwise_rbf):
 
     # -- "Clear" button --
     btn_clear_double = mo.ui.button(label="Clear", on_click=clear_figure, kind="danger")
-
-    # Display them:
-    #   1) The slider
-    #   2) The buttons in a horizontal row
-    #   3) The figure
 
     mo.hstack([btn_new_sample_double, slider_l2, btn_clear_double])
     return (
@@ -1940,13 +1936,13 @@ def _(mo):
 
         You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:
 
-        - "how do we choose a kernel function?" 
-        - "how do we choose the best parameters for the kernel function?" 
-        - "do you really have to sample 1000s of functions to get the confidence intervals?"
-        - "what if the training data is intrinsically noisy (the price of houses has some variance at a given location)
+        - "How do we choose a kernel function?" 
+        - "How do we choose the best parameters for the kernel function?" 
+        - "Do you really have to sample 1000s of functions to get the confidence intervals?"
+        - "What if the training data is intrinsically noisy (the price of houses has some variance at a given location)
           "
-        - "what if there are many features in my training data?"
-        - "but I heard GPs are expensive to train?" 
+        - "What if there are many features in my training data?"
+        - "But I heard GPs are expensive to train?" 
 
         then you should check out the resources below, which should be easier to understand now that you have the basics.
         """

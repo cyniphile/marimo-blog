@@ -12,26 +12,18 @@
   - port other posts
 
 
+# Development
+- Install `uv` with `pip install uv`
+- Install packages with `uv install`
+- Run marimo server `uv run marimo edit`
 
-- `uv run marimo edit`
-## 📚 Included Examples
-
-
-- `notebooks/penguins.py`: Interactive data analysis with Polars and marimo
-
-## 🚀 Usage
-
-1. Fork this repository
-2. Add your marimo files to the `notebooks/` or `apps/` directory
+1. Add your marimo files to the `notebooks/` or `apps/` directory
    1. `notebooks/` notebooks are exported with `--mode edit`
    2. `apps/` notebooks are exported with `--mode run`
 4. Go to repository **Settings > Pages** and change the "Source" dropdown to "GitHub Actions"
-5. GitHub Actions will automatically build and deploy to Pages
 
 ## Including data or assets
-
 To include data or assets in your notebooks, add them to the `public/` directory.
-
 For example, the `apps/charts.py` notebook loads an image asset from the `public/` directory.
 
 ```markdown

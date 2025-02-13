@@ -144,11 +144,15 @@ def _(np, plt, sns):
 def _(mo):
     mo.md(
         r"""
+
+        TODO: reindex to be better
         Even though the data on the left is much more noisy, both linear regressions model the data with the sample simple line. There's no measure of uncertainty. Let's try to add some.
 
         What if (just for fun) we assumed $\beta_0$ and $\beta_1$ were actually random variables, and that they are normally distributed with variance equal to the variance in the data? Then our linear regression equation would look like this:
 
-        $y = B_0 + B_1 x$
+        $$
+        y = B_0 + B_1 x
+        $$
 
         where we've converted our betas to random variables as follows:
 
@@ -200,43 +204,103 @@ def _(
     y_low_noise,
     y_noise,
 ):
-    # Synthetic data for demonstration
-    np.random.seed(42)
-
     # Initial parameters
     beta_0 = 0
     beta_1 = 1
     beta_1_1 = np.corrcoef(x_reg, y_noise)[0, 1] * np.std(y_noise) / np.std(x_reg)
+
+    # Define warm and cool color schemes
+    colors_subplot1 = ['#ff4d4d', '#ff8533', '#ffcc00', '#ff6b6b', '#ff9966']  # Warm colors
+    colors_subplot2 = ['#4d4dff', '#33cc33', '#6666ff', '#00cccc', '#9933ff']  # Cool colors
+
+    # Helper function to calculate figure height based on number of traces
+    def calculate_figure_height(num_traces):
+        base_height = 400  # Base height for plot
+        legend_rows = max(1, (num_traces - 4) // 2)  # Number of additional legend rows needed
+        legend_height = 40 + (legend_rows * 20)  # Base legend height + height per row
+        return base_height + legend_height
 
     # Prepare figure and traces
     _fig = make_subplots(rows=1, cols=2, subplot_titles=("a", "b"))
     _fig.update_yaxes(range=[-5, 5], fixedrange=True)
     _fig.update_xaxes(range=[-3, 3], fixedrange=True)
 
+    # Initial height calculation
+    initial_height = calculate_figure_height(4)  # Start with 4 traces
+
+    # Update layout with side-by-side grouped legend
+    _fig.update_layout(
+        height=initial_height,
+        legend=dict(
+            entrywidth=0.25,
+            entrywidthmode="fraction",
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5,
+            bgcolor="white",
+            bordercolor="LightGrey",
+            borderwidth=0,
+            itemsizing='constant',
+            itemwidth=30,
+            groupclick="toggleitem",
+            valign='middle',
+            xref='container',
+            yref='container',
+            traceorder="grouped",
+            font=dict(size=10),
+        ),
+        margin=dict(l=4, r=3, t=80, b=80),
+    )
+
     # Lines based on initial betas
     line_1 = x_reg * beta_1_1 + beta_0
     line_2 = x_reg * beta_1 + beta_0
 
-    # Create scatter/line plots for first column
+    # Create scatter/line plots for first column with first color scheme
     scatter_fig = go.Scatter(
-        x=x_reg, y=y_noise, mode="markers", marker=dict(size=10), name="Noisy Data"
+        x=x_reg, 
+        y=y_noise, 
+        mode="markers", 
+        marker=dict(size=10, color=colors_subplot1[0]), 
+        name="Noisy Data",
+        legendgroup="Plot A",
+        showlegend=True
     )
-    line_fig = go.Scatter(x=x_reg, y=line_1, mode="lines", name="Initial Fit Noisy")
+    line_fig = go.Scatter(
+        x=x_reg, 
+        y=line_1, 
+        mode="lines", 
+        line=dict(color=colors_subplot1[1]), 
+        name="True Fit Noisy",
+        legendgroup="Plot A",
+        showlegend=True
+    )
     _fig.add_trace(scatter_fig, row=1, col=1)
     _fig.add_trace(line_fig, row=1, col=1)
 
-    # Create scatter/line plots for second column
+    # Create scatter/line plots for second column with second color scheme
     scatter_fig2 = go.Scatter(
-        x=x_reg, y=y_low_noise, mode="markers", marker=dict(size=10), name="Low Noise Data"
+        x=x_reg, 
+        y=y_low_noise, 
+        mode="markers", 
+        marker=dict(size=10, color=colors_subplot2[0]), 
+        name="Low Noise Data",
+        legendgroup="Plot B",
+        showlegend=True
     )
-    line_fig2 = go.Scatter(x=x_reg, y=line_2, mode="lines", name="Initial Fit Low Noise")
+    line_fig2 = go.Scatter(
+        x=x_reg, 
+        y=line_2, 
+        mode="lines", 
+        line=dict(color=colors_subplot2[1]), 
+        name="True Fit Low Noise",
+        legendgroup="Plot B",
+        showlegend=True
+    )
     _fig.add_trace(scatter_fig2, row=1, col=2)
     _fig.add_trace(line_fig2, row=1, col=2)
-
-    # Adjust margins to make them smaller
-    # _fig.update_layout(
-    #     margin=dict(l=10, r=10, t=40, b=40),  # Adjust these values to reduce margins
-    # )
 
     get_fig, set_fig = mo.state(_fig)
 
@@ -250,31 +314,43 @@ def _(
         line_data = x_reg * beta_1_rand + beta_0_rand
         line_data2 = x_reg * beta_1_rand2 + beta_0_rand2
 
+        # Add new line to left subplot with first color scheme and legend group
+        color_idx = len(fig.data) % len(colors_subplot1)
         new_data = {
             "type": "scatter",
             "x": x_reg,
             "y": line_data,
             "mode": "lines",
+            "line": {"color": colors_subplot1[color_idx]},
             "xaxis": "x",
             "yaxis": "y",
-            "name": f"$B_0a: {beta_0_rand[0]:.2f}, B_1a: {beta_1_rand[0]:.2f}$",
+            "name": f"$B_{{0a}}: {beta_0_rand[0]:.2f}, B_{{1a}}: {beta_1_rand[0]:.2f}$",
+            "legendgroup": "Plot A",
         }
         fig.add_trace(new_data, row=1, col=1)
 
-        # Append new line to the right subplot (col=2)
+        # Add new line to right subplot with second color scheme and legend group
+        color_idx = len(fig.data) % len(colors_subplot2)
         fig.add_trace(
             {
                 "type": "scatter",
                 "x": x_reg,
                 "y": line_data2,
                 "mode": "lines",
+                "line": {"color": colors_subplot2[color_idx]},
                 "xaxis": "x2",
                 "yaxis": "y2",
-                "name": f"$B_0b: {beta_0_rand2[0]:.2f}, B_1b: {beta_1_rand2[0]:.2f}$",
+                "name": f"$B_{{0b}}: {beta_0_rand2[0]:.2f}, B_{{1b}}: {beta_1_rand2[0]:.2f}$",
+                "legendgroup": "Plot B",
             },
             row=1,
             col=2,
         )
+        
+        # Update figure height based on new number of traces
+        new_height = calculate_figure_height(len(fig.data))
+        fig.update_layout(height=new_height)
+        
         set_fig(fig)
         return
 
@@ -283,10 +359,11 @@ def _(
     def reset(_):
         fig = get_fig()
         fig["data"] = fig["data"][:4]
+        # Reset height to initial value
+        fig.update_layout(height=calculate_figure_height(4))
         set_fig(fig)
 
     clear_button = mo.ui.button(value=0, on_click=reset, label="Reset", kind="danger")
-    clear_button
 
     mo.hstack([button, clear_button])
     return (
@@ -295,8 +372,12 @@ def _(
         beta_1,
         beta_1_1,
         button,
+        calculate_figure_height,
         clear_button,
+        colors_subplot1,
+        colors_subplot2,
         get_fig,
+        initial_height,
         line_1,
         line_2,
         line_fig,

@@ -610,7 +610,7 @@ def _(go, mo, np):
         fig.add_trace(scatter)
         set_fig2(fig)  # update our global figure state
         set_clicks2(get_clicks2()+1)
-        
+
     def clear_data(_):
         """Clear all the data from the figure."""
         fig = get_fig2()
@@ -634,8 +634,6 @@ def _(go, mo, np):
 
     # 4) Lay out the two buttons and the figure
     mo.hstack([btn_new_sample, btn_clear])
-
-
     return (
         add_sample,
         btn_clear,
@@ -1337,7 +1335,6 @@ def _(mo):
 @app.cell
 def _(C, slider_l, sns):
     sns.heatmap(C).set_title(f"$ℓ$={slider_l.value}")
-
     return
 
 
@@ -1901,15 +1898,17 @@ def _(mo):
         r"""
         ## Outro
 
-        You should now have the core ideas of Gaussian processes regression. If you still have some questions, like 
+        You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:
+
         - "how do we choose a kernel function?" 
         - "how do we choose the best parameters for the kernel function?" 
         - "do you really have to sample 1000s of functions to get the confidence intervals?"
-        - "what if the training data is intrinsically noisy, unlike housing prices?"
+        - "what if the training data is intrinsically noisy (the price of houses has some variance at a given location)
+          "
         - "what if there are many features in my training data?"
         - "but I heard GPs are expensive to train?" 
 
-        then you should check out the resources below. They should be easy to understand now that you have the basics
+        then you should check out the resources below, which should be easier to understand now that you have the basics.
         """
     )
     return

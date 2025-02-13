@@ -45,15 +45,18 @@ def _(mo):
         r"""
         # The First Blog Post You Should Read about Gaussian Processes (With Interactive Plots) 
 
-        Is this the 10th blog post you've read about Gaussian Processes and still don't understand them?
+        ## Why Read This Post?
+        Is this the 10th blog post you've read about Gaussian Processes and still don't quite understand them?
 
-        When I set out to learn about Gaussian Processes (really Gaussian Process Regression), I ended up jumping around between many different resources that weren't quite dumbed down enough for me, and it took hours before the core idea hit me. I'm writing this post to get you to core idea in ~30 minutes using interactive plots.
+        When I set out to learn about "Gaussian Processes" (really Gaussian Process Regression), I ended up jumping around between many different resources and it took hours before the core idea hit me. This post should get you to **core idea in ~30 minutes using interactive plots**.
 
-        After that, I'd encourage you to read the references at the end for more details and rigor, and they should make more sense.
+        After that, I'd encourage you to read the references at the end for more detail and rigor. They'll now be more digestible.
 
-        > To understand this post, you should have a basic understanding of linear algebra and statistics.
-
-        > The code to generate this post is hidden, and not necessary for understanding the concepts. But if you know python/numpy you might find it helpful to look under the hood.
+        > Prerequisites: basic linear algebra and statistics.
+        > 
+        > If you know python/numpy you might find it helpful to look at the code under the hood. Just click the elipses in the upper right corner.
+        >
+        TODO: add example interactive plot here
         """
     )
     return
@@ -144,8 +147,7 @@ def _(np, plt, sns):
 def _(mo):
     mo.md(
         r"""
-
-        TODO: reindex to be better
+        TODO: reindex to be better, alpha and beta
         Even though the data on the left is much more noisy, both linear regressions model the data with the sample simple line. There's no measure of uncertainty. Let's try to add some.
 
         What if (just for fun) we assumed $\beta_0$ and $\beta_1$ were actually random variables, and that they are normally distributed with variance equal to the variance in the data? Then our linear regression equation would look like this:
@@ -346,11 +348,11 @@ def _(
             row=1,
             col=2,
         )
-        
+
         # Update figure height based on new number of traces
         new_height = calculate_figure_height(len(fig.data))
         fig.update_layout(height=new_height)
-        
+
         set_fig(fig)
         return
 
@@ -459,6 +461,9 @@ def _(go, mo, np):
         yaxis=dict(
             title="Count", range=[0, int(SIZE * 0.1)], fixedrange=True
         ),  # Adjust the y-axis range as needed
+    )
+    fig_hist.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
     )
     mean_state, set_mean_state = mo.state(0.0)
     variance_state, set_variance_state = mo.state(1.0)
@@ -677,6 +682,9 @@ def _(go, mo, np):
         data=[go.Scatter(mode="markers")],
         layout=go.Layout(title="Samples from a 1-D Gaussian Distribution"),
     )
+    initial_fig.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
     get_fig2, set_fig2 = mo.state(initial_fig)
     get_clicks2, set_clicks2 = mo.state(0)
 
@@ -752,6 +760,9 @@ def _(go, mo, np):
     init_scatter_2d = go.Scatter(mode="markers")
     init_layout_2d = go.Layout(title="Samples from a 2-D Gaussian Distribution")
     init_fig_2d = go.Figure(data=[init_scatter_2d], layout=init_layout_2d)
+    init_fig_2d.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
 
     get_fig_2d, set_fig_2d = mo.state(init_fig_2d)
     get_clicks_2d, set_clicks_2d = mo.state(0)
@@ -823,6 +834,9 @@ def _(go, mo, np):
     init_scatter_3d = go.Scatter(mode="markers")
     init_layout_3d = go.Layout(title="Samples from a 3-D Gaussian Distribution")
     init_fig_3d = go.Figure(data=[init_scatter_3d], layout=init_layout_3d)
+    init_fig_3d.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
 
     get_fig_3d, set_fig_3d = mo.state(init_fig_3d)
     get_clicks_3d, set_clicks_3d = mo.state(0)
@@ -894,6 +908,9 @@ def _(go, mo, np):
     init_scatter_100d = go.Scatter(mode="markers")
     init_layout_100d = go.Layout(title="Samples from a 100-D Gaussian Distribution")
     init_fig_100d = go.Figure(data=[init_scatter_100d], layout=init_layout_100d)
+    init_fig_100d.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
 
     get_fig_100d, set_fig_100d = mo.state(init_fig_100d)
     get_clicks_100d, set_clicks_100d = mo.state(0)
@@ -1024,7 +1041,7 @@ def _(np, plt, sns):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""This means that each of the variables in our multivariate normal distribution are.....???? (hover over the text below to see the answer)""")
+    mo.md(r"""This means that each of the variables in our multivariate normal distribution are.....????""")
     return
 
 
@@ -1079,7 +1096,7 @@ def _(np, pairwise_rbf, pd, slider_l, sns):
 
 @app.cell
 def _(mo):
-    slider_l = mo.ui.slider(start=1, stop=10, value=5, label="Value of ℓ")
+    slider_l = mo.ui.slider(start=1, stop=30, value=5, label="Value of ℓ")
     slider_l
     return (slider_l,)
 
@@ -1090,7 +1107,7 @@ def _(mo):
         r"""
         It looks very similar, but it's "fuzzier" around the diagonal. Think about what type of values you would expect from a Gaussian with this covariance matrix.
 
-        Try playing around with the l slider TODO:
+        (Try playing around with the mysterious "ℓ" slider, will explain later).
 
         It's saying that variables near each other are more correlated than variables far away. For example variable 1 is more correlated with variable 2 than it is with variable 100. Let visualize some samples from a 100-d Gaussian with this new covariance matrix. But before you hit the "sample" button, what do you think these new curves will look like?
         """
@@ -1112,6 +1129,9 @@ def _(go, mo, np, pairwise_rbf, slider_l):
         title='Samples from a 100-D Gaussian Distribution with "Fuzzy" Covariance'
     )
     init_fig_fuzzy = go.Figure(data=[init_scatter_fuzzy], layout=init_layout_fuzzy)
+    init_fig_fuzzy.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
 
     # 2) Store the figure in Marimo's state, plus a sample-count state
     get_fig_fuzzy, set_fig_fuzzy = mo.state(init_fig_fuzzy)
@@ -1244,7 +1264,9 @@ def _(go, mo, np):
     init_scatter_real = go.Scatter(mode="markers")
     init_layout_real = go.Layout(title="Samples from a Multivariate Gaussian at Real-Valued Indices")
     init_fig_real = go.Figure(data=[init_scatter_real], layout=init_layout_real)
-
+    init_fig_real.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
     # 2) Use Marimo state to keep track of the figure and click count
     get_fig_real, set_fig_real = mo.state(init_fig_real)
     get_clicks_real, set_clicks_real = mo.state(0)
@@ -1333,6 +1355,9 @@ def _(go, mo, np):
         title="Samples from a 100-D Multivariate Gaussian at Real-Valued Indices"
     )
     init_fig_100_real = go.Figure(data=[init_scatter_100_real], layout=init_layout_100_real)
+    init_fig_100_real.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
 
     # 2) Store the figure and a sample counter in Marimo's state
     get_fig_100real, set_fig_100real = mo.state(init_fig_100_real)
@@ -1473,6 +1498,9 @@ def _(go, make_subplots, mo, np, pairwise_rbf):
         rows=1, 
         cols=2, 
         subplot_titles=("Function Samples", "Covariance Matrix")
+    )
+    fig_double_subplots.update_layout(
+            margin=dict(l=4, r=3, t=150, b=0),
     )
 
     # 1) Prepare our initial data: an RBF covariance heatmap in col=2, an empty scatter in col=1
@@ -1830,7 +1858,7 @@ def _(X, X_test, go, gp_posterior, mo, np, y):
         x=X.T[0],
         y=y.T[0],
         mode="markers",
-        marker=dict(color="red", size=12),
+        marker=dict(color="red", size=16),
         name="Known Data"
     )
     layout_housing = go.Layout(
@@ -1839,6 +1867,9 @@ def _(X, X_test, go, gp_posterior, mo, np, y):
         yaxis_title="Cost of a house ($)",
     )
     init_fig_housing = go.Figure(data=[scatter_known], layout=layout_housing)
+    init_fig_housing.update_layout(
+            margin=dict(l=4, r=3, t=80, b=80),
+    )
 
     # 2) Wrap the figure and a sample counter in Marimo's state
     get_fig_housing, set_fig_housing = mo.state(init_fig_housing)
@@ -1917,7 +1948,7 @@ def _(mo):
         r"""
         Heck yeah! This looks like a Gaussian process regression! Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
 
-        In the plot below, I've taken 1000 samples from this conditioned distribution (a.k.a. "posterior predictive distribution") and plotted them. I also reveal the real function that I used to generate the fake housing data (in black).
+        In the plot below, I've taken 1000 samples from this conditioned distribution (a.k.a. "posterior predictive distribution") and plotted them. I also reveal the real function that I used to generate the fake housing data (in pink).
         """
     )
     return

@@ -3,11 +3,12 @@
 - make this work: https://marimo.io/p/@marimo/interactive-matrices
 - make mobile optimized
   - make legends better
-  - stack some charts
+  - margins
   - better button positioning, labels
 - caching, etc to make better load time
 - make a gpt conversion deriving some that conditional distribution
 - side by side comparison proofread
+- comments
 - blog integration
   - port other posts
 

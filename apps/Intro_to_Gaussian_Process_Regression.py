@@ -590,73 +590,51 @@ def _(get_fig2):
 
 
 @app.cell
-def _(go, mo, np, px):
-    import plotly.express as pxx
-
-    # 1) Keep a global list of all sample points (instead of adding single traces).
-    samples_x, samples_y = [], []
-
-    # 2) Build an *empty* initial figure (no samples yet, but it has the margin set up).
-    px_fig_empty = pxx.scatter(
-        x=[0], 
-        y=[0], 
-        marginal_y="histogram",
-        title="Samples from a 1-D Gaussian Distribution",
+def _(go, mo, np):
+    # 1) Create and store an initial figure in Marimo state
+    initial_fig = go.Figure(
+        data=[go.Scatter(mode="markers")],
+        layout=go.Layout(title="Samples from a 1-D Gaussian Distribution"),
     )
-    initial_fig = go.Figure(data=px_fig_empty.data, layout=px_fig_empty.layout)
-
-    # Store it in Marimo state
     get_fig2, set_fig2 = mo.state(initial_fig)
     get_clicks2, set_clicks2 = mo.state(0)
 
+    # 2) Define the callbacks that change the figure
     def add_sample(_):
-        """Add a random sample point and regenerate the entire figure with px.scatter."""
-        # 1) Add a new random sample point to our global list
-        samples_x.append(1)  # or something meaningful if you want varied x
-        samples_y.append(np.random.normal())
-
-        # 2) Rebuild the figure with Plotly Express so the histogram updates
-        px_fig = px.scatter(
-            x=samples_x,
-            y=samples_y,
-            marginal_y="histogram",
-            title="Samples from a 1-D Gaussian Distribution",
-        )
-        fig = go.Figure(data=px_fig.data, layout=px_fig.layout)
-
-        # 3) Save this new figure in Marimo state
-        set_fig2(fig)
-        set_clicks2(get_clicks2() + 1)
-
+        """Add a new random sample (1 point) to the figure."""
+        fig = get_fig2()
+        # We just stack data on top of the existing figure
+        x = ["1"]
+        y = np.random.normal(size=1)
+        scatter = go.Scatter(x=x, y=y, mode="markers", name=f"Sample {get_clicks2()}")
+        fig.add_trace(scatter)
+        set_fig2(fig)  # update our global figure state
+        set_clicks2(get_clicks2()+1)
+        
     def clear_data(_):
-        """Clear the data and re-initialize the figure."""
-        samples_x.clear()
-        samples_y.clear()
-        px_fig_empty = px.scatter(
-            x=[0], 
-            y=[0], 
-            marginal_y="histogram",
-            title="Samples from a 1-D Gaussian Distribution",
-        )
-        fig = go.Figure(data=px_fig_empty.data, layout=px_fig_empty.layout)
+        """Clear all the data from the figure."""
+        fig = get_fig2()
+        fig.data = []
         set_fig2(fig)
         set_clicks2(0)
 
+    # 3) Create the UI buttons, each calling its respective callback
     btn_new_sample = mo.ui.button(
-        value=0,
-        on_click=add_sample,
-        label="New Sample",
+        value=0, 
+        on_click=add_sample, 
+        label="New Sample", 
         kind="neutral"
     )
     btn_clear = mo.ui.button(
-        value=get_clicks2(),
-        on_click=clear_data,
-        label="Clear",
+        value=get_clicks2(), 
+        on_click=clear_data, 
+        label="Clear", 
         kind="danger"
     )
 
-    # Lay out the two buttons and the figure
+    # 4) Lay out the two buttons and the figure
     mo.hstack([btn_new_sample, btn_clear])
+
 
     return (
         add_sample,
@@ -666,10 +644,6 @@ def _(go, mo, np, px):
         get_clicks2,
         get_fig2,
         initial_fig,
-        px_fig_empty,
-        pxx,
-        samples_x,
-        samples_y,
         set_clicks2,
         set_fig2,
     )
@@ -1950,7 +1924,7 @@ def _(mo):
         ### Tutorials and Guides
         - **[Gaussian Process Tutorial](https://peterroelants.github.io/posts/gaussian-process-tutorial/)** - Really awesome set of blog posts that teaches GPs using Python. I basically took this post and made it more verbose. The other posts in the series go into more detail about the process of fitting a GP and optimizing the kernel and hyperparameters. 
 
-        - **[Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/)** - Another good GP blog post with beautiful interactive visualizations: 
+        - **[Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/)** - More detailed, with beautiful interactive visualizations.
 
         - **[Fitting Gaussian Process Models in Python](https://www.dominodatalab.com/blog/fitting-gaussian-process-models-python)** - Practical guide focused on implementing GPs using scikit-learn and other Python libraries.
 

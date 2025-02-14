@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.11.2"
+__generated_with = "0.11.4"
 app = marimo.App()
 
 
@@ -799,9 +799,7 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""So now each time we sample from a bivariate normal distribution, we get a vector of two numbers, which we plot as two connected points. Now let's look at a 3-D Gaussian,  $\textbf{Y}_{3D} = [Y_1, Y_2, Y_3]^T$,"""
-    )
+    mo.md(r"""So now each time we sample from a bivariate normal distribution, we get a vector of two numbers, which we plot as two connected points. Now let's look at a 3-D Gaussian,  $\textbf{Y}_{3D} = [Y_1, Y_2, Y_3]^T$,""")
     return
 
 
@@ -866,9 +864,7 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""Now let's take it to an extreme: a 100-D Gaussian! $\textbf{Y}_{100D} = [Y_1, Y_2, Y_3, \dots, Y_{100}]^T$, so every sample is a vector of 100 random values."""
-    )
+    mo.md(r"""Now let's take it to an extreme: a 100-D Gaussian! $\textbf{Y}_{100D} = [Y_1, Y_2, Y_3, \dots, Y_{100}]^T$, so every sample is a vector of 100 random values.""")
     return
 
 
@@ -1006,9 +1002,7 @@ def _(np, plt, sns):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""This means that each of the variables in our multivariate normal distribution are.....????"""
-    )
+    mo.md(r"""This means that each of the variables in our multivariate normal distribution are.....????""")
     return
 
 
@@ -1287,9 +1281,7 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""But now that we've defined our mean and covariance functions, we can sample from a multivariate Gaussian at any value of $x$ we want. For example, let's sample at 100 evenly spaced real values of $x$ between -1 and 1. All we do is plug these values into our mean and covariance functions, and then sample from the resulting multivariate Gaussian."""
-    )
+    mo.md(r"""But now that we've defined our mean and covariance functions, we can sample from a multivariate Gaussian at any value of $x$ we want. For example, let's sample at 100 evenly spaced real values of $x$ between -1 and 1. All we do is plug these values into our mean and covariance functions, and then sample from the resulting multivariate Gaussian.""")
     return
 
 
@@ -1434,9 +1426,7 @@ def _(mo, np, sns, sp):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""Using this kernel function, lets sample from a multivariate Gaussian at 100 evenly spaced real values of $x$ between -10 and 10. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions."""
-    )
+    mo.md(r"""Using this kernel function, lets sample from a multivariate Gaussian at 100 evenly spaced real values of $x$ between -10 and 10. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions.""")
     return
 
 
@@ -1774,7 +1764,6 @@ def _(pairwise_rbf, sp):
         mu_2__1 = (sigma_21 @ sp.linalg.inv(sigma_11) @ y_train).flatten()
         sigma_2__1 = sigma_22 - sigma_21 @ sp.linalg.inv(sigma_11) @ sigma_12
         return (mu_2__1, sigma_2__1)
-
     return (gp_posterior,)
 
 
@@ -1872,33 +1861,101 @@ def _(mo):
         r"""
         Heck yeah! This looks like a Gaussian process regression! Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
 
-        In the plot below, I've taken 1000 samples from this conditioned distribution (a.k.a. "posterior predictive distribution") and plotted them. I also reveal the real function that I used to generate the fake housing data (in pink).
+        In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 1000 samples from this posterior distrubtion? TODO: define posterior
         """
     )
     return
 
 
 @app.cell
-def _(X, X_axis, X_test, gp_posterior, np, pd, y, y_true):
-    _y_norm = (y - y.mean()) / y.std()
-    mu_1, sigma_1 = gp_posterior(_y_norm, X, X_test, l=1)
-    y_hat = np.random.multivariate_normal(mu_1, sigma_1, size=1000) * y.std() + y.mean()
-    df_1 = (
-        pd.DataFrame(y_hat.T, index=X_test.flatten())
-        .sort_index()
-        .plot(alpha=0.01, legend=False, color="blue")
+def _():
+    return
+
+
+@app.cell
+def _(many):
+    many.value
+    return
+
+
+@app.cell
+def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
+    # Suppose these are already defined somewhere in your code:
+    # X, y, X_test, y_true, X_axis
+    # gp_posterior(...) -> returns (mu, sigma)
+
+    def plot_baseline():
+        """
+        Plots only:
+          - The underlying (true) function in pink (#ff54e0).
+          - The known data points in red circles.
+          - X-axis and Y-axis labels.
+        Returns the Matplotlib axes object.
+        """
+        # Plot the pink underlying function (higher zorder => on top)
+        ax = (
+            pd.DataFrame(
+                y_true.flatten(),
+                index=X_axis.flatten(),
+                columns=["Underlying Function"],
+            )
+            .sort_index()
+            .plot(color="#ff54e0", linewidth=2, zorder=10)
+        )
+        # Plot the known data points in red (even higher zorder => on top of pink if overlapping)
+        (
+            pd.DataFrame(
+                y.flatten(),
+                index=X.flatten(),
+                columns=["Known Data"]
+            )
+            .sort_index()
+            .plot(ax=ax, style="o", color="red", zorder=20)
+        )
+        ax.set_xlabel("Distance from Nuclear Power Plant (miles)")
+        ax.set_ylabel("Price")
+        return ax
+
+    def add_posterior_samples(ax):
+        """
+        Generates 1000 posterior samples from the Gaussian process
+        and plots them on the provided axes in blue with alpha=0.01,
+        but with a lower zorder to keep them behind the pink/red lines.
+        """
+        # Normalize y
+        _y_norm = (y - y.mean()) / y.std()
+        mu_1, sigma_1 = gp_posterior(_y_norm, X, X_test, l=1)
+
+        # Draw the 1000 samples
+        y_hat = np.random.multivariate_normal(mu_1, sigma_1, size=1000) * y.std() + y.mean()
+
+        # Plot them with lower zorder so they're behind the baseline
+        (
+            pd.DataFrame(y_hat.T, index=X_test.flatten())
+            .sort_index()
+            .plot(ax=ax, alpha=0.01, legend=False, color="blue", zorder=1)
+        )
+
+    def _regenerate_plot(ax):
+        """
+        Called on button click to re-generate the plot:
+          1) Plot the baseline (pink + known data).
+          2) Add the 1000 posterior samples (blue, behind).
+        Returns the final axes object for chaining if needed.
+        """
+        add_posterior_samples(ax)
+        return ax
+
+
+    many = mo.ui.button(
+        value=plot_baseline(),  # create the initial plot on load (pink + red)
+        on_click=_regenerate_plot,
+        label="Sample 1000 Functions from Posterior",
+        kind="danger"
     )
-    df_1.set_ylabel("Price")
-    df_1.set_xlabel("Distance from Nuclear Power Plant (miles)")
-    pd.DataFrame(
-        y_true.flatten(), index=X_axis.flatten(), columns=["Underlying Function"]
-    ).sort_index().plot(ax=df_1, color="#e802e4", linewidth=2)
-    (
-        pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Known Data"])
-        .sort_index()
-        .plot(ax=df_1, style="o", color="red")
-    )
-    return df_1, mu_1, sigma_1, y_hat
+    many
+
+    return add_posterior_samples, many, plot_baseline
 
 
 @app.cell(hide_code=True)

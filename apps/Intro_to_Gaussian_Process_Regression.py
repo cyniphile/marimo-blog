@@ -148,6 +148,7 @@ def _(mo):
     mo.md(
         r"""
         TODO: reindex to be better, alpha and beta
+        TODO: rememver, when we draw a function, we're just plotting a lot of points and connecting them together
         Even though the data on the left is much more noisy, both linear regressions model the data with the sample simple line. There's no measure of uncertainty. Let's try to add some.
 
         What if (just for fun) we assumed $\beta_0$ and $\beta_1$ were actually random variables, and that they are normally distributed with variance equal to the variance in the data? Then our linear regression equation would look like this:
@@ -234,7 +235,7 @@ def _(
     _fig.update_layout(
         height=initial_height,
         legend=dict(
-            entrywidth=0.25,
+            entrywidth=0.29,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
@@ -399,7 +400,7 @@ def _(mo):
 
         Notice what we've created: it's a distribution over _functions_. Each sample from  $y = B_0 + B_1 x$ is a different function $f(x)$. Also notice that as you sample more and more, the "spread" or uncertainty of the original fit becomes more and more apparent. You can also see that the uncertainty is higher in the noisier data.
 
-        > This framework is just to develop for intuition for distributions over functions. For a more rigorous take, check out the bayesian linear regression section [here](https://gaussianprocess.org/gpml/chapters/RW.pdf#page=26&zoom=100,240,358).
+        > This framework is just to develop for intuition for distributions over functions. For a more rigorous take, check out the bayesian linear regression section [here](https://gaussianprocess.org/gpml/chapters/RW.pdf#page=26&zoom=50,240,358).
 
         Returning to our original definition, we've checked off one core idea:
 
@@ -430,8 +431,9 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig_hist):
-    get_fig_hist()
+def _(get_fig_hist, mean_slider, mo, variance_slider):
+    # 6. Lay out sliders and the figure
+    mo.vstack([get_fig_hist(), mo.hstack([mean_slider, variance_slider])])
     return
 
 
@@ -502,9 +504,6 @@ def _(go, mo, np):
         on_change=on_variance_change,
         label="Variance",
     )
-
-    # 6. Lay out sliders and the figure
-    mo.hstack([mean_slider, variance_slider])
     return (
         END,
         SIZE,
@@ -528,49 +527,53 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        What about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
+    mo.md(r""" """)
+    return
 
 
-        So while a single Gaussian is this:
+@app.cell
+def _(mo):
+    mo.md(r"""
+    What about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
 
-        $$
-        Y \sim N(\mu, \sigma^2)
-        $$
 
-        Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
+    So while a single Gaussian is this:
 
-        $$
-        \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
-        $$
+    $$
+    Y \sim N(\mu, \sigma^2)
+    $$
 
-        Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
+    Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
 
-        $$
-        \boldsymbol{\mu} = \begin{bmatrix}
-        \mu_1 \\
-        \mu_2 \\
-        \vdots \\
-        \mu_n
-        \end{bmatrix},
-        $$
+    $$
+    \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
+    $$
 
-        $$
-        \qquad
-        \Sigma = \begin{bmatrix}
-        \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
-        \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
-        \vdots & \vdots & \ddots & \vdots \\
-        \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
-        \end{bmatrix}.
-        $$
+    Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
 
-        In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
+    $$
+    \boldsymbol{\mu} = \begin{bmatrix}
+    \mu_1 \\
+    \mu_2 \\
+    \vdots \\
+    \mu_n
+    \end{bmatrix},
+    $$
 
-        In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value.
-        """
-    )
+    $$
+    \qquad
+    \Sigma = \begin{bmatrix}
+    \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
+    \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
+    \end{bmatrix}.
+    $$
+
+    In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
+
+    In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value.
+    """)
     return
 
 
@@ -637,12 +640,6 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig2):
-    get_fig2()
-    return
-
-
-@app.cell
 def _(go, mo, np):
     # 1) Create and store an initial figure in Marimo state
     initial_fig = go.Figure(
@@ -650,7 +647,7 @@ def _(go, mo, np):
         layout=go.Layout(title="Samples from a 1-D Gaussian Distribution"),
     )
     initial_fig.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
     get_fig2, set_fig2 = mo.state(initial_fig)
     get_clicks2, set_clicks2 = mo.state(0)
@@ -677,9 +674,6 @@ def _(go, mo, np):
     # 3) Create the UI buttons, each calling its respective callback
     btn_new_sample = mo.ui.button(value=0, on_click=add_sample, label="New Sample", kind="neutral")
     btn_clear = mo.ui.button(value=get_clicks2(), on_click=clear_data, label="Clear", kind="danger")
-
-    # 4) Lay out the two buttons and the figure
-    mo.hstack([btn_new_sample, btn_clear])
     return (
         add_sample,
         btn_clear,
@@ -691,6 +685,12 @@ def _(go, mo, np):
         set_clicks2,
         set_fig2,
     )
+
+
+@app.cell
+def _(btn_clear, btn_new_sample, get_fig2, mo):
+    mo.vstack([get_fig2(), mo.hstack([btn_new_sample, btn_clear])])
+    return
 
 
 @app.cell(hide_code=True)
@@ -706,8 +706,8 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig_2d):
-    get_fig_2d()
+def _(get_fig_2d, mean_slider, mo, variance_slider):
+    mo.vstack([get_fig_2d(), mo.hstack([mean_slider, variance_slider])])
     return
 
 
@@ -718,7 +718,7 @@ def _(go, mo, np):
     init_layout_2d = go.Layout(title="Samples from a 2-D Gaussian Distribution")
     init_fig_2d = go.Figure(data=[init_scatter_2d], layout=init_layout_2d)
     init_fig_2d.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
 
     get_fig_2d, set_fig_2d = mo.state(init_fig_2d)
@@ -747,8 +747,6 @@ def _(go, mo, np):
     btn_clear_2d = mo.ui.button(
         value=get_clicks_2d(), on_click=clear_data_2d, label="Clear", kind="danger"
     )
-
-    mo.hstack([btn_new_sample_2d, btn_clear_2d])
     return (
         add_sample_2d,
         btn_clear_2d,
@@ -771,8 +769,8 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig_3d):
-    get_fig_3d()
+def _(btn_clear_3d, btn_new_sample_3d, get_fig_3d, mo):
+    mo.vstack([get_fig_3d(), mo.hstack([btn_new_sample_3d, btn_clear_3d])])
     return
 
 
@@ -783,7 +781,7 @@ def _(go, mo, np):
     init_layout_3d = go.Layout(title="Samples from a 3-D Gaussian Distribution")
     init_fig_3d = go.Figure(data=[init_scatter_3d], layout=init_layout_3d)
     init_fig_3d.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
 
     get_fig_3d, set_fig_3d = mo.state(init_fig_3d)
@@ -812,8 +810,6 @@ def _(go, mo, np):
     btn_clear_3d = mo.ui.button(
         value=get_clicks_3d(), on_click=clear_data_3d, label="Clear", kind="danger"
     )
-
-    mo.hstack([btn_new_sample_3d, btn_clear_3d])
     return (
         add_sample_3d,
         btn_clear_3d,
@@ -831,138 +827,134 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""Now let's take it to an extreme: a 100-D Gaussian! $\textbf{Y}_{100D} = [Y_1, Y_2, Y_3, \dots, Y_{100}]^T$, so every sample is a vector of 100 random values.""")
+    mo.md(r"""Now let's take it to an extreme: a 50-D Gaussian! $\textbf{Y}_{50D} = [Y_1, Y_2, Y_3, \dots, Y_{50}]^T$, so every sample is a vector of 50 random values.""")
     return
 
 
 @app.cell
-def _(get_fig_100d):
-    get_fig_100d()
+def _(btn_clear_50d, btn_connect_50d, btn_new_sample_50d, get_fig_50d, mo):
+    mo.vstack([get_fig_50d(), mo.hstack([btn_new_sample_50d, btn_connect_50d, btn_clear_50d])])
     return
 
 
 @app.cell
 def _(go, mo, np):
-    # 100D Figure: "Samples from a 100-D Gaussian Distribution"
-    init_scatter_100d = go.Scatter(mode="markers")
-    init_layout_100d = go.Layout(title="Samples from a 100-D Gaussian Distribution")
-    init_fig_100d = go.Figure(data=[init_scatter_100d], layout=init_layout_100d)
-    init_fig_100d.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+    # 50D Figure: "Samples from a 50-D Gaussian Distribution"
+    init_scatter_50d = go.Scatter(mode="markers")
+    init_layout_50d = go.Layout(title="Samples from a 50-D Gaussian Distribution")
+    init_fig_50d = go.Figure(data=[init_scatter_50d], layout=init_layout_50d)
+    init_fig_50d.update_layout(
+        margin=dict(l=4, r=3, t=80, b=10),
     )
 
-    get_fig_100d, set_fig_100d = mo.state(init_fig_100d)
-    get_clicks_100d, set_clicks_100d = mo.state(0)
+    get_fig_50d, set_fig_50d = mo.state(init_fig_50d)
+    get_clicks_50d, set_clicks_50d = mo.state(0)
 
-    def add_sample_100d(_):
-        fig_100d = get_fig_100d()
-        x_vals_100d = np.arange(100)
-        y_vals_100d = np.random.normal(size=100)
-        new_scatter_100d = go.Scatter(
-            x=x_vals_100d, y=y_vals_100d, mode="markers", name=f"Sample {get_clicks_100d()}"
+    def add_sample_50d(_):
+        fig_50d = get_fig_50d()
+        x_vals_50d = np.arange(50)
+        y_vals_50d = np.random.normal(size=50)
+        new_scatter_50d = go.Scatter(
+            x=x_vals_50d, y=y_vals_50d, mode="markers", name=f"Sample {get_clicks_50d()}"
         )
-        fig_100d.add_trace(new_scatter_100d)
-        set_fig_100d(fig_100d)
-        set_clicks_100d(get_clicks_100d() + 1)
+        fig_50d.add_trace(new_scatter_50d)
+        set_fig_50d(fig_50d)
+        set_clicks_50d(get_clicks_50d() + 1)
 
-    def connect_samples_100d(_):
-        fig_100d = get_fig_100d()
-        for trace in fig_100d.data:
+    def connect_samples_50d(_):
+        fig_50d = get_fig_50d()
+        for trace in fig_50d.data:
             trace["mode"] = "lines+markers"
-        set_fig_100d(fig_100d)
+        set_fig_50d(fig_50d)
 
-    def clear_data_100d(_):
-        fig_100d = get_fig_100d()
-        fig_100d.data = []
-        set_fig_100d(fig_100d)
-        set_clicks_100d(0)
+    def clear_data_50d(_):
+        fig_50d = get_fig_50d()
+        fig_50d.data = []
+        set_fig_50d(fig_50d)
+        set_clicks_50d(0)
 
-    btn_new_sample_100d = mo.ui.button(
-        value=0, on_click=add_sample_100d, label="New Sample", kind="neutral"
+    btn_new_sample_50d = mo.ui.button(
+        value=0, on_click=add_sample_50d, label="New Sample", kind="neutral"
     )
-    btn_connect_100d = mo.ui.button(
-        label="Connect Samples", on_click=connect_samples_100d, kind="neutral"
+    btn_connect_50d = mo.ui.button(
+        label="Connect Samples", on_click=connect_samples_50d, kind="neutral"
     )
-    btn_clear_100d = mo.ui.button(
-        value=get_clicks_100d(), on_click=clear_data_100d, label="Clear", kind="danger"
+    btn_clear_50d = mo.ui.button(
+        value=get_clicks_50d(), on_click=clear_data_50d, label="Clear", kind="danger"
     )
-
-    mo.hstack([btn_new_sample_100d, btn_connect_100d, btn_clear_100d])
     return (
-        add_sample_100d,
-        btn_clear_100d,
-        btn_connect_100d,
-        btn_new_sample_100d,
-        clear_data_100d,
-        connect_samples_100d,
-        get_clicks_100d,
-        get_fig_100d,
-        init_fig_100d,
-        init_layout_100d,
-        init_scatter_100d,
-        set_clicks_100d,
-        set_fig_100d,
+        add_sample_50d,
+        btn_clear_50d,
+        btn_connect_50d,
+        btn_new_sample_50d,
+        clear_data_50d,
+        connect_samples_50d,
+        get_clicks_50d,
+        get_fig_50d,
+        init_fig_50d,
+        init_layout_50d,
+        init_scatter_50d,
+        set_clicks_50d,
+        set_fig_50d,
     )
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
-    mo.md(
-        r"""
-        Cool, so now we can visualize samples from a 100-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
+    mo.md(r"""
+    Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
 
-        You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
+    You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
 
-        Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
+    Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
 
-        If you thought "functions" then you are getting what I'm going for here. Each sample from the 100-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as 
+    If you thought "functions" then you are getting what I'm going for here. Each sample from the 50-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as 
 
-        $$
-        f(x) = Y_{x}
-        $$
+    $$
+    f(x) = Y_{x}
+    $$
 
-        given a multivariate Gaussian $Y = [Y_1, Y_2, Y_3, \dots, Y_{x}]^T \sim N(\boldsymbol{\mu}, \Sigma)$.
+    given a multivariate Gaussian $Y = [Y_1, Y_2, Y_3, \dots, Y_{x}]^T \sim N(\boldsymbol{\mu}, \Sigma)$.
 
-        But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 100-D Gaussian specifies a _distribution over functions_...
+    But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 50-D Gaussian specifies a _distribution over functions_...
 
-        <img src="https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg" width="340" height="200" />
+    <img src="https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg" width="340" height="200" />
 
-        _Almost_. The 100-D Gaussian really only specifies a distribution over 100 discrete values, so it's not quite a distribution over functions $f(x)$ that can take _any_ value of $x$. Hold that thought for now, we'll return to this later. 
+    _Almost_. The 50-D Gaussian really only specifies a distribution over 50 discrete values, so it's not quite a distribution over functions $f(x)$ that can take _any_ value of $x$. Hold that thought for now, we'll return to this later. 
 
-        But first you might have some questions. Remember, the above plot was made by taking a few samples from 100-D gaussian, $\textbf{Y}_{100D} \sim N(\boldsymbol{\mu}, \Sigma)$
+    But first you might have some questions. Remember, the above plot was made by taking a few samples from 50-D gaussian, $\textbf{Y}_{50D} \sim N(\boldsymbol{\mu}, \Sigma)$
 
-        But I didn't tell you what $\boldsymbol{\mu}$ and $\Sigma$ were. Well, I actually used a mean vector of all zeros:
+    But I didn't tell you what $\boldsymbol{\mu}$ and $\Sigma$ were. Well, I actually used a mean vector of all zeros:
 
-        $$
-        \boldsymbol{\mu} =  \begin{bmatrix}
-        0 \\
-        0 \\
-        \vdots \\
-        0
-        \end{bmatrix},
-        $$
+    $$
+    \boldsymbol{\mu} =  \begin{bmatrix}
+    0 \\
+    0 \\
+    \vdots \\
+    0
+    \end{bmatrix},
+    $$
 
-        and for the covariance matrix I simply used the Identity matrix.
+    and for the covariance matrix I simply used the Identity matrix.
 
-        $$
-        \Sigma = \begin{bmatrix}
-        1 & 0 & \dots & 0 \\
-        0 & 1 & \dots & 0 \\
-        \vdots & \vdots & \ddots & \vdots \\
-        0 & 0 & \dots & 1
-        \end{bmatrix}.
-        $$
+    $$
+    \Sigma = \begin{bmatrix}
+    1 & 0 & \dots & 0 \\
+    0 & 1 & \dots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \dots & 1
+    \end{bmatrix}.
+    $$
 
-        Since this covariance matrix is really big, let's visualize it with a heatmap:
-        """
-    )
+    Since this covariance matrix is really big, let's visualize it with a heatmap:
+    """)
     return
 
 
 @app.cell
 def _(np, plt, sns):
     # @title
-    sns.heatmap(np.identity(100))
+    sns.heatmap(np.identity(50))
     plt.show()
     return
 
@@ -1001,7 +993,7 @@ def _(HTML):
 def _(mo):
     mo.md(
         r"""
-        No variable has any covariance with any other, so you than think of this multivariate Gaussian as simply 100 separate Gaussians, each with mean = 0 and variance 1. This is why the curves we plotted above are so all over the place: each point is randomly bouncing up and down with no influence from its neighbors.
+        No variable has any covariance with any other, so you than think of this multivariate Gaussian as simply 50 separate Gaussians, each with mean = 0 and variance 1. This is why the curves we plotted above are so all over the place: each point is randomly bouncing up and down with no influence from its neighbors.
 
         What if we add some non-zero values to the covariance matrix that are off-diagonal? 
 
@@ -1015,8 +1007,8 @@ def _(mo):
 
 @app.cell
 def _(np, pairwise_rbf, pd, slider_l, sns):
-    _xa = np.arange(0, 100, 1).reshape(1, -1).T
-    _xb = np.arange(0, 100, 1).reshape(1, -1).T
+    _xa = np.arange(0, 50, 1).reshape(1, -1).T
+    _xb = np.arange(0, 50, 1).reshape(1, -1).T
     C = pd.DataFrame(pairwise_rbf(_xa, _xb, slider_l.value))
     sns.heatmap(C).set_title(f"$ℓ$={slider_l.value}")
     return (C,)
@@ -1037,15 +1029,16 @@ def _(mo):
 
         (Try playing around with the mysterious "ℓ" slider, will explain later).
 
-        It's saying that variables near each other are more correlated than variables far away. For example variable 1 is more correlated with variable 2 than it is with variable 100. Let visualize some samples from a 100-d Gaussian with this new covariance matrix. But before you hit the "sample" button, what do you think these new curves will look like?
+        It's saying that variables near each other are more correlated than variables far away. For example variable 1 is more correlated with variable 2 than it is with variable 50. Let visualize some samples from a 50-d Gaussian with this new covariance matrix. But before you hit the "sample" button, what do you think these new curves will look like?
         """
     )
     return
 
 
 @app.cell
-def _(get_fig_fuzzy):
-    get_fig_fuzzy()
+def _(btn_clear_fuzzy, btn_new_sample_fuzzy, get_fig_fuzzy, mo):
+    # 4) Layout: Place the buttons side-by-side and display the figure
+    mo.vstack([get_fig_fuzzy(), mo.hstack([btn_new_sample_fuzzy, btn_clear_fuzzy])])
     return
 
 
@@ -1054,7 +1047,7 @@ def _(go, mo, np, pairwise_rbf, slider_l):
     # 1) Create an initial figure
     init_scatter_fuzzy = go.Scatter(mode="markers")
     init_layout_fuzzy = go.Layout(
-        title='Samples from a 100-D Gaussian Distribution with "Fuzzy" Covariance'
+        title='Samples from a 50-D Gaussian Distribution with "Fuzzy" Covariance'
     )
     init_fig_fuzzy = go.Figure(data=[init_scatter_fuzzy], layout=init_layout_fuzzy)
     init_fig_fuzzy.update_layout(
@@ -1068,9 +1061,9 @@ def _(go, mo, np, pairwise_rbf, slider_l):
     def add_sample_fuzzy(_):
         """Add a new random sample using a 'fuzzy' covariance matrix."""
         fig_fuzzy = get_fig_fuzzy()
-        x = np.linspace(0, 100, 100)
+        x = np.linspace(0, 50, 50)
         cov = pairwise_rbf(x.reshape(-1, 1), x.reshape(-1, 1), l=slider_l.value)
-        y = np.random.multivariate_normal(mean=np.zeros(100), cov=cov, size=1)[0]
+        y = np.random.multivariate_normal(mean=np.zeros(50), cov=cov, size=1)[0]
         sample_num = get_clicks_fuzzy()
         new_scatter_fuzzy = go.Scatter(
             x=x,
@@ -1096,9 +1089,6 @@ def _(go, mo, np, pairwise_rbf, slider_l):
     btn_clear_fuzzy = mo.ui.button(
         value=get_clicks_fuzzy(), on_click=clear_data_fuzzy, label="Clear", kind="danger"
     )
-
-    # 4) Layout: Place the buttons side-by-side and display the figure
-    mo.hstack([btn_new_sample_fuzzy, btn_clear_fuzzy])
     return (
         add_sample_fuzzy,
         btn_clear_fuzzy,
@@ -1131,7 +1121,7 @@ def _(mo):
     mo.md(
         r"""
         ### Making these "functions" into Functions
-        We've been throwing around the word "functions" a lot now, but we still never resolved the problem that these samples are really just 100-D vectors. Sure we can connect the points with little lines, but that's not the same as a function. How do we get a distribution over true functions?
+        We've been throwing around the word "functions" a lot now, but we still never resolved the problem that these samples are really just 50-D vectors. Sure we can connect the points with little lines, but that's not the same as a function. How do we get a distribution over true functions?
 
         The answer lies in how we define the covariance and mean of our multivariate Gaussian. So far we've been manually inputting some mean vector and covariance matrix. Since these are objects with discrete, finite elements, we can't really think of the distributions they define as functions. But what if we could redefine these objects (the mean and covariance) as functions? 
 
@@ -1171,8 +1161,8 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig_real):
-    get_fig_real()
+def _(btn_clear_real, btn_new_sample_real, get_fig_real, mo):
+    mo.vstack([get_fig_real(), mo.hstack([btn_new_sample_real, btn_clear_real])])
     return
 
 
@@ -1190,7 +1180,7 @@ def _(go, mo, np):
     )
     init_fig_real = go.Figure(data=[init_scatter_real], layout=init_layout_real)
     init_fig_real.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
     # 2) Use Marimo state to keep track of the figure and click count
     get_fig_real, set_fig_real = mo.state(init_fig_real)
@@ -1228,8 +1218,6 @@ def _(go, mo, np):
     btn_clear_real = mo.ui.button(
         value=get_clicks_real(), on_click=clear_data_real, label="Clear", kind="danger"
     )
-
-    mo.hstack([btn_new_sample_real, btn_clear_real])
     return (
         add_sample_real,
         btn_clear_real,
@@ -1248,90 +1236,88 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""But now that we've defined our mean and covariance functions, we can sample from a multivariate Gaussian at any value of $x$ we want. For example, let's sample at 100 evenly spaced real values of $x$ between -1 and 1. All we do is plug these values into our mean and covariance functions, and then sample from the resulting multivariate Gaussian.""")
+    mo.md(r"""But now that we've defined our mean and covariance functions, we can sample from a multivariate Gaussian at any value of $x$ we want. For example, let's sample at 50 evenly spaced real values of $x$ between -1 and 1. All we do is plug these values into our mean and covariance functions, and then sample from the resulting multivariate Gaussian.""")
     return
 
 
 @app.cell
-def _(get_fig_100real):
-    get_fig_100real()
+def _(btn_clear_50real, btn_new_sample_50real, get_fig_50real, mo):
+    mo.vstack([get_fig_50real(), mo.hstack([btn_new_sample_50real, btn_clear_50real])])
     return
 
 
 @app.cell
 def _(go, mo, np):
     # We assume you've already defined:
-    x_real_big = np.linspace(-1, 1, 100)
+    x_real_big = np.linspace(-1, 1, 50)
     # m = lambda x: x
     # k = lambda x: np.diag(x**2)
     m = lambda x: x
     k = lambda x: np.diag(x**2)
 
     # 1) Create the initial figure
-    init_scatter_100_real = go.Scatter(mode="markers")
-    init_layout_100_real = go.Layout(
-        title="Samples from a 100-D Multivariate Gaussian at Real-Valued Indices"
+    init_scatter_50_real = go.Scatter(mode="markers")
+    init_layout_50_real = go.Layout(
+        title="Samples from a 50-D Multivariate Gaussian at Real-Valued Indices"
     )
-    init_fig_100_real = go.Figure(data=[init_scatter_100_real], layout=init_layout_100_real)
-    init_fig_100_real.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+    init_fig_50_real = go.Figure(data=[init_scatter_50_real], layout=init_layout_50_real)
+    init_fig_50_real.update_layout(
+        margin=dict(l=4, r=3, t=80, b=10),
     )
 
     # 2) Store the figure and a sample counter in Marimo's state
-    get_fig_100real, set_fig_100real = mo.state(init_fig_100_real)
-    get_clicks_100real, set_clicks_100real = mo.state(0)
+    get_fig_50real, set_fig_50real = mo.state(init_fig_50_real)
+    get_clicks_50real, set_clicks_50real = mo.state(0)
 
-    def add_sample_100real(_):
-        """Draw one random sample from a 100-D Gaussian (diag covariance = x^2)."""
-        fig_100r = get_fig_100real()
-        sample_num = get_clicks_100real()
+    def add_sample_50real(_):
+        """Draw one random sample from a 50-D Gaussian (diag covariance = x^2)."""
+        fig_50r = get_fig_50real()
+        sample_num = get_clicks_50real()
 
         # Build covariance and mean from the user-defined functions
-        cov_100 = k(x_real_big)
-        mean_100 = m(x_real_big)
-        # Draw a single 100-D sample
-        y_samp = np.random.multivariate_normal(mean=mean_100, cov=cov_100, size=1)[0]
+        cov_50 = k(x_real_big)
+        mean_50 = m(x_real_big)
+        # Draw a single 50-D sample
+        y_samp = np.random.multivariate_normal(mean=mean_50, cov=cov_50, size=1)[0]
 
-        new_scatter_100r = go.Scatter(
+        new_scatter_50r = go.Scatter(
             x=x_real_big,
             y=y_samp,
             mode="lines+markers",
             name=f"Sample {sample_num}",
         )
-        fig_100r.add_trace(new_scatter_100r)
+        fig_50r.add_trace(new_scatter_50r)
 
-        set_fig_100real(fig_100r)
-        set_clicks_100real(sample_num + 1)
+        set_fig_50real(fig_50r)
+        set_clicks_50real(sample_num + 1)
 
-    def clear_data_100real(_):
+    def clear_data_50real(_):
         """Remove all existing traces."""
-        fig_100r = get_fig_100real()
-        fig_100r.data = []
-        set_fig_100real(fig_100r)
-        set_clicks_100real(0)
+        fig_50r = get_fig_50real()
+        fig_50r.data = []
+        set_fig_50real(fig_50r)
+        set_clicks_50real(0)
 
     # 3) Create the UI: Two buttons + the figure
-    btn_new_sample_100real = mo.ui.button(
-        label="New Sample", on_click=add_sample_100real, kind="neutral"
+    btn_new_sample_50real = mo.ui.button(
+        label="New Sample", on_click=add_sample_50real, kind="neutral"
     )
 
-    btn_clear_100real = mo.ui.button(label="Clear", on_click=clear_data_100real, kind="danger")
-
-    mo.hstack([btn_new_sample_100real, btn_clear_100real])
+    btn_clear_50real = mo.ui.button(label="Clear", on_click=clear_data_50real, kind="danger")
     return (
-        add_sample_100real,
-        btn_clear_100real,
-        btn_new_sample_100real,
-        clear_data_100real,
-        get_clicks_100real,
-        get_fig_100real,
-        init_fig_100_real,
-        init_layout_100_real,
-        init_scatter_100_real,
+        add_sample_50real,
+        btn_clear_50real,
+        btn_new_sample_50real,
+        clear_data_50real,
+        get_clicks_50real,
+        get_fig_50real,
+        init_fig_50_real,
+        init_layout_50_real,
+        init_scatter_50_real,
         k,
         m,
-        set_clicks_100real,
-        set_fig_100real,
+        set_clicks_50real,
+        set_fig_50real,
         x_real_big,
     )
 
@@ -1393,148 +1379,181 @@ def _(mo, np, sns, sp):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""Using this kernel function, lets sample from a multivariate Gaussian at 100 evenly spaced real values of $x$ between -10 and 10. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions.""")
+    mo.md(r"""Using this kernel function, lets sample from a multivariate Gaussian at 50 evenly spaced real values of $x$ between -10 and 10. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions.""")
     return
 
 
 @app.cell
-def _(get_fig_double):
-    get_fig_double()
+def _(get_fig_cov, get_fig_samples, mo):
+    mo.vstack([
+        get_fig_samples(),
+        get_fig_cov(),
+
+    ])
+
     return
 
 
 @app.cell
-def _(go, make_subplots, mo, np, pairwise_rbf):
-    # --- Setup the subplot figure with two columns ---
-    # (Left: "Function Samples", Right: "Covariance Matrix")
-    fig_double_subplots = make_subplots(
-        rows=1, cols=2, subplot_titles=("Function Samples", "Covariance Matrix")
+def _(btn_clear, btn_new_sample, mo, slider_ld):
+
+
+    mo.hstack([btn_new_sample, slider_ld, btn_clear])
+    return
+
+
+@app.cell
+def _(go, mo, np, pairwise_rbf, set_sample_count):
+    #################################################################
+    # 2) Prepare initial data
+    #################################################################
+
+    _xa = np.linspace(-1, 1, 50).reshape(-1, 1)
+    init_cov = pairwise_rbf(_xa, _xa, l=0.5)  # initial lengthscale
+
+    #################################################################
+    # 3) Build the two separate Plotly figures
+    #################################################################
+
+    # -- Figure A: "Function Samples" --
+    fig_samples = go.Figure()
+    # Start with an empty scatter for function samples
+    scatter_init = go.Scatter(mode="lines", x=[], y=[], name="Samples")
+    fig_samples.add_trace(scatter_init)
+    fig_samples.update_yaxes(range=[-5, 5], fixedrange=True)
+    fig_samples.update_layout(
+        title="Function Samples",
+        margin=dict(l=20, r=20, t=40, b=20),
+        width=600,
+        height=400,
     )
-    fig_double_subplots.update_layout(
-        margin=dict(l=4, r=3, t=150, b=0),
+
+    # -- Figure B: "Covariance Matrix" --
+    fig_cov = go.Figure()
+    # Create a 50×50 heatmap; rotate it so indexing matches your original code
+    z = np.rot90(init_cov)
+    heatmap_init = go.Heatmap(
+        z=z,
+        x=np.arange(z.shape[1]),  # 0..49
+        y=np.arange(z.shape[0]),  # 0..49
+        showscale=False,
+    )
+    fig_cov.add_trace(heatmap_init)
+    # Make it "square" in data coordinates
+    fig_cov.update_xaxes(range=[0, 49])
+    fig_cov.update_yaxes(
+        range=[0, 50],
+        scaleanchor="x",  # tie y-axis scale to x-axis
+        scaleratio=1
+    )
+    fig_cov.update_layout(
+        title="Covariance Matrix",
+        width=500,
+        height=500,
+        margin=dict(l=20, r=20, t=40, b=20),
     )
 
-    # 1) Prepare our initial data: an RBF covariance heatmap in col=2, an empty scatter in col=1
-    _xa = np.linspace(-1, 1, 100).reshape(-1, 1)
-    init_cov = pairwise_rbf(_xa, _xa, l=0.5)  # initial value of l=0.5
-    heatmap_init = go.Heatmap(z=np.rot90(init_cov), showscale=False)
-    scatter_init2 = go.Scatter(mode="lines", x=[], y=[])
+    #################################################################
+    # 4) Store the figures and relevant parameters in Miarmo state
+    #################################################################
 
-    fig_double_subplots.add_trace(heatmap_init, row=1, col=2)
-    fig_double_subplots.add_trace(scatter_init2, row=1, col=1)
-    fig_double_subplots.update_yaxes(range=[-5, 5], fixedrange=True, row=1, col=1)
+    get_fig_samples, set_fig_samples = mo.state(fig_samples)
+    get_fig_cov, set_fig_cov = mo.state(fig_cov)
 
-    # Convert subplots to a final figure
-    init_fig_double = go.Figure(fig_double_subplots)
-
-    # 2) Store the figure and relevant parameters in Marimo's state
-    get_fig_double, set_fig_double = mo.state(init_fig_double)
-    # Keep track of the RBF parameter l, the covariance matrix, and a sample counter
     get_l_param, set_l_param = mo.state(0.5)
-    get_cov_double, set_cov_double = mo.state(init_cov)
-    get_sample_count_double, set_sample_count_double = mo.state(0)
+    get_cov, set_cov = mo.state(init_cov)
 
-    # 3) Define the callback functions
+    #################################################################
+    # 5) Define the callback functions
+    #################################################################
+
     def on_slider_change(new_l):
         """
-        When the slider for 'l' changes, update the covariance heatmap
-        in the right subplot and store the new matrix for future samples.
+        1) Update the stored lengthscale
+        2) Recompute the covariance
+        3) Update the heatmap in fig_cov
         """
-        fig_d = get_fig_double()
         set_l_param(new_l)
-        # Recompute covariance
         new_cov = pairwise_rbf(_xa, _xa, l=new_l)
-        set_cov_double(new_cov)
-        # Update the heatmap trace (which should be the first data item)
-        # We keep it in row=1, col=2, so that is data[0].
-        fig_d.data[0].z = np.rot90(new_cov)
-        set_fig_double(fig_d)
+        set_cov(new_cov)
+
+        fig_c = get_fig_cov()
+        fig_c.data[0].z = np.rot90(new_cov)  # data[0] is the heatmap
+        set_fig_cov(fig_c)
 
     def add_new_sample(_):
         """
-        Generate a new random function sample from the current covariance
-        and plot it in the left subplot (row=1, col=1).
+        Generate a random function sample from the current covariance
+        and add it to fig_samples.
         """
-        fig_d = get_fig_double()
-        sample_num = get_sample_count_double()
-        current_cov = get_cov_double()
+        current_cov = get_cov()
 
-        # Draw one random sample from the current covariance
-        y_samp = np.random.multivariate_normal(mean=np.zeros(len(_xa)), cov=current_cov, size=1)[0]
+        # Draw a random sample from the multivariate normal
+        y_samp = np.random.multivariate_normal(
+            mean=np.zeros(len(_xa)),
+            cov=current_cov,
+            size=1
+        )[0]
 
-        # Append a new trace on the left
+        fig_s = get_fig_samples()
         new_trace = go.Scatter(
             x=_xa.ravel(),
             y=y_samp,
             mode="lines",
             name=f"ℓ={get_l_param():.2f}",
-            xaxis="x",
-            yaxis="y",
         )
-        fig_d.add_trace(new_trace, row=1, col=1)
-
-        set_fig_double(fig_d)
-        set_sample_count_double(sample_num + 1)
+        fig_s.add_trace(new_trace)
+        set_fig_samples(fig_s)
 
     def clear_figure(_):
         """
-        Reset the figure to just the heatmap (data[0]) and
-        one empty scatter (data[1]) on the left subplot.
-        Also reset the sample counter.
+        Reset the samples figure so it has only one empty scatter trace.
+        Also reset the sample counter to 0.
         """
-        fig_d = get_fig_double()
-        # Keep only the first two traces:
-        #  - data[0] is the heatmap
-        #  - data[1] is the empty scatter
-        fig_d.data = fig_d.data[:2]
+        fig_s = get_fig_samples()
+        fig_s.data = [go.Scatter(mode="lines", x=[], y=[], name="Samples")]
+        set_fig_samples(fig_s)
+        set_sample_count(0)
 
-        # Optionally re-initialize the second trace to be truly empty
-        fig_d.data[1] = go.Scatter(mode="lines", x=[], y=[])
+    #################################################################
+    # 6) Build the UI (slider + two buttons + display figures)
+    #################################################################
 
-        set_fig_double(fig_d)
-        set_sample_count_double(0)
-
-    # 4) Build the UI: slider + two buttons + the figure
-
-    # -- Slider for the RBF kernel parameter 'l' --
-    slider_l2 = mo.ui.slider(
+    slider_ld = mo.ui.slider(
         value=get_l_param(),
         start=0.01,
-        stop=1.0,
+        stop=2.0,
         step=0.01,
         on_change=on_slider_change,
         label="RBF Kernel Parameter (ℓ)",
     )
 
-    # -- "New Sample" button --
     btn_new_sample_double = mo.ui.button(
         label="New Sample", on_click=add_new_sample, kind="neutral"
     )
 
-    # -- "Clear" button --
     btn_clear_double = mo.ui.button(label="Clear", on_click=clear_figure, kind="danger")
-
-    mo.hstack([btn_new_sample_double, slider_l2, btn_clear_double])
     return (
         add_new_sample,
         btn_clear_double,
         btn_new_sample_double,
         clear_figure,
-        fig_double_subplots,
-        get_cov_double,
-        get_fig_double,
+        fig_cov,
+        fig_samples,
+        get_cov,
+        get_fig_cov,
+        get_fig_samples,
         get_l_param,
-        get_sample_count_double,
         heatmap_init,
         init_cov,
-        init_fig_double,
         on_slider_change,
-        scatter_init2,
-        set_cov_double,
-        set_fig_double,
+        scatter_init,
+        set_cov,
+        set_fig_cov,
+        set_fig_samples,
         set_l_param,
-        set_sample_count_double,
-        slider_l2,
+        slider_ld,
+        z,
     )
 
 
@@ -1610,9 +1629,9 @@ def _(np, pd):
         ]
     )
     DOMAIN = (0, 4 * np.pi)
-    X_axis = np.linspace(DOMAIN[0], DOMAIN[1], 100).reshape(1, -1).T
+    X_axis = np.linspace(DOMAIN[0], DOMAIN[1], 50).reshape(1, -1).T
     y_true = (0.1 * np.sin(X_axis) + 1) * 200000 + X_axis * 10000
-    X_test = np.linspace(DOMAIN[0], DOMAIN[1], 100).reshape(1, -1).T
+    X_test = np.linspace(DOMAIN[0], DOMAIN[1], 50).reshape(1, -1).T
     df = pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Cost of a house"]).sort_index()
     df.index.name = "Distance from the Nuclear Power Plant (miles)"
     df.plot(style="o", color="red")
@@ -1684,7 +1703,7 @@ def _(mo):
         p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}}) \sim N\left(m(\textbf{x}) + k(\textbf{x}, \textbf{x}_{\text{known}})k(\textbf{x}_{\text{known}})^{-1}(\textbf{c}_{\text{known}} - m(\textbf{x}_{\text{known}})), k(\textbf{x}) - k(\textbf{x}, \textbf{x}_{\text{known}})k(\textbf{x}_{\text{known}})^{-1}k(\textbf{x}_{\text{known}}, \textbf{x})\right)
         $$
 
-        > Please don't get mad at me for just giving you the answer. It's a kind of complicated derivation, and I don't want us to get bogged down. If you want to go through it, see this section of [Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/RW.pdf#page=218&zoom=100,240,358). 
+        > Please don't get mad at me for just giving you the answer. It's a kind of complicated derivation, and I don't want us to get bogged down. If you want to go through it, see this section of [Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/RW.pdf#page=218&zoom=50,240,358). 
         >
         > For now, just accept that there's a nice closed form solution to this problem. 
 
@@ -1704,9 +1723,9 @@ def _(mo):
         r"""
         # Actually Fitting a Regression Model
 
-        Using our conditional distribution above, we can plug in our known house costs to create a conditional distribution of functions. Then we can sample from this distribution at, say, 100 evenly spaced distance from 0 to 12 miles away from the nuclear plant.
+        Using our conditional distribution above, we can plug in our known house costs to create a conditional distribution of functions. Then we can sample from this distribution at, say, 50 evenly spaced distance from 0 to 12 miles away from the nuclear plant.
 
-        We have 15 known cost data points. This means that $\textbf{c}_{\text{known}}$ and $\textbf{x}_{\text{known}}$ is are vectors of length 15. We want to predicted prices at 100 evenly spaced points, so $\textbf{x}$ and $\textbf{c}$ are vectors of length 100. 
+        We have 15 known cost data points. This means that $\textbf{c}_{\text{known}}$ and $\textbf{x}_{\text{known}}$ is are vectors of length 15. We want to predicted prices at 50 evenly spaced points, so $\textbf{x}$ and $\textbf{c}$ are vectors of length 50. 
 
         Plugging this into the conditional distribution above, we can now sample from the conditional distribution of functions:
 
@@ -1775,7 +1794,7 @@ def _(X, X_test, go, gp_posterior, mo, np, y):
         fig_housing = get_fig_housing()
         current_clicks = get_clicks_housing()
 
-        # Draw a single sample from the posterior (100D)
+        # Draw a single sample from the posterior (50D)
         # Then "un-normalize" it back to actual scale
         yp = np.random.multivariate_normal(mean=mu, cov=sigma, size=1)[0] * y.std() + y.mean()
         new_scatter = go.Scatter(
@@ -1828,14 +1847,9 @@ def _(mo):
         r"""
         Heck yeah! This looks like a Gaussian process regression! Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
 
-        In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 1000 samples from this posterior distrubtion? TODO: define posterior
+        In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 500 samples from this posterior distrubtion? TODO: define posterior
         """
     )
-    return
-
-
-@app.cell
-def _():
     return
 
 
@@ -1921,7 +1935,6 @@ def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
         kind="danger"
     )
     many
-
     return add_posterior_samples, many, plot_baseline
 
 
@@ -1929,7 +1942,7 @@ def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
 def _(mo):
     mo.md(
         r"""
-        Remember what there blue lines are: they are samples from a multivariate gaussian conditioned on the known data points, and sampled at 1000 evenly spaced points between 0 and 12. We used the complicated formula above to find the conditional mean vector and conditional covariance matrix, and then sampled from a distribution using that mean and covariance.
+        Remember what there blue lines are: they are samples from a multivariate gaussian conditioned on the known data points, and sampled at 500 evenly spaced points between 0 and 12. We used the complicated formula above to find the conditional mean vector and conditional covariance matrix, and then sampled from a distribution using that mean and covariance.
 
         Below are some heatmaps of the _conditional_ covariance matrix and _conditional_ mean vector (conditioned on the known housing data) that specify the predictive multivariate gaussian distribution.
 
@@ -1940,16 +1953,19 @@ def _(mo):
 
 
 @app.cell
-def _(X_test, mu_1, pd, plt, sigma_1, sns, y):
+def _(X_test, pd, sigma, sns):
+    #@title
     ix = X_test.flatten().round(2)
-    sns.heatmap(pd.DataFrame(sigma_1, index=ix, columns=ix)).set_title(
-        "Conditional Covariance Matrix"
-    )
-    plt.show()
-    _ = sns.heatmap(pd.DataFrame((mu_1 * y.std() + y.mean()).reshape(-1, 1), index=ix)).set_title(
-        "Conditional Mean Vector"
-    )
-    return (ix,)
+    plt1 = sns.heatmap(pd.DataFrame(sigma, index=ix, columns=ix)).set_title('Conditional Covariance Matrix')
+    plt1
+    return ix, plt1
+
+
+@app.cell
+def _(ix, mu, pd, sns, y):
+    plt2 = sns.heatmap(pd.DataFrame((mu * y.std() + y.mean()).reshape(-1,1), index=ix)).set_title('Conditional Mean Vector')
+    plt2
+    return (plt2,)
 
 
 @app.cell(hide_code=True)
@@ -1962,7 +1978,7 @@ def _(mo):
 
         - "How do we choose a kernel function?" 
         - "How do we choose the best parameters for the kernel function?" 
-        - "Do you really have to sample 1000s of functions to get the confidence intervals?"
+        - "Do you really have to sample 500s of functions to get the confidence intervals?"
         - "What if the training data is intrinsically noisy (the price of houses has some variance at a given location)
           "
         - "What if there are many features in my training data?"

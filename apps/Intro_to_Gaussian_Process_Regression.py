@@ -68,7 +68,7 @@ def _(mo):
         r"""
         ## Why Gaussian Process Regression?
 
-        I've always been intrigued by Gaussian Processes regression. It has a certain air of mystery about it...one of those models for the cool kids. GPR is supposed to be "beautiful", but also pretty hard to understand. All I knew about it was the following: 
+        <!-- I've always been intrigued by Gaussian Processes regression. It has a certain air of mystery about it...one of those models for the cool kids. GPR is supposed to be "beautiful", but also pretty hard to understand. All I knew about it was the following:  -->
 
         1. It's a non-linear regression model 
         1. It also does built-in modeling of uncertainties (cool!)
@@ -568,44 +568,7 @@ def _(mo):
 
         In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
 
-        In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single valueWhat about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
-
-        So while a single Gaussian is this:
-
-        $$
-        Y \sim N(\mu, \sigma^2)
-        $$
-
-        Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
-
-        $$
-        \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
-        $$
-
-        Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
-
-        $$
-        \boldsymbol{\mu} = \begin{bmatrix}
-        \mu_1 \\
-        \mu_2 \\
-        \vdots \\
-        \mu_n
-        \end{bmatrix},
-        $$
-
-        $$
-        \qquad
-        \Sigma = \begin{bmatrix}
-        \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
-        \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
-        \vdots & \vdots & \ddots & \vdots \\
-        \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
-        \end{bmatrix}.
-        $$
-
-        In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
-
-        In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value
+        In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value.
         """
     )
     return
@@ -625,19 +588,23 @@ def _(mo):
 
 @app.cell
 def _(Matrix, alt, mo, np, pd):
+    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
+    arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))    
     x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
     df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
-
-    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
-    arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))
     x_sim = np.random.multivariate_normal(
-        np.array(arr.matrix).reshape(-1), np.array(mat.matrix), 2500
+        np.array(arr.matrix).reshape(-1), 
+        np.array(mat.matrix), 
+        2500
     )
     df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
-    chart_sim = alt.Chart(df_sim).mark_point().encode(x="x", y="y")
+    chart_sim = (
+        alt.Chart(df_sim).mark_point().encode(x="x", y="y") + 
+        alt.Chart(df_orig).mark_point(color="gray").encode(x="x", y="y")
+    )
 
-    mo.vstack([mo.hstack([arr, mat, chart_sim])])
+    mo.vstack([arr, mat, chart_sim])
     return arr, chart_sim, df_orig, df_sim, mat, x_orig, x_sim
 
 

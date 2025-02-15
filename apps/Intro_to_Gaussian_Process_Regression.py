@@ -533,47 +533,49 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""
-    What about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
+    mo.md(
+        r"""
+        What about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
 
 
-    So while a single Gaussian is this:
+        So while a single Gaussian is this:
 
-    $$
-    Y \sim N(\mu, \sigma^2)
-    $$
+        $$
+        Y \sim N(\mu, \sigma^2)
+        $$
 
-    Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
+        Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
 
-    $$
-    \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
-    $$
+        $$
+        \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
+        $$
 
-    Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
+        Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
 
-    $$
-    \boldsymbol{\mu} = \begin{bmatrix}
-    \mu_1 \\
-    \mu_2 \\
-    \vdots \\
-    \mu_n
-    \end{bmatrix},
-    $$
+        $$
+        \boldsymbol{\mu} = \begin{bmatrix}
+        \mu_1 \\
+        \mu_2 \\
+        \vdots \\
+        \mu_n
+        \end{bmatrix},
+        $$
 
-    $$
-    \qquad
-    \Sigma = \begin{bmatrix}
-    \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
-    \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
-    \vdots & \vdots & \ddots & \vdots \\
-    \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
-    \end{bmatrix}.
-    $$
+        $$
+        \qquad
+        \Sigma = \begin{bmatrix}
+        \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
+        \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
+        \end{bmatrix}.
+        $$
 
-    In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
+        In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
 
-    In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value.
-    """)
+        In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value.
+        """
+    )
     return
 
 
@@ -706,8 +708,8 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig_2d, mean_slider, mo, variance_slider):
-    mo.vstack([get_fig_2d(), mo.hstack([mean_slider, variance_slider])])
+def _(btn_clear_2d, btn_new_sample_2d, get_fig_2d, mo):
+    mo.vstack([get_fig_2d(), mo.hstack([btn_new_sample_2d, btn_clear_2d])])
     return
 
 
@@ -901,53 +903,55 @@ def _(go, mo, np):
 
 @app.cell
 def _(mo):
-    mo.md(r"""
-    Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
+    mo.md(
+        r"""
+        Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
 
-    You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
+        You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
 
-    Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
+        Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
 
-    If you thought "functions" then you are getting what I'm going for here. Each sample from the 50-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as 
+        If you thought "functions" then you are getting what I'm going for here. Each sample from the 50-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as 
 
-    $$
-    f(x) = Y_{x}
-    $$
+        $$
+        f(x) = Y_{x}
+        $$
 
-    given a multivariate Gaussian $Y = [Y_1, Y_2, Y_3, \dots, Y_{x}]^T \sim N(\boldsymbol{\mu}, \Sigma)$.
+        given a multivariate Gaussian $Y = [Y_1, Y_2, Y_3, \dots, Y_{x}]^T \sim N(\boldsymbol{\mu}, \Sigma)$.
 
-    But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 50-D Gaussian specifies a _distribution over functions_...
+        But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 50-D Gaussian specifies a _distribution over functions_...
 
-    <img src="https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg" width="340" height="200" />
+        <img src="https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg" width="340" height="200" />
 
-    _Almost_. The 50-D Gaussian really only specifies a distribution over 50 discrete values, so it's not quite a distribution over functions $f(x)$ that can take _any_ value of $x$. Hold that thought for now, we'll return to this later. 
+        _Almost_. The 50-D Gaussian really only specifies a distribution over 50 discrete values, so it's not quite a distribution over functions $f(x)$ that can take _any_ value of $x$. Hold that thought for now, we'll return to this later. 
 
-    But first you might have some questions. Remember, the above plot was made by taking a few samples from 50-D gaussian, $\textbf{Y}_{50D} \sim N(\boldsymbol{\mu}, \Sigma)$
+        But first you might have some questions. Remember, the above plot was made by taking a few samples from 50-D gaussian, $\textbf{Y}_{50D} \sim N(\boldsymbol{\mu}, \Sigma)$
 
-    But I didn't tell you what $\boldsymbol{\mu}$ and $\Sigma$ were. Well, I actually used a mean vector of all zeros:
+        But I didn't tell you what $\boldsymbol{\mu}$ and $\Sigma$ were. Well, I actually used a mean vector of all zeros:
 
-    $$
-    \boldsymbol{\mu} =  \begin{bmatrix}
-    0 \\
-    0 \\
-    \vdots \\
-    0
-    \end{bmatrix},
-    $$
+        $$
+        \boldsymbol{\mu} =  \begin{bmatrix}
+        0 \\
+        0 \\
+        \vdots \\
+        0
+        \end{bmatrix},
+        $$
 
-    and for the covariance matrix I simply used the Identity matrix.
+        and for the covariance matrix I simply used the Identity matrix.
 
-    $$
-    \Sigma = \begin{bmatrix}
-    1 & 0 & \dots & 0 \\
-    0 & 1 & \dots & 0 \\
-    \vdots & \vdots & \ddots & \vdots \\
-    0 & 0 & \dots & 1
-    \end{bmatrix}.
-    $$
+        $$
+        \Sigma = \begin{bmatrix}
+        1 & 0 & \dots & 0 \\
+        0 & 1 & \dots & 0 \\
+        \vdots & \vdots & \ddots & \vdots \\
+        0 & 0 & \dots & 1
+        \end{bmatrix}.
+        $$
 
-    Since this covariance matrix is really big, let's visualize it with a heatmap:
-    """)
+        Since this covariance matrix is really big, let's visualize it with a heatmap:
+        """
+    )
     return
 
 
@@ -1384,9 +1388,18 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig_cov, get_fig_samples, mo):
+def _(
+    btn_clear_double,
+    btn_new_sample_double,
+    get_fig_cov,
+    get_fig_samples,
+    mo,
+    slider_ld,
+):
     mo.vstack([
         get_fig_samples(),
+        mo.hstack([btn_new_sample_double, btn_clear_double]),
+        slider_ld,
         get_fig_cov(),
 
     ])
@@ -1395,21 +1408,18 @@ def _(get_fig_cov, get_fig_samples, mo):
 
 
 @app.cell
-def _(btn_clear, btn_new_sample, mo, slider_ld):
-
-
-    mo.hstack([btn_new_sample, slider_ld, btn_clear])
+def _():
     return
 
 
 @app.cell
-def _(go, mo, np, pairwise_rbf, set_sample_count):
+def _(go, mo, np, pairwise_rbf):
     #################################################################
     # 2) Prepare initial data
     #################################################################
 
-    _xa = np.linspace(-1, 1, 50).reshape(-1, 1)
-    init_cov = pairwise_rbf(_xa, _xa, l=0.5)  # initial lengthscale
+    xa = np.linspace(-1, 1, 50).reshape(-1, 1)
+    init_cov = pairwise_rbf(xa, xa, l=0.5)  # initial lengthscale
 
     #################################################################
     # 3) Build the two separate Plotly figures
@@ -1424,7 +1434,7 @@ def _(go, mo, np, pairwise_rbf, set_sample_count):
     fig_samples.update_layout(
         title="Function Samples",
         margin=dict(l=20, r=20, t=40, b=20),
-        width=600,
+        width=700,
         height=400,
     )
 
@@ -1448,8 +1458,8 @@ def _(go, mo, np, pairwise_rbf, set_sample_count):
     )
     fig_cov.update_layout(
         title="Covariance Matrix",
-        width=500,
-        height=500,
+        width=400,
+        height=400,
         margin=dict(l=20, r=20, t=40, b=20),
     )
 
@@ -1474,7 +1484,7 @@ def _(go, mo, np, pairwise_rbf, set_sample_count):
         3) Update the heatmap in fig_cov
         """
         set_l_param(new_l)
-        new_cov = pairwise_rbf(_xa, _xa, l=new_l)
+        new_cov = pairwise_rbf(xa, xa, l=new_l)
         set_cov(new_cov)
 
         fig_c = get_fig_cov()
@@ -1487,17 +1497,18 @@ def _(go, mo, np, pairwise_rbf, set_sample_count):
         and add it to fig_samples.
         """
         current_cov = get_cov()
+        print('hey')
 
         # Draw a random sample from the multivariate normal
         y_samp = np.random.multivariate_normal(
-            mean=np.zeros(len(_xa)),
+            mean=np.zeros(len(xa)),
             cov=current_cov,
             size=1
         )[0]
 
         fig_s = get_fig_samples()
         new_trace = go.Scatter(
-            x=_xa.ravel(),
+            x=xa.ravel(),
             y=y_samp,
             mode="lines",
             name=f"ℓ={get_l_param():.2f}",
@@ -1511,9 +1522,13 @@ def _(go, mo, np, pairwise_rbf, set_sample_count):
         Also reset the sample counter to 0.
         """
         fig_s = get_fig_samples()
-        fig_s.data = [go.Scatter(mode="lines", x=[], y=[], name="Samples")]
+        fig_s.data = fig_s.data[:1]
+
+        # Optionally re-initialize the second trace to be truly empty
+        fig_s.data[1] = go.Scatter(mode="lines", x=[], y=[])
         set_fig_samples(fig_s)
-        set_sample_count(0)
+
+
 
     #################################################################
     # 6) Build the UI (slider + two buttons + display figures)
@@ -1553,6 +1568,7 @@ def _(go, mo, np, pairwise_rbf, set_sample_count):
         set_fig_samples,
         set_l_param,
         slider_ld,
+        xa,
         z,
     )
 

@@ -1,14 +1,20 @@
 # TODO:
 - latex matrices fucking up
+- disable plotly swiping
+- caching, etc to make better load time
 - make this work: https://marimo.io/p/@marimo/interactive-matrices
+- make buttons green
 - make mobile optimized
+  - plot titles cut off
+  - side scrolling wide things
+  - plots dynamic width
   - make legends better
   - margins
   - better button positioning, labels
-- caching, etc to make better load time
 - make a gpt conversion deriving some that conditional distribution
 - side by side comparison proofread
 - comments
+- all todos
 - blog integration
   - port other posts
 

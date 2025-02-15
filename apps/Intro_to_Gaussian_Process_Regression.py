@@ -1767,7 +1767,7 @@ def _(get_fig_housing):
 
 
 @app.cell
-def _(X, X_test, go, gp_posterior, mo, np, y):
+def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
     # We'll assume y, X, X_test, and gp_posterior(...) are already defined above.
     # y is the original housing data, X the known inputs, X_test the test inputs.
 
@@ -1786,6 +1786,37 @@ def _(X, X_test, go, gp_posterior, mo, np, y):
     )
     init_fig_housing = go.Figure(data=[scatter_known], layout=layout_housing)
     init_fig_housing.update_layout(
+        margin=dict(l=4, r=3, t=80, b=80),
+    )
+
+
+
+    # Initial height calculation
+    initial_height2 = calculate_figure_height(4)  # Start with 4 traces
+
+    # Update layout with side-by-side grouped legend
+    init_fig_housing.update_layout(
+        height=initial_height2,
+        legend=dict(
+            entrywidth=0.29,
+            entrywidthmode="fraction",
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5,
+            bgcolor="white",
+            bordercolor="LightGrey",
+            borderwidth=0,
+            itemsizing="constant",
+            itemwidth=30,
+            groupclick="toggleitem",
+            valign="middle",
+            xref="container",
+            yref="container",
+            traceorder="grouped",
+            font=dict(size=10),
+        ),
         margin=dict(l=4, r=3, t=80, b=80),
     )
 
@@ -1808,8 +1839,11 @@ def _(X, X_test, go, gp_posterior, mo, np, y):
             x=X_test.T[0], y=yp, mode="lines+markers", name=f"Sample {current_clicks}"
         )
         fig_housing.add_trace(new_scatter)
+        new_height = calculate_figure_height(len(fig_housing.data))
+        fig_housing.update_layout(height=new_height)
 
         set_fig_housing(fig_housing)
+
         set_clicks_housing(current_clicks + 1)
 
     def clear_data_housing(_):
@@ -1839,6 +1873,7 @@ def _(X, X_test, go, gp_posterior, mo, np, y):
         get_clicks_housing,
         get_fig_housing,
         init_fig_housing,
+        initial_height2,
         layout_housing,
         mu,
         scatter_known,
@@ -1915,7 +1950,7 @@ def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
         mu_1, sigma_1 = gp_posterior(_y_norm, X, X_test, l=1)
 
         # Draw the 1000 samples
-        y_hat = np.random.multivariate_normal(mu_1, sigma_1, size=1000) * y.std() + y.mean()
+        y_hat = np.random.multivariate_normal(mu_1, sigma_1, size=500) * y.std() + y.mean()
 
         # Plot them with lower zorder so they're behind the baseline
         (
@@ -1938,8 +1973,8 @@ def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
     many = mo.ui.button(
         value=plot_baseline(),  # create the initial plot on load (pink + red)
         on_click=_regenerate_plot,
-        label="Sample 1000 Functions from Posterior",
-        kind="danger"
+        label="Sample 500 Functions from Posterior",
+        kind="success"
     )
     many
     return add_posterior_samples, many, plot_baseline

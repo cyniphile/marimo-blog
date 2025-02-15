@@ -1408,11 +1408,6 @@ def _(
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
 def _(go, mo, np, pairwise_rbf):
     #################################################################
     # 2) Prepare initial data
@@ -1497,7 +1492,6 @@ def _(go, mo, np, pairwise_rbf):
         and add it to fig_samples.
         """
         current_cov = get_cov()
-        print('hey')
 
         # Draw a random sample from the multivariate normal
         y_samp = np.random.multivariate_normal(
@@ -1523,9 +1517,6 @@ def _(go, mo, np, pairwise_rbf):
         """
         fig_s = get_fig_samples()
         fig_s.data = fig_s.data[:1]
-
-        # Optionally re-initialize the second trace to be truly empty
-        fig_s.data[1] = go.Scatter(mode="lines", x=[], y=[])
         set_fig_samples(fig_s)
 
 

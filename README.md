@@ -2,6 +2,7 @@
 - latex matrices fucking up
 - disable plotly swiping
 - caching, etc to make better load time
+  - https://docs.marimo.io/api/layouts/lazy/#marimo.lazy
 - make this work: https://marimo.io/p/@marimo/interactive-matrices
 - make buttons green
 - make mobile optimized
@@ -13,6 +14,7 @@
   - better button positioning, labels
 - make a gpt conversion deriving some that conditional distribution
 - side by side comparison proofread
+- https://docs.marimo.io/api/inputs/code_editor/
 - comments
 - all todos
 - blog integration

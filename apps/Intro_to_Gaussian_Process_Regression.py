@@ -1429,8 +1429,6 @@ def _(go, mo, np, pairwise_rbf):
     fig_samples.update_layout(
         title="Function Samples",
         margin=dict(l=20, r=20, t=40, b=20),
-        width=700,
-        height=400,
     )
 
     # -- Figure B: "Covariance Matrix" --

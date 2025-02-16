@@ -13,16 +13,13 @@ def _():
     import plotly.graph_objs as go
     import scipy as sp
     import seaborn as sns
-    from matplotlib import pyplot as plt
     from plotly.subplots import make_subplots
     from wigglystuff import Matrix
 
 
-    plt.rcParams['font.family'] = ['sans-serif']  # Use only sans-serif fonts
-    plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Helvetica']  # Specify specific fonts
 
     np.random.seed(42)
-    return Matrix, go, make_subplots, mo, np, pd, plt, sns, sp
+    return Matrix, go, make_subplots, mo, np, pd, sns, sp
 
 
 @app.cell(hide_code=True)
@@ -942,10 +939,9 @@ def _(mo):
 
 
 @app.cell
-def _(np, plt, sns):
+def _(np, sns):
     # @title
     sns.heatmap(np.identity(50))
-    plt.show()
     return
 
 

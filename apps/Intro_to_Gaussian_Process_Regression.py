@@ -18,13 +18,16 @@ def _():
     import plotly.graph_objs as go
     import scipy as sp
     import seaborn as sns
+    from matplotlib import pyplot as plt
     from plotly.subplots import make_subplots
     from wigglystuff import Matrix
 
 
+    plt.rcParams['font.family'] = ['sans-serif']  # Use only sans-serif fonts
+    plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Helvetica']  # Specify specific fonts
 
     np.random.seed(42)
-    return Matrix, go, make_subplots, np, pd, sns, sp
+    return Matrix, go, make_subplots, np, pd, plt, sns, sp
 
 
 @app.cell(hide_code=True)
@@ -111,16 +114,24 @@ def _(mo):
 
 
 @app.cell
-def _(np):
-    # _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+def _(np, plt, sns):
+    _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
     x_reg = np.linspace(-3, 3, 10)
     NOISE_VARIANCE = 1
     y_noise = x_reg + np.random.normal(0, NOISE_VARIANCE, 10)
     LOW_NOISE_VARIANCE = 0.1
     y_low_noise = x_reg + np.random.normal(0, LOW_NOISE_VARIANCE, 10)
-    # sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None).set_title("a")
-    # sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title("b")
-    return LOW_NOISE_VARIANCE, NOISE_VARIANCE, x_reg, y_low_noise, y_noise
+    sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None, color="red").set_title("A")
+    sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title("B")
+    return (
+        LOW_NOISE_VARIANCE,
+        NOISE_VARIANCE,
+        ax1,
+        ax2,
+        x_reg,
+        y_low_noise,
+        y_noise,
+    )
 
 
 @app.cell(hide_code=True)
@@ -1034,7 +1045,7 @@ def _(go, mo, np, pairwise_rbf, slider_l):
     )
     init_fig_fuzzy = go.Figure(data=[init_scatter_fuzzy], layout=init_layout_fuzzy)
     init_fig_fuzzy.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
 
     # 2) Store the figure in Marimo's state, plus a sample-count state
@@ -1994,12 +2005,13 @@ def _(mo):
 
         You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:
 
+        - "Do you really have to sample 100s of functions to get the confidence intervals?"
+            - (You should already be able to figure out the answer to this!)
         - "How do we choose a kernel function?" 
         - "How do we choose the best parameters for the kernel function?" 
-        - "Do you really have to sample 500s of functions to get the confidence intervals?"
         - "What if the training data is intrinsically noisy (the price of houses has some variance at a given location)
           "
-        - "What if there are many features in my training data?"
+        - "What if there are many features in my training data? E.g. Square footage of houses."
         - "But I heard GPs are expensive to train?" 
 
         then you should check out the resources below, which should be easier to understand now that you have the basics.
@@ -2017,14 +2029,19 @@ def _(mo):
         ### Tutorials and Guides
         - **[Gaussian Process Tutorial](https://peterroelants.github.io/posts/gaussian-process-tutorial/)** - Really awesome set of blog posts that teaches GPs using Python. I basically took this post and made it more verbose. The other posts in the series go into more detail about the process of fitting a GP and optimizing the kernel and hyperparameters. 
 
-        - **[Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/)** - More detailed, with beautiful interactive visualizations.
+        - **[Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/)** - More detailed, with beautiful interactive visualizations. Explores other non-RBF kernel functions more.
 
         - **[Fitting Gaussian Process Models in Python](https://www.dominodatalab.com/blog/fitting-gaussian-process-models-python)** - Practical guide focused on implementing GPs using scikit-learn and other Python libraries.
 
         ### Advanced Reading
-        - **[Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/)** - _The book_ on GPs, with probably all the detail you'll ever need.
+        - **[Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/)** - _The book_ on GPs, with all the detail you'll ever need.
         """
     )
+    return
+
+
+@app.cell
+def _():
     return
 
 

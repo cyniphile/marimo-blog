@@ -15,18 +15,19 @@ def _():
     # @title
     import numpy as np
     import pandas as pd
-    import plotly.graph_objs as go
+    import plotly
     import scipy as sp
     import seaborn as sns
     from matplotlib import pyplot as plt
     from wigglystuff import Matrix
+    from plotly import graph_objs as go
 
 
     plt.rcParams['font.family'] = ['sans-serif']  # Use only sans-serif fonts
     plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Helvetica']  # Specify specific fonts
 
     np.random.seed(42)
-    return Matrix, go, np, pd, plt, sns, sp
+    return Matrix, go, np, pd, plotly, plt, sns, sp
 
 
 @app.cell(hide_code=True)
@@ -481,6 +482,7 @@ def _(go, mo, np):
         title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
         xaxis=dict(title="Value", range=[START, END], fixedrange=True),
         yaxis=dict(title="Count"),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
 
     # 2. Store the figure and the slider states

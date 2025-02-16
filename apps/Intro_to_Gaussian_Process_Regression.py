@@ -1010,7 +1010,7 @@ def _(np, pairwise_rbf, pd, slider_l, sns):
 
 @app.cell
 def _(mo):
-    slider_l = mo.ui.slider(start=1, stop=30, value=5, label="Value of ℓ")
+    slider_l = mo.ui.slider(start=1, stop=30, value=5, label="Value of ℓ", debounce=True)
     slider_l
     return (slider_l,)
 

@@ -6,8 +6,13 @@ app = marimo.App()
 
 @app.cell
 def _():
-    # @title
     import marimo as mo
+    return (mo,)
+
+
+@app.cell
+def _():
+    # @title
     import numpy as np
     import pandas as pd
     import plotly.graph_objs as go
@@ -19,7 +24,7 @@ def _():
 
 
     np.random.seed(42)
-    return Matrix, go, make_subplots, mo, np, pd, sns, sp
+    return Matrix, go, make_subplots, np, pd, sns, sp
 
 
 @app.cell(hide_code=True)
@@ -106,24 +111,16 @@ def _(mo):
 
 
 @app.cell
-def _(np, plt, sns):
-    _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+def _(np):
+    # _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
     x_reg = np.linspace(-3, 3, 10)
     NOISE_VARIANCE = 1
     y_noise = x_reg + np.random.normal(0, NOISE_VARIANCE, 10)
     LOW_NOISE_VARIANCE = 0.1
     y_low_noise = x_reg + np.random.normal(0, LOW_NOISE_VARIANCE, 10)
-    sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None).set_title("a")
-    sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title("b")
-    return (
-        LOW_NOISE_VARIANCE,
-        NOISE_VARIANCE,
-        ax1,
-        ax2,
-        x_reg,
-        y_low_noise,
-        y_noise,
-    )
+    # sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None).set_title("a")
+    # sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title("b")
+    return LOW_NOISE_VARIANCE, NOISE_VARIANCE, x_reg, y_low_noise, y_noise
 
 
 @app.cell(hide_code=True)

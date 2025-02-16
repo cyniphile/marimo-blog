@@ -17,6 +17,10 @@ def _():
     from plotly.subplots import make_subplots
     from wigglystuff import Matrix
 
+
+    plt.rcParams['font.family'] = ['sans-serif']  # Use only sans-serif fonts
+    plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Helvetica']  # Specify specific fonts
+
     np.random.seed(42)
     return Matrix, go, make_subplots, mo, np, pd, plt, sns, sp
 

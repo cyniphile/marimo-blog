@@ -19,7 +19,6 @@ def _():
     import scipy as sp
     import seaborn as sns
     from matplotlib import pyplot as plt
-    from plotly.subplots import make_subplots
     from wigglystuff import Matrix
 
 
@@ -27,7 +26,7 @@ def _():
     plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Helvetica']  # Specify specific fonts
 
     np.random.seed(42)
-    return Matrix, go, make_subplots, np, pd, plt, sns, sp
+    return Matrix, go, np, pd, plt, sns, sp
 
 
 @app.cell(hide_code=True)
@@ -181,8 +180,8 @@ def _(mo):
 
 
 @app.cell
-def _(get_fig):
-    get_fig()
+def _(button, clear_button, get_fig_A, get_fig_B, mo):
+    mo.vstack([mo.hstack([get_fig_A(), get_fig_B()]), mo.hstack([button, clear_button])])
     return
 
 
@@ -191,40 +190,33 @@ def _(
     LOW_NOISE_VARIANCE,
     NOISE_VARIANCE,
     go,
-    make_subplots,
     mo,
     np,
     x_reg,
     y_low_noise,
     y_noise,
 ):
-    # Initial parameters
+    # --- Initial parameters and helper function ---
     beta_0 = 0
     beta_1 = 1
     beta_1_1 = np.corrcoef(x_reg, y_noise)[0, 1] * np.std(y_noise) / np.std(x_reg)
 
-    # Define warm and cool color schemes
+    # Define color schemes for each plot
     colors_subplot1 = ["#ff4d4d", "#ff8533", "#ffcc00", "#ff6b6b", "#ff9966"]  # Warm colors
     colors_subplot2 = ["#4d4dff", "#33cc33", "#6666ff", "#00cccc", "#9933ff"]  # Cool colors
 
-    # Helper function to calculate figure height based on number of traces
     def calculate_figure_height(num_traces):
         base_height = 400  # Base height for plot
-        legend_rows = max(1, (num_traces - 4) // 2)  # Number of additional legend rows needed
+        legend_rows = max(1, (num_traces - 2) // 2)  # For separate figures, initial trace count is 2
         legend_height = 40 + (legend_rows * 20)  # Base legend height + height per row
         return base_height + legend_height
 
-    # Prepare figure and traces
-    _fig = make_subplots(rows=1, cols=2, subplot_titles=("a", "b"))
-    _fig.update_yaxes(range=[-5, 5], fixedrange=True)
-    _fig.update_xaxes(range=[-3, 3], fixedrange=True)
-
-    # Initial height calculation
-    initial_height = calculate_figure_height(4)  # Start with 4 traces
-
-    # Update layout with side-by-side grouped legend
-    _fig.update_layout(
-        height=initial_height,
+    # --- Create two separate figures ---
+    # Figure for Plot A (left figure)
+    fig_A = go.Figure()
+    fig_A.update_layout(
+        title_text="a",
+        height=calculate_figure_height(2),
         legend=dict(
             entrywidth=0.29,
             entrywidthmode="fraction",
@@ -245,15 +237,48 @@ def _(
             traceorder="grouped",
             font=dict(size=10),
         ),
-        margin=dict(l=4, r=3, t=80, b=80),
+        margin=dict(l=4, r=3, t=80, b=80)
     )
+    fig_A.update_xaxes(range=[-3, 3], fixedrange=True)
+    fig_A.update_yaxes(range=[-5, 5], fixedrange=True)
 
-    # Lines based on initial betas
-    line_1 = x_reg * beta_1_1 + beta_0
-    line_2 = x_reg * beta_1 + beta_0
+    # Figure for Plot B (right figure)
+    fig_B = go.Figure()
+    fig_B.update_layout(
+        title_text="b",
+        height=calculate_figure_height(2),
+        legend=dict(
+            entrywidth=0.29,
+            entrywidthmode="fraction",
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5,
+            bgcolor="white",
+            bordercolor="LightGrey",
+            borderwidth=0,
+            itemsizing="constant",
+            itemwidth=30,
+            groupclick="toggleitem",
+            valign="middle",
+            xref="container",
+            yref="container",
+            traceorder="grouped",
+            font=dict(size=10),
+        ),
+        margin=dict(l=4, r=3, t=80, b=80)
+    )
+    fig_B.update_xaxes(range=[-3, 3], fixedrange=True)
+    fig_B.update_yaxes(range=[-5, 5], fixedrange=True)
 
-    # Create scatter/line plots for first column with first color scheme
-    scatter_fig = go.Scatter(
+    # --- Add initial traces to each figure ---
+    # Compute the lines for each plot
+    line_A = x_reg * beta_1_1 + beta_0
+    line_B = x_reg * beta_1 + beta_0
+
+    # For Plot A: Noisy data and its fit
+    scatter_A = go.Scatter(
         x=x_reg,
         y=y_noise,
         mode="markers",
@@ -262,20 +287,20 @@ def _(
         legendgroup="Plot A",
         showlegend=True,
     )
-    line_fig = go.Scatter(
+    line_A_trace = go.Scatter(
         x=x_reg,
-        y=line_1,
+        y=line_A,
         mode="lines",
         line=dict(color=colors_subplot1[1]),
         name="True Fit Noisy",
         legendgroup="Plot A",
         showlegend=True,
     )
-    _fig.add_trace(scatter_fig, row=1, col=1)
-    _fig.add_trace(line_fig, row=1, col=1)
+    fig_A.add_trace(scatter_A)
+    fig_A.add_trace(line_A_trace)
 
-    # Create scatter/line plots for second column with second color scheme
-    scatter_fig2 = go.Scatter(
+    # For Plot B: Low noise data and its fit
+    scatter_B = go.Scatter(
         x=x_reg,
         y=y_low_noise,
         mode="markers",
@@ -284,82 +309,91 @@ def _(
         legendgroup="Plot B",
         showlegend=True,
     )
-    line_fig2 = go.Scatter(
+    line_B_trace = go.Scatter(
         x=x_reg,
-        y=line_2,
+        y=line_B,
         mode="lines",
         line=dict(color=colors_subplot2[1]),
         name="True Fit Low Noise",
         legendgroup="Plot B",
         showlegend=True,
     )
-    _fig.add_trace(scatter_fig2, row=1, col=2)
-    _fig.add_trace(line_fig2, row=1, col=2)
+    fig_B.add_trace(scatter_B)
+    fig_B.add_trace(line_B_trace)
 
-    get_fig, set_fig = mo.state(_fig)
+    # --- Save figures to state (using your mo.state API) ---
+    get_fig_A, set_fig_A = mo.state(fig_A)
+    get_fig_B, set_fig_B = mo.state(fig_B)
 
+    # --- Callback functions ---
     def add_plot_to_fig(_):
-        fig = get_fig()
+        # Retrieve the current figures from state
+        fig_A = get_fig_A()
+        fig_B = get_fig_B()
+        
+        # Generate new random coefficients for both figures
         beta_0_rand = np.random.normal(beta_0, NOISE_VARIANCE, 1)
         beta_1_rand = np.random.normal(beta_1_1, NOISE_VARIANCE, 1)
         beta_0_rand2 = np.random.normal(beta_0, LOW_NOISE_VARIANCE, 1)
         beta_1_rand2 = np.random.normal(beta_1, LOW_NOISE_VARIANCE, 1)
-
-        line_data = x_reg * beta_1_rand + beta_0_rand
-        line_data2 = x_reg * beta_1_rand2 + beta_0_rand2
-
-        # Add new line to left subplot with first color scheme and legend group
-        color_idx = len(fig.data) % len(colors_subplot1)
-        new_data = {
-            "type": "scatter",
-            "x": x_reg,
-            "y": line_data,
-            "mode": "lines",
-            "line": {"color": colors_subplot1[color_idx]},
-            "xaxis": "x",
-            "yaxis": "y",
-            "name": f"$B_{{0a}}: {beta_0_rand[0]:.2f}, B_{{1a}}: {beta_1_rand[0]:.2f}$",
-            "legendgroup": "Plot A",
-        }
-        fig.add_trace(new_data, row=1, col=1)
-
-        # Add new line to right subplot with second color scheme and legend group
-        color_idx = len(fig.data) % len(colors_subplot2)
-        fig.add_trace(
-            {
-                "type": "scatter",
-                "x": x_reg,
-                "y": line_data2,
-                "mode": "lines",
-                "line": {"color": colors_subplot2[color_idx]},
-                "xaxis": "x2",
-                "yaxis": "y2",
-                "name": f"$B_{{0b}}: {beta_0_rand2[0]:.2f}, B_{{1b}}: {beta_1_rand2[0]:.2f}$",
-                "legendgroup": "Plot B",
-            },
-            row=1,
-            col=2,
-        )
-
-        # Update figure height based on new number of traces
-        new_height = calculate_figure_height(len(fig.data))
-        fig.update_layout(height=new_height)
-
-        set_fig(fig)
-        return
-
-    button = mo.ui.button(value=0, on_click=add_plot_to_fig, label="New Sample", kind="neutral")
+        
+        # Compute new line data for each plot
+        line_data_A = x_reg * beta_1_rand + beta_0_rand
+        line_data_B = x_reg * beta_1_rand2 + beta_0_rand2
+        
+        # Append new trace to Plot A (first figure)
+        color_idx_A = len(fig_A.data) % len(colors_subplot1)
+        fig_A.add_trace(go.Scatter(
+            x=x_reg,
+            y=line_data_A,
+            mode="lines",
+            line=dict(color=colors_subplot1[color_idx_A]),
+            name=f"$B_{{0a}}: {beta_0_rand[0]:.2f}, B_{{1a}}: {beta_1_rand[0]:.2f}$",
+            legendgroup="Plot A",
+        ))
+        
+        # Append new trace to Plot B (second figure)
+        color_idx_B = len(fig_B.data) % len(colors_subplot2)
+        fig_B.add_trace(go.Scatter(
+            x=x_reg,
+            y=line_data_B,
+            mode="lines",
+            line=dict(color=colors_subplot2[color_idx_B]),
+            name=f"$B_{{0b}}: {beta_0_rand2[0]:.2f}, B_{{1b}}: {beta_1_rand2[0]:.2f}$",
+            legendgroup="Plot B",
+        ))
+        
+        # Update each figure's height based on the new number of traces
+        new_height_A = calculate_figure_height(len(fig_A.data))
+        new_height_B = calculate_figure_height(len(fig_B.data))
+        fig_A.update_layout(height=new_height_A)
+        fig_B.update_layout(height=new_height_B)
+        
+        # Save the updated figures back into state
+        set_fig_A(fig_A)
+        set_fig_B(fig_B)
 
     def reset(_):
-        fig = get_fig()
-        fig["data"] = fig["data"][:4]
-        # Reset height to initial value
-        fig.update_layout(height=calculate_figure_height(4))
-        set_fig(fig)
+        # Retrieve the figures from state
+        fig_A = get_fig_A()
+        fig_B = get_fig_B()
+        
+        # Reset each figure to its initial two traces (scatter and original line)
+        fig_A.data = fig_A.data[:2]
+        fig_B.data = fig_B.data[:2]
+        
+        # Reset heights based on only the two traces
+        fig_A.update_layout(height=calculate_figure_height(2))
+        fig_B.update_layout(height=calculate_figure_height(2))
+        
+        set_fig_A(fig_A)
+        set_fig_B(fig_B)
 
+    # --- Create UI buttons ---
+    button = mo.ui.button(value=0, on_click=add_plot_to_fig, label="New Sample", kind="neutral")
     clear_button = mo.ui.button(value=0, on_click=reset, label="Reset", kind="danger")
 
-    mo.hstack([button, clear_button])
+
     return (
         add_plot_to_fig,
         beta_0,
@@ -370,16 +404,19 @@ def _(
         clear_button,
         colors_subplot1,
         colors_subplot2,
-        get_fig,
-        initial_height,
-        line_1,
-        line_2,
-        line_fig,
-        line_fig2,
+        fig_A,
+        fig_B,
+        get_fig_A,
+        get_fig_B,
+        line_A,
+        line_A_trace,
+        line_B,
+        line_B_trace,
         reset,
-        scatter_fig,
-        scatter_fig2,
-        set_fig,
+        scatter_A,
+        scatter_B,
+        set_fig_A,
+        set_fig_B,
     )
 
 

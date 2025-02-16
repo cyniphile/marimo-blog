@@ -6,7 +6,13 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
-    print("hello world")
+    import marimo as mo
+    return (mo,)
+
+
+@app.cell
+def _(mo):
+    mo.md("HEllo world")
     return
 
 

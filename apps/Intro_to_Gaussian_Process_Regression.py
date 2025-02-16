@@ -1,42 +1,24 @@
 import marimo
 
-__generated_with = "0.11.4"
+__generated_with = "0.11.5"
 app = marimo.App()
 
 
 @app.cell
 def _():
     # @title
-    import altair as alt
     import marimo as mo
     import numpy as np
     import pandas as pd
-    import plotly.express as px
     import plotly.graph_objs as go
     import scipy as sp
     import seaborn as sns
-    from IPython.core.display import HTML
-    from IPython.display import display
     from matplotlib import pyplot as plt
     from plotly.subplots import make_subplots
     from wigglystuff import Matrix
 
     np.random.seed(42)
-    return (
-        HTML,
-        Matrix,
-        alt,
-        display,
-        go,
-        make_subplots,
-        mo,
-        np,
-        pd,
-        plt,
-        px,
-        sns,
-        sp,
-    )
+    return Matrix, go, make_subplots, mo, np, pd, plt, sns, sp
 
 
 @app.cell(hide_code=True)
@@ -592,25 +574,25 @@ def _(mo):
 
 
 @app.cell
-def _(Matrix, alt, mo, np, pd):
-    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
-    arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))    
-    x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
-    df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
-    x_sim = np.random.multivariate_normal(
-        np.array(arr.matrix).reshape(-1), 
-        np.array(mat.matrix), 
-        2500
-    )
-    df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
+def _():
+    # mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
+    # arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))    
+    # x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
+    # df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
+    # x_sim = np.random.multivariate_normal(
+    #     np.array(arr.matrix).reshape(-1), 
+    #     np.array(mat.matrix), 
+    #     2500
+    # )
+    # df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
-    chart_sim = (
-        alt.Chart(df_sim).mark_point().encode(x="x", y="y") + 
-        alt.Chart(df_orig).mark_point(color="gray").encode(x="x", y="y")
-    )
+    # chart_sim = (
+    #     alt.Chart(df_sim).mark_point().encode(x="x", y="y") + 
+    #     alt.Chart(df_orig).mark_point(color="gray").encode(x="x", y="y")
+    # )
 
-    mo.vstack([arr, mat, chart_sim])
-    return arr, chart_sim, df_orig, df_sim, mat, x_orig, x_sim
+    # mo.vstack([arr, mat, chart_sim])
+    return
 
 
 @app.cell(hide_code=True)
@@ -970,11 +952,11 @@ def _(mo):
 
 
 @app.cell
-def _(HTML):
+def _(mo):
     # @title
-    HTML(
+    mo.Html(
         """
-    <span class="hover-text">Hover for answer</span>:
+    <span class="hover-text">Hover or tap for answer</span>:
 
     <span class="hidden-text">INDEPENDENT!</span>
 
@@ -1403,7 +1385,6 @@ def _(
         get_fig_cov(),
 
     ])
-
     return
 
 

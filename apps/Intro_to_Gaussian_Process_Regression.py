@@ -182,7 +182,8 @@ def _(mo):
 
 @app.cell
 def _(button, clear_button, get_fig_A, get_fig_B, mo):
-    mo.vstack([mo.hstack([get_fig_A(), get_fig_B()]), mo.hstack([button, clear_button])])
+    mo.vstack([mo.hstack([mo.ui.plotly(get_fig_A(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.ui.plotly(get_fig_B(), config={'responsive': True, "displayModeBar":False})]), mo.hstack([button, clear_button])])
+
     return
 
 
@@ -207,8 +208,8 @@ def _(
     colors_subplot2 = ["#4d4dff", "#33cc33", "#6666ff", "#00cccc", "#9933ff"]  # Cool colors
 
     def calculate_figure_height(num_traces):
-        base_height = 400  # Base height for plot
-        legend_rows = max(1, (num_traces - 2) // 2)  # For separate figures, initial trace count is 2
+        base_height = 300  # Base height for plot
+        legend_rows = max(1, (num_traces - 2))  # For separate figures, initial trace count is 2
         legend_height = 40 + (legend_rows * 20)  # Base legend height + height per row
         return base_height + legend_height
 
@@ -236,12 +237,15 @@ def _(
             xref="container",
             yref="container",
             traceorder="grouped",
-            font=dict(size=10),
+            font=dict(size=10), 
         ),
-        margin=dict(l=4, r=3, t=80, b=80)
+        autosize=True,
+        margin=dict(l=4, r=3, t=80, b=10),
+        width=300
     )
     fig_A.update_xaxes(range=[-3, 3], fixedrange=True)
-    fig_A.update_yaxes(range=[-5, 5], fixedrange=True)
+
+     
 
     # Figure for Plot B (right figure)
     fig_B = go.Figure()
@@ -268,6 +272,7 @@ def _(
             traceorder="grouped",
             font=dict(size=10),
         ),
+        autosize=True,
         margin=dict(l=4, r=3, t=80, b=80)
     )
     fig_B.update_xaxes(range=[-3, 3], fixedrange=True)
@@ -393,7 +398,6 @@ def _(
     # --- Create UI buttons ---
     button = mo.ui.button(value=0, on_click=add_plot_to_fig, label="New Sample", kind="neutral")
     clear_button = mo.ui.button(value=0, on_click=reset, label="Reset", kind="danger")
-
 
     return (
         add_plot_to_fig,

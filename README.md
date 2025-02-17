@@ -19,6 +19,16 @@
   - favicons, etc
 
 
+first gaussian basics
+
+remember what functions are, remember what it is when we plot functions.
+- intdractive point adding
+
+- review: is GP really "distribution over functions"? or a stochastic function over vectors?
+remember linear regression with epsilon noise term iid, plot those at each point
+
+
+
 # Development
 - Install `uv` with `pip install uv`
 - Install packages with `uv install`

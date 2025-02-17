@@ -19,6 +19,7 @@ def _():
     import scipy as sp
     import seaborn as sns
     from matplotlib import pyplot as plt
+    import matplotlib
     from wigglystuff import Matrix
     from plotly import graph_objs as go
 
@@ -27,7 +28,65 @@ def _():
     plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Helvetica']  # Specify specific fonts
 
     np.random.seed(42)
-    return Matrix, go, np, pd, plotly, plt, sns, sp
+    return Matrix, go, matplotlib, np, pd, plotly, plt, sns, sp
+
+
+@app.cell
+async def _(matplotlib):
+    import asyncio
+    import matplotlib.font_manager as fm
+
+    # Try to import Pyodide's fetch; if unavailable, fall back to requests
+    try:
+        from pyodide.http import pyfetch
+
+        async def fetch_font(url):
+            response = await pyfetch(url)
+            return await response.bytes()
+    except ImportError:
+        import requests
+
+        async def fetch_font(url):
+            # This is a synchronous call, wrapped for async compatibility
+            return requests.get(url).content
+
+    async def setup_custom_font():
+        # URL for DejaVu Sans TTF file on GitHub (raw link)
+        # url = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
+        
+        # Alternatively, you could use:
+        # Noto Sans: 
+        url = "https://github.com/googlefonts/noto-fonts/raw/main/unhinted/ttf/NotoSans/NotoSans-Regular.ttf"
+        # Roboto:   url = "https://github.com/google/roboto/raw/main/src/hinted/Roboto-Regular.ttf"
+        
+        response = await fetch_font(url)
+        font_bytes = response
+        
+        # Write the font file to Pyodide's in-memory filesystem
+        font_path = "/tmp/DejaVuSans.ttf"
+        with open(font_path, "wb") as f:
+            f.write(font_bytes)
+        
+        # Register the font with Matplotlib
+        fm.fontManager.addfont(font_path)
+        prop = fm.FontProperties(fname=font_path)
+        font_name = prop.get_name()
+        matplotlib.rcParams["font.family"] = font_name
+        
+        # Override the font search to return only our custom font
+        def only_my_font(*args, **kwargs):
+            return [font_path]
+        fm.findSystemFonts = only_my_font
+        
+        # Clear the cached font list to force a rebuild using only our font
+        fm.fontManager.ttflist = []
+        
+        print(f"Custom font '{font_name}' has been set up.")
+
+    # Run the setup asynchronously
+    await setup_custom_font()
+
+    return asyncio, fetch_font, fm, pyfetch, requests, setup_custom_font
 
 
 @app.cell(hide_code=True)
@@ -1182,6 +1241,9 @@ def _(mo):
         $$
 
         Now we can sample from a multivariate Gaussian at these specific values of $x$:
+
+
+        TODO: make this interactive where you can put in whatever samples you want. Also. show covariance matrix
         """
     )
     return

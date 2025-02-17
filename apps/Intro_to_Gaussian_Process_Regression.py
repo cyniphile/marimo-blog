@@ -183,7 +183,6 @@ def _(mo):
 @app.cell
 def _(button, clear_button, get_fig_A, get_fig_B, mo):
     mo.vstack([mo.hstack([mo.ui.plotly(get_fig_A(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.ui.plotly(get_fig_B(), config={'responsive': True, "displayModeBar":False})]), mo.hstack([button, clear_button])])
-
     return
 
 
@@ -245,7 +244,7 @@ def _(
     )
     fig_A.update_xaxes(range=[-3, 3], fixedrange=True)
 
-     
+
 
     # Figure for Plot B (right figure)
     fig_B = go.Figure()
@@ -336,17 +335,17 @@ def _(
         # Retrieve the current figures from state
         fig_A = get_fig_A()
         fig_B = get_fig_B()
-        
+
         # Generate new random coefficients for both figures
         beta_0_rand = np.random.normal(beta_0, NOISE_VARIANCE, 1)
         beta_1_rand = np.random.normal(beta_1_1, NOISE_VARIANCE, 1)
         beta_0_rand2 = np.random.normal(beta_0, LOW_NOISE_VARIANCE, 1)
         beta_1_rand2 = np.random.normal(beta_1, LOW_NOISE_VARIANCE, 1)
-        
+
         # Compute new line data for each plot
         line_data_A = x_reg * beta_1_rand + beta_0_rand
         line_data_B = x_reg * beta_1_rand2 + beta_0_rand2
-        
+
         # Append new trace to Plot A (first figure)
         color_idx_A = len(fig_A.data) % len(colors_subplot1)
         fig_A.add_trace(go.Scatter(
@@ -357,7 +356,7 @@ def _(
             name=f"$B_{{0a}}: {beta_0_rand[0]:.2f}, B_{{1a}}: {beta_1_rand[0]:.2f}$",
             legendgroup="Plot A",
         ))
-        
+
         # Append new trace to Plot B (second figure)
         color_idx_B = len(fig_B.data) % len(colors_subplot2)
         fig_B.add_trace(go.Scatter(
@@ -368,13 +367,13 @@ def _(
             name=f"$B_{{0b}}: {beta_0_rand2[0]:.2f}, B_{{1b}}: {beta_1_rand2[0]:.2f}$",
             legendgroup="Plot B",
         ))
-        
+
         # Update each figure's height based on the new number of traces
         new_height_A = calculate_figure_height(len(fig_A.data))
         new_height_B = calculate_figure_height(len(fig_B.data))
         fig_A.update_layout(height=new_height_A)
         fig_B.update_layout(height=new_height_B)
-        
+
         # Save the updated figures back into state
         set_fig_A(fig_A)
         set_fig_B(fig_B)
@@ -383,22 +382,21 @@ def _(
         # Retrieve the figures from state
         fig_A = get_fig_A()
         fig_B = get_fig_B()
-        
+
         # Reset each figure to its initial two traces (scatter and original line)
         fig_A.data = fig_A.data[:2]
         fig_B.data = fig_B.data[:2]
-        
+
         # Reset heights based on only the two traces
         fig_A.update_layout(height=calculate_figure_height(2))
         fig_B.update_layout(height=calculate_figure_height(2))
-        
+
         set_fig_A(fig_A)
         set_fig_B(fig_B)
 
     # --- Create UI buttons ---
-    button = mo.ui.button(value=0, on_click=add_plot_to_fig, label="New Sample", kind="neutral")
+    button = mo.ui.button(value=0, on_click=add_plot_to_fig, label="New Sample", kind="success")
     clear_button = mo.ui.button(value=0, on_click=reset, label="Reset", kind="danger")
-
     return (
         add_plot_to_fig,
         beta_0,
@@ -466,7 +464,7 @@ def _(mo):
 @app.cell
 def _(get_fig_hist, mean_slider, mo, variance_slider):
     # 6. Lay out sliders and the figure
-    mo.vstack([get_fig_hist(), mo.hstack([mean_slider, variance_slider])])
+    mo.vstack([mo.ui.plotly(get_fig_hist(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([mean_slider, variance_slider])])
     return
 
 
@@ -482,13 +480,6 @@ def _(go, mo, np):
         x=x, xbins=dict(start=START, end=END, size=0.1)  # whatever bin width you want
     )
     fig_hist = go.Figure(hist_trace)
-    fig_hist.update_layout(
-        title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
-        xaxis=dict(title="Value", range=[START, END], fixedrange=True),
-        yaxis=dict(title="Count"),
-        margin=dict(l=4, r=3, t=80, b=10),
-    )
-
     # 2. Store the figure and the slider states
     get_fig_hist, set_fig_hist = mo.state(fig_hist)
     fig_hist.update_layout(
@@ -496,10 +487,8 @@ def _(go, mo, np):
         xaxis=dict(title="Value", range=[START, END], fixedrange=True),
         yaxis=dict(
             title="Count", range=[0, int(SIZE * 0.1)], fixedrange=True
-        ),  # Adjust the y-axis range as needed
-    )
-    fig_hist.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+        ),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
     mean_state, set_mean_state = mo.state(0.0)
     variance_state, set_variance_state = mo.state(1.0)
@@ -708,7 +697,7 @@ def _(go, mo, np):
         set_clicks2(0)
 
     # 3) Create the UI buttons, each calling its respective callback
-    btn_new_sample = mo.ui.button(value=0, on_click=add_sample, label="New Sample", kind="neutral")
+    btn_new_sample = mo.ui.button(value=0, on_click=add_sample, label="New Sample", kind="success")
     btn_clear = mo.ui.button(value=get_clicks2(), on_click=clear_data, label="Clear", kind="danger")
     return (
         add_sample,
@@ -725,7 +714,7 @@ def _(go, mo, np):
 
 @app.cell
 def _(btn_clear, btn_new_sample, get_fig2, mo):
-    mo.vstack([get_fig2(), mo.hstack([btn_new_sample, btn_clear])])
+    mo.vstack([mo.ui.plotly(get_fig2(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample, btn_clear])])
     return
 
 
@@ -778,7 +767,7 @@ def _(go, mo, np):
         set_clicks_2d(0)
 
     btn_new_sample_2d = mo.ui.button(
-        value=0, on_click=add_sample_2d, label="New Sample", kind="neutral"
+        value=0, on_click=add_sample_2d, label="New Sample", kind="success"
     )
     btn_clear_2d = mo.ui.button(
         value=get_clicks_2d(), on_click=clear_data_2d, label="Clear", kind="danger"
@@ -806,7 +795,7 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_3d, btn_new_sample_3d, get_fig_3d, mo):
-    mo.vstack([get_fig_3d(), mo.hstack([btn_new_sample_3d, btn_clear_3d])])
+    mo.vstack([mo.ui.plotly(get_fig_3d(),config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample_3d, btn_clear_3d])])
     return
 
 
@@ -841,7 +830,7 @@ def _(go, mo, np):
         set_clicks_3d(0)
 
     btn_new_sample_3d = mo.ui.button(
-        value=0, on_click=add_sample_3d, label="New Sample", kind="neutral"
+        value=0, on_click=add_sample_3d, label="New Sample", kind="success"
     )
     btn_clear_3d = mo.ui.button(
         value=get_clicks_3d(), on_click=clear_data_3d, label="Clear", kind="danger"
@@ -869,7 +858,7 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_50d, btn_connect_50d, btn_new_sample_50d, get_fig_50d, mo):
-    mo.vstack([get_fig_50d(), mo.hstack([btn_new_sample_50d, btn_connect_50d, btn_clear_50d])])
+    mo.vstack([mo.ui.plotly(get_fig_50d(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample_50d, btn_connect_50d, btn_clear_50d])])
     return
 
 
@@ -910,10 +899,10 @@ def _(go, mo, np):
         set_clicks_50d(0)
 
     btn_new_sample_50d = mo.ui.button(
-        value=0, on_click=add_sample_50d, label="New Sample", kind="neutral"
+        value=0, on_click=add_sample_50d, label="New Sample", kind="success"
     )
     btn_connect_50d = mo.ui.button(
-        label="Connect Samples", on_click=connect_samples_50d, kind="neutral"
+        label="Connect Samples", on_click=connect_samples_50d,
     )
     btn_clear_50d = mo.ui.button(
         value=get_clicks_50d(), on_click=clear_data_50d, label="Clear", kind="danger"
@@ -1075,7 +1064,7 @@ def _(mo):
 @app.cell
 def _(btn_clear_fuzzy, btn_new_sample_fuzzy, get_fig_fuzzy, mo):
     # 4) Layout: Place the buttons side-by-side and display the figure
-    mo.vstack([get_fig_fuzzy(), mo.hstack([btn_new_sample_fuzzy, btn_clear_fuzzy])])
+    mo.vstack([mo.ui.plotly(get_fig_fuzzy(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample_fuzzy, btn_clear_fuzzy])])
     return
 
 
@@ -1089,6 +1078,7 @@ def _(go, mo, np, pairwise_rbf, slider_l):
     init_fig_fuzzy = go.Figure(data=[init_scatter_fuzzy], layout=init_layout_fuzzy)
     init_fig_fuzzy.update_layout(
         margin=dict(l=4, r=3, t=80, b=10),
+        height=400
     )
 
     # 2) Store the figure in Marimo's state, plus a sample-count state
@@ -1121,7 +1111,7 @@ def _(go, mo, np, pairwise_rbf, slider_l):
 
     # 3) Create the UI buttons
     btn_new_sample_fuzzy = mo.ui.button(
-        label="New Sample", on_click=add_sample_fuzzy, kind="neutral"
+        label="New Sample", on_click=add_sample_fuzzy, kind="success"
     )
     btn_clear_fuzzy = mo.ui.button(
         value=get_clicks_fuzzy(), on_click=clear_data_fuzzy, label="Clear", kind="danger"
@@ -1199,7 +1189,7 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_real, btn_new_sample_real, get_fig_real, mo):
-    mo.vstack([get_fig_real(), mo.hstack([btn_new_sample_real, btn_clear_real])])
+    mo.vstack([mo.ui.plotly(get_fig_real(), config={'responsive': True, "displayModeBar":False}), mo.hstack([btn_new_sample_real, btn_clear_real])])
     return
 
 
@@ -1213,11 +1203,12 @@ def _(go, mo, np):
     # 1) Create a figure with an initial (empty) scatter trace
     init_scatter_real = go.Scatter(mode="markers")
     init_layout_real = go.Layout(
-        title="Samples from a Multivariate Gaussian at Real-Valued Indices"
+        title="Samples from a Multivariate Gaussian at Multiples of Pi"
     )
     init_fig_real = go.Figure(data=[init_scatter_real], layout=init_layout_real)
     init_fig_real.update_layout(
         margin=dict(l=4, r=3, t=80, b=10),
+        height=400
     )
     # 2) Use Marimo state to keep track of the figure and click count
     get_fig_real, set_fig_real = mo.state(init_fig_real)
@@ -1251,7 +1242,7 @@ def _(go, mo, np):
         set_clicks_real(0)
 
     # 4) Build UI: two buttons + the figure
-    btn_new_sample_real = mo.ui.button(label="New Sample", on_click=add_sample_real, kind="neutral")
+    btn_new_sample_real = mo.ui.button(label="New Sample", on_click=add_sample_real, kind="success")
     btn_clear_real = mo.ui.button(
         value=get_clicks_real(), on_click=clear_data_real, label="Clear", kind="danger"
     )
@@ -1279,7 +1270,7 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_50real, btn_new_sample_50real, get_fig_50real, mo):
-    mo.vstack([get_fig_50real(), mo.hstack([btn_new_sample_50real, btn_clear_50real])])
+    mo.vstack([mo.ui.plotly(get_fig_50real(), config={'responsive': True, "displayModeBar":False}), mo.hstack([btn_new_sample_50real, btn_clear_50real])])
     return
 
 
@@ -1300,6 +1291,7 @@ def _(go, mo, np):
     init_fig_50_real = go.Figure(data=[init_scatter_50_real], layout=init_layout_50_real)
     init_fig_50_real.update_layout(
         margin=dict(l=4, r=3, t=80, b=10),
+        height=400
     )
 
     # 2) Store the figure and a sample counter in Marimo's state
@@ -1337,7 +1329,7 @@ def _(go, mo, np):
 
     # 3) Create the UI: Two buttons + the figure
     btn_new_sample_50real = mo.ui.button(
-        label="New Sample", on_click=add_sample_50real, kind="neutral"
+        label="New Sample", on_click=add_sample_50real, kind="success"
     )
 
     btn_clear_50real = mo.ui.button(label="Clear", on_click=clear_data_50real, kind="danger")
@@ -1430,10 +1422,10 @@ def _(
     slider_ld,
 ):
     mo.vstack([
-        get_fig_samples(),
+        mo.ui.plotly(get_fig_samples(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}),
         mo.hstack([btn_new_sample_double, btn_clear_double]),
         slider_ld,
-        get_fig_cov(),
+        mo.ui.plotly(get_fig_cov(),config={'responsive': True, "displayModeBar":False, "staticPlot":True})
 
     ])
     return
@@ -1461,6 +1453,7 @@ def _(go, mo, np, pairwise_rbf):
     fig_samples.update_layout(
         title="Function Samples",
         margin=dict(l=20, r=20, t=40, b=20),
+        height=350
     )
 
     # -- Figure B: "Covariance Matrix" --
@@ -1477,14 +1470,14 @@ def _(go, mo, np, pairwise_rbf):
     # Make it "square" in data coordinates
     fig_cov.update_xaxes(range=[0, 49])
     fig_cov.update_yaxes(
-        range=[0, 50],
+        range=[0, 49],
         scaleanchor="x",  # tie y-axis scale to x-axis
         scaleratio=1
     )
     fig_cov.update_layout(
         title="Covariance Matrix",
-        width=400,
-        height=400,
+        width=350,
+        height=350,
         margin=dict(l=20, r=20, t=40, b=20),
     )
 
@@ -1565,7 +1558,7 @@ def _(go, mo, np, pairwise_rbf):
     )
 
     btn_new_sample_double = mo.ui.button(
-        label="New Sample", on_click=add_new_sample, kind="neutral"
+        label="New Sample", on_click=add_new_sample, kind="success"
     )
 
     btn_clear_double = mo.ui.button(label="Clear", on_click=clear_figure, kind="danger")
@@ -1791,8 +1784,14 @@ def _(pairwise_rbf, sp):
 
 
 @app.cell
-def _(get_fig_housing):
+def _(btn_clear_housing, btn_new_sample_housing, get_fig_housing, mo):
     get_fig_housing()
+
+    mo.vstack([
+        
+        mo.ui.plotly(get_fig_housing(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}),
+        mo.hstack([btn_new_sample_housing, btn_clear_housing])
+    ])
     return
 
 
@@ -1816,7 +1815,7 @@ def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
     )
     init_fig_housing = go.Figure(data=[scatter_known], layout=layout_housing)
     init_fig_housing.update_layout(
-        margin=dict(l=4, r=3, t=80, b=80),
+        margin=dict(l=4, r=3, t=80, b=10),
     )
 
 
@@ -1889,12 +1888,11 @@ def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
 
     # 3) Create the UI: two buttons + the figure
     btn_new_sample_housing = mo.ui.button(
-        label="New Sample", on_click=add_sample_housing, kind="neutral"
+        label="New Sample", on_click=add_sample_housing, kind="success"
     )
     btn_clear_housing = mo.ui.button(label="Clear", on_click=clear_data_housing, kind="danger")
 
     # 4) Display everything
-    mo.hstack([btn_new_sample_housing, btn_clear_housing])
     return (
         add_sample_housing,
         btn_clear_housing,

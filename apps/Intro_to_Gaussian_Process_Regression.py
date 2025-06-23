@@ -1,39 +1,44 @@
 import marimo
 
-__generated_with = "0.11.5"
+__generated_with = "0.14.6"
 app = marimo.App()
 
 
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
 @app.cell
 def _():
     # @title
+    import matplotlib
     import numpy as np
     import pandas as pd
     import plotly
     import scipy as sp
     import seaborn as sns
     from matplotlib import pyplot as plt
-    import matplotlib
-    from wigglystuff import Matrix
     from plotly import graph_objs as go
+    from wigglystuff import Matrix
 
-
-    plt.rcParams['font.family'] = ['sans-serif']  # Use only sans-serif fonts
-    plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Helvetica']  # Specify specific fonts
+    plt.rcParams["font.family"] = ["sans-serif"]  # Use only sans-serif fonts
+    plt.rcParams["font.sans-serif"] = [
+        "Arial",
+        "DejaVu Sans",
+        "Helvetica",
+    ]  # Specify specific fonts
 
     np.random.seed(42)
-    return Matrix, go, matplotlib, np, pd, plotly, plt, sns, sp
+    return go, matplotlib, np, pd, plt, sns, sp
 
 
 @app.cell
 async def _(matplotlib):
     import asyncio
+
     import matplotlib.font_manager as fm
 
     # Try to import Pyodide's fetch; if unavailable, fall back to requests
@@ -43,6 +48,7 @@ async def _(matplotlib):
         async def fetch_font(url):
             response = await pyfetch(url)
             return await response.bytes()
+
     except ImportError:
         import requests
 
@@ -53,40 +59,41 @@ async def _(matplotlib):
     async def setup_custom_font():
         # URL for DejaVu Sans TTF file on GitHub (raw link)
         # url = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
-        
+
         # Alternatively, you could use:
-        # Noto Sans: 
+        # Noto Sans:
         url = "https://github.com/googlefonts/noto-fonts/raw/main/unhinted/ttf/NotoSans/NotoSans-Regular.ttf"
         # Roboto:   url = "https://github.com/google/roboto/raw/main/src/hinted/Roboto-Regular.ttf"
-        
+
         response = await fetch_font(url)
         font_bytes = response
-        
+
         # Write the font file to Pyodide's in-memory filesystem
         font_path = "/tmp/DejaVuSans.ttf"
         with open(font_path, "wb") as f:
             f.write(font_bytes)
-        
+
         # Register the font with Matplotlib
         fm.fontManager.addfont(font_path)
         prop = fm.FontProperties(fname=font_path)
         font_name = prop.get_name()
         matplotlib.rcParams["font.family"] = font_name
-        
+
         # Override the font search to return only our custom font
         def only_my_font(*args, **kwargs):
             return [font_path]
+
         fm.findSystemFonts = only_my_font
-        
+
         # Clear the cached font list to force a rebuild using only our font
         fm.fontManager.ttflist = []
-        
+
         print(f"Custom font '{font_name}' has been set up.")
 
     # Run the setup asynchronously
     await setup_custom_font()
 
-    return asyncio, fetch_font, fm, pyfetch, requests, setup_custom_font
+    return
 
 
 @app.cell(hide_code=True)
@@ -104,10 +111,10 @@ def _(mo):
 
         > Prerequisites: basic linear algebra and statistics.
         > 
-        > If you know python/numpy you might find it helpful to look at the code under the hood. Just click the elipses in the upper right corner.
+        > If you know python/numpy you might find it helpful to look at the code under the hood. Just click the ellipses in the upper right corner.
         >
-        TODO: add example interactive plot here
         """
+        # TODO: add example interactive plot here
     )
     return
 
@@ -116,17 +123,17 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## Why Gaussian Process Regression?
+    ## Why Gaussian Process Regression?
 
-        <!-- I've always been intrigued by Gaussian Processes regression. It has a certain air of mystery about it...one of those models for the cool kids. GPR is supposed to be "beautiful", but also pretty hard to understand. All I knew about it was the following:  -->
+    <!-- I've always been intrigued by Gaussian Processes regression. It has a certain air of mystery about it...one of those models for the cool kids. GPR is supposed to be "beautiful", but also pretty hard to understand. All I knew about it was the following:  -->
 
-        1. It's a non-linear regression model 
-        1. It also does built-in modeling of uncertainties (cool!)
+    1. It's a non-linear regression model 
+    1. It also does built-in modeling of uncertainties (cool!)
 
-        The following plot from the sci-kit learn documentation shows the output of GP regression model. Note the beautifully curved uncertainty bands. Where does all this come from?
+    The following plot from the sci-kit learn documentation shows the output of GP regression model. Note the beautifully curved uncertainty bands. Where does all this come from?
 
-        ![](https://scikit-learn.org/0.17/_images/plot_gp_regression_001.png)
-        """
+    ![](https://scikit-learn.org/0.17/_images/plot_gp_regression_001.png)
+    """
     )
     return
 
@@ -135,23 +142,23 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        <!-- I was recently looking at a cool dataset: a list of about 30k different COVID antibodies, each one with a repeated measurement of how well it stuck to COVID spike particles. The better an antibody sticks, the better it is at fighting COVID (more or less). Importantly, each different antibody was measured for its binding strength three times, and the measurements were noisy. So we have a problem with:
+    <!-- I was recently looking at a cool dataset: a list of about 30k different COVID antibodies, each one with a repeated measurement of how well it stuck to COVID spike particles. The better an antibody sticks, the better it is at fighting COVID (more or less). Importantly, each different antibody was measured for its binding strength three times, and the measurements were noisy. So we have a problem with:
 
-        1. Nonlinear relationships 
-        1. Noisy data (uncertainty is important!) 
-        1. Dataset not huge.
+    1. Nonlinear relationships 
+    1. Noisy data (uncertainty is important!) 
+    1. Dataset not huge.
 
-        Finally I have a reason to learn about GPs (and level up how cool I am on Twitter)!  -->
+    Finally I have a reason to learn about GPs (and level up how cool I am on Twitter)!  -->
 
-        ## GP Regression: The One Line Definition
-        Turns out GP regression can be described in one (somewhat loaded) line:
+    ## GP Regression: The One Line Definition
+    Turns out GP regression can be described in one (somewhat loaded) line:
 
-        **GP Regression: A Multivariate Gaussian Distribution over functions, conditioned on some training data.**
+    **GP Regression: A Multivariate Gaussian Distribution over functions, conditioned on some training data.**
 
-        Hmm. Maybe not so terrible? But how does this connect to the idea of "a nonlinear regression that models uncertainty"?
+    Hmm. Maybe not so terrible? But how does this connect to the idea of "a nonlinear regression that models uncertainty"?
 
-        Let's unpack this definition bit by bit, starting with "distribution over functions".
-        """
+    Let's unpack this definition bit by bit, starting with "distribution over functions".
+    """
     )
     return
 
@@ -160,14 +167,14 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## Prequel: Distributions over Functions
+    ## Prequel: Distributions over Functions
 
-        We all know linear regression; it has the form $y = \beta_0 + \beta_1 x$. We have some data $x$ and $y$, and we want to find the $\beta_0$ and $\beta_1$ that describe a line of best fit. We can do this using OLS (ordinary least squares), and we end up with a linear function $f(x) = \beta_0 + \beta_1 x$, that for any $x$ gives us a prediction for $y$.
+    We all know linear regression; it has the form $y = \beta_0 + \beta_1 x$. We have some data $x$ and $y$, and we want to find the $\beta_0$ and $\beta_1$ that describe a line of best fit. We can do this using OLS (ordinary least squares), and we end up with a linear function $f(x) = \beta_0 + \beta_1 x$, that for any $x$ gives us a prediction for $y$.
 
-        But what if we want some notion of the uncertainty of our prediction?
+    But what if we want some notion of the uncertainty of our prediction?
 
-        For example, look at the two plots below:
-        """
+    For example, look at the two plots below:
+    """
     )
     return
 
@@ -182,23 +189,15 @@ def _(np, plt, sns):
     y_low_noise = x_reg + np.random.normal(0, LOW_NOISE_VARIANCE, 10)
     sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None, color="red").set_title("A")
     sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title("B")
-    return (
-        LOW_NOISE_VARIANCE,
-        NOISE_VARIANCE,
-        ax1,
-        ax2,
-        x_reg,
-        y_low_noise,
-        y_noise,
-    )
+    return LOW_NOISE_VARIANCE, NOISE_VARIANCE, x_reg, y_low_noise, y_noise
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
+        # TODO: reindex to be better, alpha and beta
+        # TODO: rememver, when we draw a function, we're just plotting a lot of points and connecting them together
         r"""
-        TODO: reindex to be better, alpha and beta
-        TODO: rememver, when we draw a function, we're just plotting a lot of points and connecting them together
         Even though the data on the left is much more noisy, both linear regressions model the data with the sample simple line. There's no measure of uncertainty. Let's try to add some.
 
         What if (just for fun) we assumed $\beta_0$ and $\beta_1$ were actually random variables, and that they are normally distributed with variance equal to the variance in the data? Then our linear regression equation would look like this:
@@ -241,7 +240,20 @@ def _(mo):
 
 @app.cell
 def _(button, clear_button, get_fig_A, get_fig_B, mo):
-    mo.vstack([mo.hstack([mo.ui.plotly(get_fig_A(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.ui.plotly(get_fig_B(), config={'responsive': True, "displayModeBar":False})]), mo.hstack([button, clear_button])])
+    mo.vstack(
+        [
+            mo.hstack(
+                [
+                    mo.ui.plotly(
+                        get_fig_A(),
+                        config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+                    ),
+                    mo.ui.plotly(get_fig_B(), config={"responsive": True, "displayModeBar": False}),
+                ]
+            ),
+            mo.hstack([button, clear_button]),
+        ]
+    )
     return
 
 
@@ -295,15 +307,13 @@ def _(
             xref="container",
             yref="container",
             traceorder="grouped",
-            font=dict(size=10), 
+            font=dict(size=10),
         ),
         autosize=True,
         margin=dict(l=4, r=3, t=80, b=10),
-        width=300
+        width=300,
     )
     fig_A.update_xaxes(range=[-3, 3], fixedrange=True)
-
-
 
     # Figure for Plot B (right figure)
     fig_B = go.Figure()
@@ -331,7 +341,7 @@ def _(
             font=dict(size=10),
         ),
         autosize=True,
-        margin=dict(l=4, r=3, t=80, b=80)
+        margin=dict(l=4, r=3, t=80, b=80),
     )
     fig_B.update_xaxes(range=[-3, 3], fixedrange=True)
     fig_B.update_yaxes(range=[-5, 5], fixedrange=True)
@@ -407,25 +417,29 @@ def _(
 
         # Append new trace to Plot A (first figure)
         color_idx_A = len(fig_A.data) % len(colors_subplot1)
-        fig_A.add_trace(go.Scatter(
-            x=x_reg,
-            y=line_data_A,
-            mode="lines",
-            line=dict(color=colors_subplot1[color_idx_A]),
-            name=f"$B_{{0a}}: {beta_0_rand[0]:.2f}, B_{{1a}}: {beta_1_rand[0]:.2f}$",
-            legendgroup="Plot A",
-        ))
+        fig_A.add_trace(
+            go.Scatter(
+                x=x_reg,
+                y=line_data_A,
+                mode="lines",
+                line=dict(color=colors_subplot1[color_idx_A]),
+                name=f"$B_{{0a}}: {beta_0_rand[0]:.2f}, B_{{1a}}: {beta_1_rand[0]:.2f}$",
+                legendgroup="Plot A",
+            )
+        )
 
         # Append new trace to Plot B (second figure)
         color_idx_B = len(fig_B.data) % len(colors_subplot2)
-        fig_B.add_trace(go.Scatter(
-            x=x_reg,
-            y=line_data_B,
-            mode="lines",
-            line=dict(color=colors_subplot2[color_idx_B]),
-            name=f"$B_{{0b}}: {beta_0_rand2[0]:.2f}, B_{{1b}}: {beta_1_rand2[0]:.2f}$",
-            legendgroup="Plot B",
-        ))
+        fig_B.add_trace(
+            go.Scatter(
+                x=x_reg,
+                y=line_data_B,
+                mode="lines",
+                line=dict(color=colors_subplot2[color_idx_B]),
+                name=f"$B_{{0b}}: {beta_0_rand2[0]:.2f}, B_{{1b}}: {beta_1_rand2[0]:.2f}$",
+                legendgroup="Plot B",
+            )
+        )
 
         # Update each figure's height based on the new number of traces
         new_height_A = calculate_figure_height(len(fig_A.data))
@@ -456,48 +470,25 @@ def _(
     # --- Create UI buttons ---
     button = mo.ui.button(value=0, on_click=add_plot_to_fig, label="New Sample", kind="success")
     clear_button = mo.ui.button(value=0, on_click=reset, label="Reset", kind="danger")
-    return (
-        add_plot_to_fig,
-        beta_0,
-        beta_1,
-        beta_1_1,
-        button,
-        calculate_figure_height,
-        clear_button,
-        colors_subplot1,
-        colors_subplot2,
-        fig_A,
-        fig_B,
-        get_fig_A,
-        get_fig_B,
-        line_A,
-        line_A_trace,
-        line_B,
-        line_B_trace,
-        reset,
-        scatter_A,
-        scatter_B,
-        set_fig_A,
-        set_fig_B,
-    )
+    return button, calculate_figure_height, clear_button, get_fig_A, get_fig_B
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        Each time you click the button, a new sample $\beta_0, \beta_1$ are drawn from the distributions of $B_0$ and $B_1$ (one set of betas for the noisy data on the left and one set for the less noisy on the right), and the corresponding lines are plotted.
+    Each time you click the button, a new sample $\beta_0, \beta_1$ are drawn from the distributions of $B_0$ and $B_1$ (one set of betas for the noisy data on the left and one set for the less noisy on the right), and the corresponding lines are plotted.
 
-        Notice what we've created: it's a distribution over _functions_. Each sample from  $y = B_0 + B_1 x$ is a different function $f(x)$. Also notice that as you sample more and more, the "spread" or uncertainty of the original fit becomes more and more apparent. You can also see that the uncertainty is higher in the noisier data.
+    Notice what we've created: it's a distribution over _functions_. Each sample from  $y = B_0 + B_1 x$ is a different function $f(x)$. Also notice that as you sample more and more, the "spread" or uncertainty of the original fit becomes more and more apparent. You can also see that the uncertainty is higher in the noisier data.
 
-        > This framework is just to develop for intuition for distributions over functions. For a more rigorous take, check out the bayesian linear regression section [here](https://gaussianprocess.org/gpml/chapters/RW.pdf#page=26&zoom=50,240,358).
+    > This framework is just to develop for intuition for distributions over functions. For a more rigorous take, check out the bayesian linear regression section [here](https://gaussianprocess.org/gpml/chapters/RW.pdf#page=26&zoom=50,240,358).
 
-        Returning to our original definition, we've checked off one core idea:
+    Returning to our original definition, we've checked off one core idea:
 
-        **GP Regression: A Multivariate Gaussian <font color="#32a852">Distribution over functions</font>, conditioned on some training data.**
+    **GP Regression: A Multivariate Gaussian <font color="#32a852">Distribution over functions</font>, conditioned on some training data.**
 
-        What if we want to model a non-linear relationship? Now we're getting closer to the core idea of GPs. But of course, before we get to Gaussian processes, we have to talk about Gaussians.
-        """
+    What if we want to model a non-linear relationship? Now we're getting closer to the core idea of GPs. But of course, before we get to Gaussian processes, we have to talk about Gaussians.
+    """
     )
     return
 
@@ -506,16 +497,16 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        # Gaussians...and Multivariate Gaussians!
+    # Gaussians...and Multivariate Gaussians!
 
-        The Gaussian, the bell curve, the normal distribution, we've seen it before. It's defined by 
+    The Gaussian, the bell curve, the normal distribution, we've seen it before. It's defined by 
 
-        $$
-        Y \sim N(\mu, \sigma^2)
-        $$
+    $$
+    Y \sim N(\mu, \sigma^2)
+    $$
 
-        where $\mu$ is the mean and $\sigma^2$ is the variance. You can play around with the parameters of the distribution below. Each time you change the sliders, 10,000 samples are drawn from the distribution and plotted as a histogram.
-        """
+    where $\mu$ is the mean and $\sigma^2$ is the variance. You can play around with the parameters of the distribution below. Each time you change the sliders, 10,000 samples are drawn from the distribution and plotted as a histogram.
+    """
     )
     return
 
@@ -523,7 +514,15 @@ def _(mo):
 @app.cell
 def _(get_fig_hist, mean_slider, mo, variance_slider):
     # 6. Lay out sliders and the figure
-    mo.vstack([mo.ui.plotly(get_fig_hist(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([mean_slider, variance_slider])])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig_hist(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+            mo.hstack([mean_slider, variance_slider]),
+        ]
+    )
     return
 
 
@@ -544,9 +543,7 @@ def _(go, mo, np):
     fig_hist.update_layout(
         title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
         xaxis=dict(title="Value", range=[START, END], fixedrange=True),
-        yaxis=dict(
-            title="Count", range=[0, int(SIZE * 0.1)], fixedrange=True
-        ),
+        yaxis=dict(title="Count", range=[0, int(SIZE * 0.1)], fixedrange=True),
         margin=dict(l=4, r=3, t=80, b=10),
     )
     mean_state, set_mean_state = mo.state(0.0)
@@ -586,25 +583,7 @@ def _(go, mo, np):
         on_change=on_variance_change,
         label="Variance",
     )
-    return (
-        END,
-        SIZE,
-        START,
-        fig_hist,
-        get_fig_hist,
-        hist_trace,
-        mean_slider,
-        mean_state,
-        on_mean_change,
-        on_variance_change,
-        set_fig_hist,
-        set_mean_state,
-        set_variance_state,
-        update_histogram,
-        variance_slider,
-        variance_state,
-        x,
-    )
+    return get_fig_hist, mean_slider, variance_slider
 
 
 @app.cell(hide_code=True)
@@ -617,46 +596,46 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        What about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
+    What about multivariate Gaussians? That is, a Gaussian distribution but with more than one variable. They are basically the same thing, but instead of having a single mean and variance, there's there's a mean vector and a covariance matrix. 
 
 
-        So while a single Gaussian is this:
+    So while a single Gaussian is this:
 
-        $$
-        Y \sim N(\mu, \sigma^2)
-        $$
+    $$
+    Y \sim N(\mu, \sigma^2)
+    $$
 
-        Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
+    Where $\mu$ is the mean and $\sigma$ is the variance, a multivariate Gaussian is this:
 
-        $$
-        \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
-        $$
+    $$
+    \textbf{Y} \sim N(\boldsymbol{\mu}, \Sigma)
+    $$
 
-        Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
+    Where $\boldsymbol{\mu}$ is a vector of means, $\Sigma$ is a covariance matrix.
 
-        $$
-        \boldsymbol{\mu} = \begin{bmatrix}
-        \mu_1 \\
-        \mu_2 \\
-        \vdots \\
-        \mu_n
-        \end{bmatrix},
-        $$
+    $$
+    \boldsymbol{\mu} = \begin{bmatrix}
+    \mu_1 \\
+    \mu_2 \\
+    \vdots \\
+    \mu_n
+    \end{bmatrix},
+    $$
 
-        $$
-        \qquad
-        \Sigma = \begin{bmatrix}
-        \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
-        \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
-        \vdots & \vdots & \ddots & \vdots \\
-        \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
-        \end{bmatrix}.
-        $$
+    $$
+    \qquad
+    \Sigma = \begin{bmatrix}
+    \sigma_{11} & \sigma_{12} & \dots & \sigma_{1n} \\
+    \sigma_{21} & \sigma_{22} & \dots & \sigma_{2n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \sigma_{n1} & \sigma_{n2} & \dots & \sigma_{nn}
+    \end{bmatrix}.
+    $$
 
-        In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
+    In the above expressions, $\mu_i$ is the mean of the $i$ th component of $\textbf{Y}$
 
-        In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value.
-        """
+    In this case when we sample from $\textbf{Y}$, we get a vector $\textbf{Y} = [Y_1, Y_2, \dots, Y_n]^T$,  instead of just a single value.
+    """
     )
     return
 
@@ -665,10 +644,10 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        Nothing too crazy right? Well, except that the multivariate normal distribution has a covariance _matrix_, not just a variance.
+    Nothing too crazy right? Well, except that the multivariate normal distribution has a covariance _matrix_, not just a variance.
 
-        In the covariance matrix we specify not only the variance of each variable, but also the covariance between each variable and every other. Each of the $n$ variables in a multivariate Gaussian can be correlated with each other. Below is an overhead view of a bunch of samples for a 2D multivariate Gaussian distribution. You can interactively change the covariance matrix to see how it affects the distribution.
-        """
+    In the covariance matrix we specify not only the variance of each variable, but also the covariance between each variable and every other. Each of the $n$ variables in a multivariate Gaussian can be correlated with each other. Below is an overhead view of a bunch of samples for a 2D multivariate Gaussian distribution. You can interactively change the covariance matrix to see how it affects the distribution.
+    """
     )
     return
 
@@ -676,18 +655,18 @@ def _(mo):
 @app.cell
 def _():
     # mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
-    # arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))    
+    # arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))
     # x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
     # df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
     # x_sim = np.random.multivariate_normal(
-    #     np.array(arr.matrix).reshape(-1), 
-    #     np.array(mat.matrix), 
+    #     np.array(arr.matrix).reshape(-1),
+    #     np.array(mat.matrix),
     #     2500
     # )
     # df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
     # chart_sim = (
-    #     alt.Chart(df_sim).mark_point().encode(x="x", y="y") + 
+    #     alt.Chart(df_sim).mark_point().encode(x="x", y="y") +
     #     alt.Chart(df_orig).mark_point(color="gray").encode(x="x", y="y")
     # )
 
@@ -699,12 +678,12 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        Note that if you change the diagonal elements, the variance of one or the other variable will change (look at the scale of axes). If you change the off-diagonal elements, the covariance between the two variables will change. 
+    Note that if you change the diagonal elements, the variance of one or the other variable will change (look at the scale of axes). If you change the off-diagonal elements, the covariance between the two variables will change. 
 
-        You also probably saw that the matrix has to be symmetric and with positive diagonals. Why? Well think about what covariance is: its how two variables vary together. It doesn't make sense for Cov(X,Y) != Cov(Y,X). And it doesn't make sense for Cov(X,X) — that is, Var(X) — to be negative.
+    You also probably saw that the matrix has to be symmetric and with positive diagonals. Why? Well think about what covariance is: its how two variables vary together. It doesn't make sense for Cov(X,Y) != Cov(Y,X). And it doesn't make sense for Cov(X,X) — that is, Var(X) — to be negative.
 
-        Also note that while the combined joint distribution changes form, each of the individual distributions is still a Gaussian. That is to say, the distribution of $X_1$ is still a gaussian, and the distribution of $X_2$ is still a Gaussian. The only thing that changes is the covariance between the two variables.
-        """
+    Also note that while the combined joint distribution changes form, each of the individual distributions is still a Gaussian. That is to say, the distribution of $X_1$ is still a gaussian, and the distribution of $X_2$ is still a Gaussian. The only thing that changes is the covariance between the two variables.
+    """
     )
     return
 
@@ -713,12 +692,12 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## Gaussian Distribution Over Functions
+    ## Gaussian Distribution Over Functions
 
-        So far we've visualized a multivariate Gaussian of just two variables, but you can imagine taking this into many many dimensions. That is to say, many many Gaussian random variables that may or may not be correlated with each other according to some big covariance matrix.
+    So far we've visualized a multivariate Gaussian of just two variables, but you can imagine taking this into many many dimensions. That is to say, many many Gaussian random variables that may or may not be correlated with each other according to some big covariance matrix.
 
-        In order to think about more than two dimensions, we'll need to visualize our distributions differently. Let's start with a 1-D Gaussian. We'll draw samples from the distribution and plot them below:
-        """
+    In order to think about more than two dimensions, we'll need to visualize our distributions differently. Let's start with a 1-D Gaussian. We'll draw samples from the distribution and plot them below:
+    """
     )
     return
 
@@ -758,22 +737,19 @@ def _(go, mo, np):
     # 3) Create the UI buttons, each calling its respective callback
     btn_new_sample = mo.ui.button(value=0, on_click=add_sample, label="New Sample", kind="success")
     btn_clear = mo.ui.button(value=get_clicks2(), on_click=clear_data, label="Clear", kind="danger")
-    return (
-        add_sample,
-        btn_clear,
-        btn_new_sample,
-        clear_data,
-        get_clicks2,
-        get_fig2,
-        initial_fig,
-        set_clicks2,
-        set_fig2,
-    )
+    return btn_clear, btn_new_sample, get_fig2
 
 
 @app.cell
 def _(btn_clear, btn_new_sample, get_fig2, mo):
-    mo.vstack([mo.ui.plotly(get_fig2(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample, btn_clear])])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig2(), config={"responsive": True, "displayModeBar": False, "staticPlot": True}
+            ),
+            mo.hstack([btn_new_sample, btn_clear]),
+        ]
+    )
     return
 
 
@@ -781,10 +757,10 @@ def _(btn_clear, btn_new_sample, get_fig2, mo):
 def _(mo):
     mo.md(
         r"""
-        Each new sample is drawn from a normal distribution with mean 0 and variance 1.
+    Each new sample is drawn from a normal distribution with mean 0 and variance 1.
 
-        What if we want to sample from a multivariate normal distribution? Well, this time $\textbf{Y}$ is a _vector_ of random variables. If $\textbf{Y}$ is 2-d then $\textbf{Y} = [Y_1, Y_2]^T$, so each sample is a vector of two values which we'll plot each on their own part of the X-axis.
-        """
+    What if we want to sample from a multivariate normal distribution? Well, this time $\textbf{Y}$ is a _vector_ of random variables. If $\textbf{Y}$ is 2-d then $\textbf{Y} = [Y_1, Y_2]^T$, so each sample is a vector of two values which we'll plot each on their own part of the X-axis.
+    """
     )
     return
 
@@ -831,19 +807,7 @@ def _(go, mo, np):
     btn_clear_2d = mo.ui.button(
         value=get_clicks_2d(), on_click=clear_data_2d, label="Clear", kind="danger"
     )
-    return (
-        add_sample_2d,
-        btn_clear_2d,
-        btn_new_sample_2d,
-        clear_data_2d,
-        get_clicks_2d,
-        get_fig_2d,
-        init_fig_2d,
-        init_layout_2d,
-        init_scatter_2d,
-        set_clicks_2d,
-        set_fig_2d,
-    )
+    return btn_clear_2d, btn_new_sample_2d, get_fig_2d
 
 
 @app.cell(hide_code=True)
@@ -854,7 +818,15 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_3d, btn_new_sample_3d, get_fig_3d, mo):
-    mo.vstack([mo.ui.plotly(get_fig_3d(),config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample_3d, btn_clear_3d])])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig_3d(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+            mo.hstack([btn_new_sample_3d, btn_clear_3d]),
+        ]
+    )
     return
 
 
@@ -894,19 +866,7 @@ def _(go, mo, np):
     btn_clear_3d = mo.ui.button(
         value=get_clicks_3d(), on_click=clear_data_3d, label="Clear", kind="danger"
     )
-    return (
-        add_sample_3d,
-        btn_clear_3d,
-        btn_new_sample_3d,
-        clear_data_3d,
-        get_clicks_3d,
-        get_fig_3d,
-        init_fig_3d,
-        init_layout_3d,
-        init_scatter_3d,
-        set_clicks_3d,
-        set_fig_3d,
-    )
+    return btn_clear_3d, btn_new_sample_3d, get_fig_3d
 
 
 @app.cell(hide_code=True)
@@ -917,7 +877,15 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_50d, btn_connect_50d, btn_new_sample_50d, get_fig_50d, mo):
-    mo.vstack([mo.ui.plotly(get_fig_50d(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample_50d, btn_connect_50d, btn_clear_50d])])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig_50d(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+            mo.hstack([btn_new_sample_50d, btn_connect_50d, btn_clear_50d]),
+        ]
+    )
     return
 
 
@@ -961,78 +929,65 @@ def _(go, mo, np):
         value=0, on_click=add_sample_50d, label="New Sample", kind="success"
     )
     btn_connect_50d = mo.ui.button(
-        label="Connect Samples", on_click=connect_samples_50d,
+        label="Connect Samples",
+        on_click=connect_samples_50d,
     )
     btn_clear_50d = mo.ui.button(
         value=get_clicks_50d(), on_click=clear_data_50d, label="Clear", kind="danger"
     )
-    return (
-        add_sample_50d,
-        btn_clear_50d,
-        btn_connect_50d,
-        btn_new_sample_50d,
-        clear_data_50d,
-        connect_samples_50d,
-        get_clicks_50d,
-        get_fig_50d,
-        init_fig_50d,
-        init_layout_50d,
-        init_scatter_50d,
-        set_clicks_50d,
-        set_fig_50d,
-    )
+    return btn_clear_50d, btn_connect_50d, btn_new_sample_50d, get_fig_50d
 
 
 @app.cell
 def _(mo):
     mo.md(
         r"""
-        Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
+    Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
 
-        You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
+    You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
 
-        Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
+    Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
 
-        If you thought "functions" then you are getting what I'm going for here. Each sample from the 50-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as 
+    If you thought "functions" then you are getting what I'm going for here. Each sample from the 50-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as 
 
-        $$
-        f(x) = Y_{x}
-        $$
+    $$
+    f(x) = Y_{x}
+    $$
 
-        given a multivariate Gaussian $Y = [Y_1, Y_2, Y_3, \dots, Y_{x}]^T \sim N(\boldsymbol{\mu}, \Sigma)$.
+    given a multivariate Gaussian $Y = [Y_1, Y_2, Y_3, \dots, Y_{x}]^T \sim N(\boldsymbol{\mu}, \Sigma)$.
 
-        But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 50-D Gaussian specifies a _distribution over functions_...
+    But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 50-D Gaussian specifies a _distribution over functions_...
 
-        <img src="https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg" width="340" height="200" />
+    <img src="https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg" width="340" height="200" />
 
-        _Almost_. The 50-D Gaussian really only specifies a distribution over 50 discrete values, so it's not quite a distribution over functions $f(x)$ that can take _any_ value of $x$. Hold that thought for now, we'll return to this later. 
+    _Almost_. The 50-D Gaussian really only specifies a distribution over 50 discrete values, so it's not quite a distribution over functions $f(x)$ that can take _any_ value of $x$. Hold that thought for now, we'll return to this later. 
 
-        But first you might have some questions. Remember, the above plot was made by taking a few samples from 50-D gaussian, $\textbf{Y}_{50D} \sim N(\boldsymbol{\mu}, \Sigma)$
+    But first you might have some questions. Remember, the above plot was made by taking a few samples from 50-D gaussian, $\textbf{Y}_{50D} \sim N(\boldsymbol{\mu}, \Sigma)$
 
-        But I didn't tell you what $\boldsymbol{\mu}$ and $\Sigma$ were. Well, I actually used a mean vector of all zeros:
+    But I didn't tell you what $\boldsymbol{\mu}$ and $\Sigma$ were. Well, I actually used a mean vector of all zeros:
 
-        $$
-        \boldsymbol{\mu} =  \begin{bmatrix}
-        0 \\
-        0 \\
-        \vdots \\
-        0
-        \end{bmatrix},
-        $$
+    $$
+    \boldsymbol{\mu} =  \begin{bmatrix}
+    0 \\
+    0 \\
+    \vdots \\
+    0
+    \end{bmatrix},
+    $$
 
-        and for the covariance matrix I simply used the Identity matrix.
+    and for the covariance matrix I simply used the Identity matrix.
 
-        $$
-        \Sigma = \begin{bmatrix}
-        1 & 0 & \dots & 0 \\
-        0 & 1 & \dots & 0 \\
-        \vdots & \vdots & \ddots & \vdots \\
-        0 & 0 & \dots & 1
-        \end{bmatrix}.
-        $$
+    $$
+    \Sigma = \begin{bmatrix}
+    1 & 0 & \dots & 0 \\
+    0 & 1 & \dots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \dots & 1
+    \end{bmatrix}.
+    $$
 
-        Since this covariance matrix is really big, let's visualize it with a heatmap:
-        """
+    Since this covariance matrix is really big, let's visualize it with a heatmap:
+    """
     )
     return
 
@@ -1078,14 +1033,14 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        No variable has any covariance with any other, so you than think of this multivariate Gaussian as simply 50 separate Gaussians, each with mean = 0 and variance 1. This is why the curves we plotted above are so all over the place: each point is randomly bouncing up and down with no influence from its neighbors.
+    No variable has any covariance with any other, so you than think of this multivariate Gaussian as simply 50 separate Gaussians, each with mean = 0 and variance 1. This is why the curves we plotted above are so all over the place: each point is randomly bouncing up and down with no influence from its neighbors.
 
-        What if we add some non-zero values to the covariance matrix that are off-diagonal? 
+    What if we add some non-zero values to the covariance matrix that are off-diagonal? 
 
-        >Remember the diagonal elements of the matrix at row and column $i$ is $Cov(Y_i, Y_i) = Var(Y_i)$ while the off-diagonal elements at $i,j$ are $Cov(Y_i, Y_j)$. 
+    >Remember the diagonal elements of the matrix at row and column $i$ is $Cov(Y_i, Y_i) = Var(Y_i)$ while the off-diagonal elements at $i,j$ are $Cov(Y_i, Y_j)$. 
 
-        For example, check out the covariance matrix below:
-        """
+    For example, check out the covariance matrix below:
+    """
     )
     return
 
@@ -1110,12 +1065,12 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        It looks very similar, but it's "fuzzier" around the diagonal. Think about what type of values you would expect from a Gaussian with this covariance matrix.
+    It looks very similar, but it's "fuzzier" around the diagonal. Think about what type of values you would expect from a Gaussian with this covariance matrix.
 
-        (Try playing around with the mysterious "ℓ" slider, will explain later).
+    (Try playing around with the mysterious "ℓ" slider, will explain later).
 
-        It's saying that variables near each other are more correlated than variables far away. For example variable 1 is more correlated with variable 2 than it is with variable 50. Let visualize some samples from a 50-d Gaussian with this new covariance matrix. But before you hit the "sample" button, what do you think these new curves will look like?
-        """
+    It's saying that variables near each other are more correlated than variables far away. For example variable 1 is more correlated with variable 2 than it is with variable 50. Let visualize some samples from a 50-d Gaussian with this new covariance matrix. But before you hit the "sample" button, what do you think these new curves will look like?
+    """
     )
     return
 
@@ -1123,7 +1078,15 @@ def _(mo):
 @app.cell
 def _(btn_clear_fuzzy, btn_new_sample_fuzzy, get_fig_fuzzy, mo):
     # 4) Layout: Place the buttons side-by-side and display the figure
-    mo.vstack([mo.ui.plotly(get_fig_fuzzy(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}), mo.hstack([btn_new_sample_fuzzy, btn_clear_fuzzy])])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig_fuzzy(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+            mo.hstack([btn_new_sample_fuzzy, btn_clear_fuzzy]),
+        ]
+    )
     return
 
 
@@ -1135,10 +1098,7 @@ def _(go, mo, np, pairwise_rbf, slider_l):
         title='Samples from a 50-D Gaussian Distribution with "Fuzzy" Covariance'
     )
     init_fig_fuzzy = go.Figure(data=[init_scatter_fuzzy], layout=init_layout_fuzzy)
-    init_fig_fuzzy.update_layout(
-        margin=dict(l=4, r=3, t=80, b=10),
-        height=400
-    )
+    init_fig_fuzzy.update_layout(margin=dict(l=4, r=3, t=80, b=10), height=400)
 
     # 2) Store the figure in Marimo's state, plus a sample-count state
     get_fig_fuzzy, set_fig_fuzzy = mo.state(init_fig_fuzzy)
@@ -1175,29 +1135,17 @@ def _(go, mo, np, pairwise_rbf, slider_l):
     btn_clear_fuzzy = mo.ui.button(
         value=get_clicks_fuzzy(), on_click=clear_data_fuzzy, label="Clear", kind="danger"
     )
-    return (
-        add_sample_fuzzy,
-        btn_clear_fuzzy,
-        btn_new_sample_fuzzy,
-        clear_data_fuzzy,
-        get_clicks_fuzzy,
-        get_fig_fuzzy,
-        init_fig_fuzzy,
-        init_layout_fuzzy,
-        init_scatter_fuzzy,
-        set_clicks_fuzzy,
-        set_fig_fuzzy,
-    )
+    return btn_clear_fuzzy, btn_new_sample_fuzzy, get_fig_fuzzy
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        Cool! They are now much smoother. This is because the variables near each other are more correlated, so nearby points are more likely to be similar. This smooths out the curves.
+    Cool! They are now much smoother. This is because the variables near each other are more correlated, so nearby points are more likely to be similar. This smooths out the curves.
 
-        Now we can see that by changing the covariance matrix, we can control the shape of the functions that our multivariate normal distribution produces.
-        """
+    Now we can see that by changing the covariance matrix, we can control the shape of the functions that our multivariate normal distribution produces.
+    """
     )
     return
 
@@ -1243,15 +1191,20 @@ def _(mo):
         Now we can sample from a multivariate Gaussian at these specific values of $x$:
 
 
-        TODO: make this interactive where you can put in whatever samples you want. Also. show covariance matrix
         """
+        # TODO: make this interactive where you can put in whatever samples you want. Also. show covariance matrix
     )
     return
 
 
 @app.cell
 def _(btn_clear_real, btn_new_sample_real, get_fig_real, mo):
-    mo.vstack([mo.ui.plotly(get_fig_real(), config={'responsive': True, "displayModeBar":False}), mo.hstack([btn_new_sample_real, btn_clear_real])])
+    mo.vstack(
+        [
+            mo.ui.plotly(get_fig_real(), config={"responsive": True, "displayModeBar": False}),
+            mo.hstack([btn_new_sample_real, btn_clear_real]),
+        ]
+    )
     return
 
 
@@ -1264,14 +1217,9 @@ def _(go, mo, np):
 
     # 1) Create a figure with an initial (empty) scatter trace
     init_scatter_real = go.Scatter(mode="markers")
-    init_layout_real = go.Layout(
-        title="Samples from a Multivariate Gaussian at Multiples of Pi"
-    )
+    init_layout_real = go.Layout(title="Samples from a Multivariate Gaussian at Multiples of Pi")
     init_fig_real = go.Figure(data=[init_scatter_real], layout=init_layout_real)
-    init_fig_real.update_layout(
-        margin=dict(l=4, r=3, t=80, b=10),
-        height=400
-    )
+    init_fig_real.update_layout(margin=dict(l=4, r=3, t=80, b=10), height=400)
     # 2) Use Marimo state to keep track of the figure and click count
     get_fig_real, set_fig_real = mo.state(init_fig_real)
     get_clicks_real, set_clicks_real = mo.state(0)
@@ -1308,20 +1256,7 @@ def _(go, mo, np):
     btn_clear_real = mo.ui.button(
         value=get_clicks_real(), on_click=clear_data_real, label="Clear", kind="danger"
     )
-    return (
-        add_sample_real,
-        btn_clear_real,
-        btn_new_sample_real,
-        clear_data_real,
-        get_clicks_real,
-        get_fig_real,
-        init_fig_real,
-        init_layout_real,
-        init_scatter_real,
-        set_clicks_real,
-        set_fig_real,
-        x_specific,
-    )
+    return btn_clear_real, btn_new_sample_real, get_fig_real
 
 
 @app.cell(hide_code=True)
@@ -1332,7 +1267,12 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_50real, btn_new_sample_50real, get_fig_50real, mo):
-    mo.vstack([mo.ui.plotly(get_fig_50real(), config={'responsive': True, "displayModeBar":False}), mo.hstack([btn_new_sample_50real, btn_clear_50real])])
+    mo.vstack(
+        [
+            mo.ui.plotly(get_fig_50real(), config={"responsive": True, "displayModeBar": False}),
+            mo.hstack([btn_new_sample_50real, btn_clear_50real]),
+        ]
+    )
     return
 
 
@@ -1351,10 +1291,7 @@ def _(go, mo, np):
         title="Samples from a 50-D Multivariate Gaussian at Real-Valued Indices"
     )
     init_fig_50_real = go.Figure(data=[init_scatter_50_real], layout=init_layout_50_real)
-    init_fig_50_real.update_layout(
-        margin=dict(l=4, r=3, t=80, b=10),
-        height=400
-    )
+    init_fig_50_real.update_layout(margin=dict(l=4, r=3, t=80, b=10), height=400)
 
     # 2) Store the figure and a sample counter in Marimo's state
     get_fig_50real, set_fig_50real = mo.state(init_fig_50_real)
@@ -1395,34 +1332,19 @@ def _(go, mo, np):
     )
 
     btn_clear_50real = mo.ui.button(label="Clear", on_click=clear_data_50real, kind="danger")
-    return (
-        add_sample_50real,
-        btn_clear_50real,
-        btn_new_sample_50real,
-        clear_data_50real,
-        get_clicks_50real,
-        get_fig_50real,
-        init_fig_50_real,
-        init_layout_50_real,
-        init_scatter_50_real,
-        k,
-        m,
-        set_clicks_50real,
-        set_fig_50real,
-        x_real_big,
-    )
+    return btn_clear_50real, btn_new_sample_50real, get_fig_50real
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        Now we've truly got a distribution over functions!
+    Now we've truly got a distribution over functions!
 
-        If we want the distribution at _any_ value $x$, we can just plug it in to the mean and covariance functions and voila! We just need to define a mean and valid covariance function that we like, and we can sample from a multivariate Gaussian at any value of $x$ we want. 
+    If we want the distribution at _any_ value $x$, we can just plug it in to the mean and covariance functions and voila! We just need to define a mean and valid covariance function that we like, and we can sample from a multivariate Gaussian at any value of $x$ we want. 
 
-        By the way, "covariance functions" are usually referred to by a fancy name: **kernel functions**. Remember this plot of a covariance matrix from earlier?
-        """
+    By the way, "covariance functions" are usually referred to by a fancy name: **kernel functions**. Remember this plot of a covariance matrix from earlier?
+    """
     )
     return
 
@@ -1437,18 +1359,18 @@ def _(C, slider_l, sns):
 def _(mo):
     mo.md(
         r"""
-        This covariance we actually generated by using a specific kernel function called the squared exponential kernel, a.k.a. the Gaussian kernel a.k.a the radial basis function (RBF) kernel. I'll refer to it as the RBF kernel for this post.
+    This covariance we actually generated by using a specific kernel function called the squared exponential kernel, a.k.a. the Gaussian kernel a.k.a the radial basis function (RBF) kernel. I'll refer to it as the RBF kernel for this post.
 
-        It's defined as:	
+    It's defined as:	
 
-        $$
-        k(\textbf{x}) = \exp\left(-\frac{1}{2ℓ^2} ||\textbf{x} - \textbf{x}||^2\right)
-        $$
+    $$
+    k(\textbf{x}) = \exp\left(-\frac{1}{2ℓ^2} ||\textbf{x} - \textbf{x}||^2\right)
+    $$
 
-        where $||\textbf{x} - \textbf{x}||^2$ is the element-wise squared difference matrix between each element of $x$ with each other element, and $ℓ$ is an adjustable parameter. 
+    where $||\textbf{x} - \textbf{x}||^2$ is the element-wise squared difference matrix between each element of $x$ with each other element, and $ℓ$ is an adjustable parameter. 
 
-        No need to worry about the math here too closely. The important thing to note is that the RBF kernel is a function of $\textbf{x}$ that generates a positive semidefinite matrix. It's covariance function, a.k.a. kernel, and it happens to be one of the most useful kernels in the real-world.
-        """
+    No need to worry about the math here too closely. The important thing to note is that the RBF kernel is a function of $\textbf{x}$ that generates a positive semidefinite matrix. It's covariance function, a.k.a. kernel, and it happens to be one of the most useful kernels in the real-world.
+    """
     )
     return
 
@@ -1465,7 +1387,7 @@ def _(mo, np, sns, sp):
 
     # TODO: made this an editable / run code cell
     mo.show_code(sns.heatmap(rbf_output, annot=True))
-    return pairwise_rbf, rbf_output, x_test
+    return (pairwise_rbf,)
 
 
 @app.cell(hide_code=True)
@@ -1483,13 +1405,20 @@ def _(
     mo,
     slider_ld,
 ):
-    mo.vstack([
-        mo.ui.plotly(get_fig_samples(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}),
-        mo.hstack([btn_new_sample_double, btn_clear_double]),
-        slider_ld,
-        mo.ui.plotly(get_fig_cov(),config={'responsive': True, "displayModeBar":False, "staticPlot":True})
-
-    ])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig_samples(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+            mo.hstack([btn_new_sample_double, btn_clear_double]),
+            slider_ld,
+            mo.ui.plotly(
+                get_fig_cov(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+        ]
+    )
     return
 
 
@@ -1513,9 +1442,7 @@ def _(go, mo, np, pairwise_rbf):
     fig_samples.add_trace(scatter_init)
     fig_samples.update_yaxes(range=[-5, 5], fixedrange=True)
     fig_samples.update_layout(
-        title="Function Samples",
-        margin=dict(l=20, r=20, t=40, b=20),
-        height=350
+        title="Function Samples", margin=dict(l=20, r=20, t=40, b=20), height=350
     )
 
     # -- Figure B: "Covariance Matrix" --
@@ -1531,11 +1458,7 @@ def _(go, mo, np, pairwise_rbf):
     fig_cov.add_trace(heatmap_init)
     # Make it "square" in data coordinates
     fig_cov.update_xaxes(range=[0, 49])
-    fig_cov.update_yaxes(
-        range=[0, 49],
-        scaleanchor="x",  # tie y-axis scale to x-axis
-        scaleratio=1
-    )
+    fig_cov.update_yaxes(range=[0, 49], scaleanchor="x", scaleratio=1)  # tie y-axis scale to x-axis
     fig_cov.update_layout(
         title="Covariance Matrix",
         width=350,
@@ -1579,11 +1502,7 @@ def _(go, mo, np, pairwise_rbf):
         current_cov = get_cov()
 
         # Draw a random sample from the multivariate normal
-        y_samp = np.random.multivariate_normal(
-            mean=np.zeros(len(xa)),
-            cov=current_cov,
-            size=1
-        )[0]
+        y_samp = np.random.multivariate_normal(mean=np.zeros(len(xa)), cov=current_cov, size=1)[0]
 
         fig_s = get_fig_samples()
         new_trace = go.Scatter(
@@ -1604,8 +1523,6 @@ def _(go, mo, np, pairwise_rbf):
         fig_s.data = fig_s.data[:1]
         set_fig_samples(fig_s)
 
-
-
     #################################################################
     # 6) Build the UI (slider + two buttons + display figures)
     #################################################################
@@ -1625,27 +1542,11 @@ def _(go, mo, np, pairwise_rbf):
 
     btn_clear_double = mo.ui.button(label="Clear", on_click=clear_figure, kind="danger")
     return (
-        add_new_sample,
         btn_clear_double,
         btn_new_sample_double,
-        clear_figure,
-        fig_cov,
-        fig_samples,
-        get_cov,
         get_fig_cov,
         get_fig_samples,
-        get_l_param,
-        heatmap_init,
-        init_cov,
-        on_slider_change,
-        scatter_init,
-        set_cov,
-        set_fig_cov,
-        set_fig_samples,
-        set_l_param,
         slider_ld,
-        xa,
-        z,
     )
 
 
@@ -1653,28 +1554,28 @@ def _(go, mo, np, pairwise_rbf):
 def _(mo):
     mo.md(
         r"""
-        ## Conditioning on Data
+    ## Conditioning on Data
 
-        Wow, we've come a long way. Let's regroup here and remember our original definition of a Gaussian Process Regression.
+    Wow, we've come a long way. Let's regroup here and remember our original definition of a Gaussian Process Regression.
 
-        **GP Regression: <font color="#32a852">A Multivariate Gaussian Distribution over functions</font>, conditioned on some training data.**
+    **GP Regression: <font color="#32a852">A Multivariate Gaussian Distribution over functions</font>, conditioned on some training data.**
 
-        > In fact this highlighted part above is the definition of a Gaussian Process. But we want "Gaussian Process Regression". (People sometimes use the two to mean the same thing, but technically GP is the distribution and GPR is the regression problem.)
+    > In fact this highlighted part above is the definition of a Gaussian Process. But we want "Gaussian Process Regression". (People sometimes use the two to mean the same thing, but technically GP is the distribution and GPR is the regression problem.)
 
-        We're more than half-way done! But we still need to condition it on some training data. Right now we're just sampling these pretty functions, but they are completely random. 
+    We're more than half-way done! But we still need to condition it on some training data. Right now we're just sampling these pretty functions, but they are completely random. 
 
-        Conditioning means we want the probability of some outcome given some data. Mathematically we write this as:
+    Conditioning means we want the probability of some outcome given some data. Mathematically we write this as:
 
-        $$
-        p(y | x)
-        $$
+    $$
+    p(y | x)
+    $$
 
-        that is, the probability of some outcome $y$ given some other data $x$. 
+    that is, the probability of some outcome $y$ given some other data $x$. 
 
-        Let's take a simple toy problem as a concrete example:
+    Let's take a simple toy problem as a concrete example:
 
-        Say we are trying to predict the cost of a house along a particular road. At one end of the road, there is a nuclear power plant (yikes!). We have some data on the cost of some of the houses on this road, but we want to predict the cost of a house at any location. Let's look at the data first:
-        """
+    Say we are trying to predict the cost of a house along a particular road. At one end of the road, there is a nuclear power plant (yikes!). We have some data on the cost of some of the houses on this road, but we want to predict the cost of a house at any location. Let's look at the data first:
+    """
     )
     return
 
@@ -1727,84 +1628,84 @@ def _(np, pd):
     df = pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Cost of a house"]).sort_index()
     df.index.name = "Distance from the Nuclear Power Plant (miles)"
     df.plot(style="o", color="red")
-    return DOMAIN, X, X_axis, X_test, df, y, y_true
+    return X, X_axis, X_test, y, y_true
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        Right away we see a couple things. Housing costs are not just linearly increasing as we get further away from the plant; there seem to be a few dips. Maybe there is a prison 5 miles away from the plant; who knows. Regardless, we probably want some non-linear model for this data. 
+    Right away we see a couple things. Housing costs are not just linearly increasing as we get further away from the plant; there seem to be a few dips. Maybe there is a prison 5 miles away from the plant; who knows. Regardless, we probably want some non-linear model for this data. 
 
-        The main question at hand is given this known cost data, what is the expected cost of a house at another location $x$?
+    The main question at hand is given this known cost data, what is the expected cost of a house at another location $x$?
 
-        To state this mathematically, we want some function structured as follows:
+    To state this mathematically, we want some function structured as follows:
 
-        $$
-        p(\textbf{c} | \textbf{x})
-        $$
+    $$
+    p(\textbf{c} | \textbf{x})
+    $$
 
-        That is, we want the probability distribution of cost of a house $c$, given its distance $x$ from the nuclear plant. Since we've been thinking about multivariate Gaussian, let's make an assumption that the distribution above follows a multivariate Gaussian.
+    That is, we want the probability distribution of cost of a house $c$, given its distance $x$ from the nuclear plant. Since we've been thinking about multivariate Gaussian, let's make an assumption that the distribution above follows a multivariate Gaussian.
 
-        $$
-        p(\textbf{c} | \textbf{x}) \sim N(m(\textbf{x}), k(\textbf{x}, \textbf{x}))
-        $$
+    $$
+    p(\textbf{c} | \textbf{x}) \sim N(m(\textbf{x}), k(\textbf{x}, \textbf{x}))
+    $$
 
-        Where $k(\textbf{x}, \textbf{x})$ is the covariance function, and $m(\textbf{x})$ is the mean function. For now we'll just assume that the mean function is zero, and for the covariance function we'll use the RBF kernel. 
+    Where $k(\textbf{x}, \textbf{x})$ is the covariance function, and $m(\textbf{x})$ is the mean function. For now we'll just assume that the mean function is zero, and for the covariance function we'll use the RBF kernel. 
 
-        Why these? Remember the RBF function's effect above: it sort of "smooths" out the data. This makes sense to model housing prices, because it's reasonable to expect that houses near each other will have similar prices. 
+    Why these? Remember the RBF function's effect above: it sort of "smooths" out the data. This makes sense to model housing prices, because it's reasonable to expect that houses near each other will have similar prices. 
 
-        > But why is the mean function zero? A: trust me bro. It just works out in practice that mean = 0 is usually good enough to model the data. For example sklearn's GP implementation doesn't even let you specify a mean function. For more on this see [Section 2.7 here](http://gaussianprocess.org/gpml/chapters/RW2.pdf).
+    > But why is the mean function zero? A: trust me bro. It just works out in practice that mean = 0 is usually good enough to model the data. For example sklearn's GP implementation doesn't even let you specify a mean function. For more on this see [Section 2.7 here](http://gaussianprocess.org/gpml/chapters/RW2.pdf).
 
-        We really need the following if we want to condition on the known data:
+    We really need the following if we want to condition on the known data:
 
-        $$
-        p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}})
-        $$
+    $$
+    p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}})
+    $$
 
-        Putting this into words, we want the probability distribution of prices of a house, given its location _and_ given the prices of houses at some other locations.
+    Putting this into words, we want the probability distribution of prices of a house, given its location _and_ given the prices of houses at some other locations.
 
-        Let's assume that the known data also came from the same multivariate Gaussian distribution as the unknown. So we can write:
+    Let's assume that the known data also came from the same multivariate Gaussian distribution as the unknown. So we can write:
 
 
-        $$
-        p(\textbf{c}_{\text{known}}| \textbf{x}_{\text{known}}) \sim N(0, k(\textbf{x}_{\text{known}}, \textbf{x}_{\text{known}}))
-        $$
+    $$
+    p(\textbf{c}_{\text{known}}| \textbf{x}_{\text{known}}) \sim N(0, k(\textbf{x}_{\text{known}}, \textbf{x}_{\text{known}}))
+    $$
 
-        And for the unknown data, remember we had:
+    And for the unknown data, remember we had:
 
-        $$
-        p(\textbf{c} | \textbf{x}) \sim N(0, k(\textbf{x}, \textbf{x}))
-        $$
+    $$
+    p(\textbf{c} | \textbf{x}) \sim N(0, k(\textbf{x}, \textbf{x}))
+    $$
 
-        Notice that we've assumed both the known data and the unknown data come from multivariate Gaussians. What if we just combined them into one big multivariate gaussian? We could basically just stack the distributions on top of each other to form a big "mother" Gaussian.
+    Notice that we've assumed both the known data and the unknown data come from multivariate Gaussians. What if we just combined them into one big multivariate gaussian? We could basically just stack the distributions on top of each other to form a big "mother" Gaussian.
 
-        $$
-        p(\begin{bmatrix} \textbf{c} \\ \textbf{c}_{\text{known}} \end{bmatrix} | \begin{bmatrix} \textbf{x} \\ \textbf{x}_{\text{known}} \end{bmatrix}) \sim N\left(\begin{bmatrix}0 \\ 0\end{bmatrix}, \begin{bmatrix}k(\textbf{x}, \textbf{x}) & k(\textbf{x}, \textbf{x}_{\text{known}}) \\ k(\textbf{x}_{\text{known}}, \textbf{x}) & k(\textbf{x}_{\text{known} }, \textbf{x}_{\text{known}})\end{bmatrix}\right)
-        $$
+    $$
+    p(\begin{bmatrix} \textbf{c} \\ \textbf{c}_{\text{known}} \end{bmatrix} | \begin{bmatrix} \textbf{x} \\ \textbf{x}_{\text{known}} \end{bmatrix}) \sim N\left(\begin{bmatrix}0 \\ 0\end{bmatrix}, \begin{bmatrix}k(\textbf{x}, \textbf{x}) & k(\textbf{x}, \textbf{x}_{\text{known}}) \\ k(\textbf{x}_{\text{known}}, \textbf{x}) & k(\textbf{x}_{\text{known} }, \textbf{x}_{\text{known}})\end{bmatrix}\right)
+    $$
 
-        The one wrinkle here is the covariance function. For the off-diagonal elements, we need to use the covariance function between the unknown data and the known data. So _now_ we see why the kernel function is written as $k(\textbf{x}, \textbf{x})$; in this case we need to compute the covariance between two different vectors of data to fill in the off-diagonal blocks of the covariance matrix above.
+    The one wrinkle here is the covariance function. For the off-diagonal elements, we need to use the covariance function between the unknown data and the known data. So _now_ we see why the kernel function is written as $k(\textbf{x}, \textbf{x})$; in this case we need to compute the covariance between two different vectors of data to fill in the off-diagonal blocks of the covariance matrix above.
 
-        Now question is can we massage the beast above into a probability distribution conditioned on the known data? Like so:
+    Now question is can we massage the beast above into a probability distribution conditioned on the known data? Like so:
 
-        $p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}}) \sim ???$
+    $p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}}) \sim ???$
 
-        The answer is yes. It's the following:
+    The answer is yes. It's the following:
 
-        $$
-        p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}}) \sim N\left(m(\textbf{x}) + k(\textbf{x}, \textbf{x}_{\text{known}})k(\textbf{x}_{\text{known}})^{-1}(\textbf{c}_{\text{known}} - m(\textbf{x}_{\text{known}})), k(\textbf{x}) - k(\textbf{x}, \textbf{x}_{\text{known}})k(\textbf{x}_{\text{known}})^{-1}k(\textbf{x}_{\text{known}}, \textbf{x})\right)
-        $$
+    $$
+    p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}}) \sim N\left(m(\textbf{x}) + k(\textbf{x}, \textbf{x}_{\text{known}})k(\textbf{x}_{\text{known}})^{-1}(\textbf{c}_{\text{known}} - m(\textbf{x}_{\text{known}})), k(\textbf{x}) - k(\textbf{x}, \textbf{x}_{\text{known}})k(\textbf{x}_{\text{known}})^{-1}k(\textbf{x}_{\text{known}}, \textbf{x})\right)
+    $$
 
-        > Please don't get mad at me for just giving you the answer. It's a kind of complicated derivation, and I don't want us to get bogged down. If you want to go through it, see this section of [Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/RW.pdf#page=218&zoom=50,240,358). 
-        >
-        > For now, just accept that there's a nice closed form solution to this problem. 
+    > Please don't get mad at me for just giving you the answer. It's a kind of complicated derivation, and I don't want us to get bogged down. If you want to go through it, see this section of [Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/RW.pdf#page=218&zoom=50,240,358). 
+    >
+    > For now, just accept that there's a nice closed form solution to this problem. 
 
-        Wait, uh, so we're done? 
+    Wait, uh, so we're done? 
 
-        **GP Regression: <font color="#32a852">A Multivariate Gaussian Distribution over functions, conditioned on some training data.</font>**
+    **GP Regression: <font color="#32a852">A Multivariate Gaussian Distribution over functions, conditioned on some training data.</font>**
 
-        We're done! We've got a nice closed form distribution over functions conditioned on some data.
-        """
+    We're done! We've got a nice closed form distribution over functions conditioned on some data.
+    """
     )
     return
 
@@ -1813,16 +1714,16 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        # Actually Fitting a Regression Model
+    # Actually Fitting a Regression Model
 
-        Using our conditional distribution above, we can plug in our known house costs to create a conditional distribution of functions. Then we can sample from this distribution at, say, 50 evenly spaced distance from 0 to 12 miles away from the nuclear plant.
+    Using our conditional distribution above, we can plug in our known house costs to create a conditional distribution of functions. Then we can sample from this distribution at, say, 50 evenly spaced distance from 0 to 12 miles away from the nuclear plant.
 
-        We have 15 known cost data points. This means that $\textbf{c}_{\text{known}}$ and $\textbf{x}_{\text{known}}$ is are vectors of length 15. We want to predicted prices at 50 evenly spaced points, so $\textbf{x}$ and $\textbf{c}$ are vectors of length 50. 
+    We have 15 known cost data points. This means that $\textbf{c}_{\text{known}}$ and $\textbf{x}_{\text{known}}$ is are vectors of length 15. We want to predicted prices at 50 evenly spaced points, so $\textbf{x}$ and $\textbf{c}$ are vectors of length 50. 
 
-        Plugging this into the conditional distribution above, we can now sample from the conditional distribution of functions:
+    Plugging this into the conditional distribution above, we can now sample from the conditional distribution of functions:
 
-        > Note: we're using the RBF kernel here with parameter $ℓ$ set to 1.0.
-        """
+    > Note: we're using the RBF kernel here with parameter $ℓ$ set to 1.0.
+    """
     )
     return
 
@@ -1842,6 +1743,7 @@ def _(pairwise_rbf, sp):
         mu_2__1 = (sigma_21 @ sp.linalg.inv(sigma_11) @ y_train).flatten()
         sigma_2__1 = sigma_22 - sigma_21 @ sp.linalg.inv(sigma_11) @ sigma_12
         return (mu_2__1, sigma_2__1)
+
     return (gp_posterior,)
 
 
@@ -1849,11 +1751,15 @@ def _(pairwise_rbf, sp):
 def _(btn_clear_housing, btn_new_sample_housing, get_fig_housing, mo):
     get_fig_housing()
 
-    mo.vstack([
-        
-        mo.ui.plotly(get_fig_housing(), config={'responsive': True, "displayModeBar":False, "staticPlot":True}),
-        mo.hstack([btn_new_sample_housing, btn_clear_housing])
-    ])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig_housing(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+            mo.hstack([btn_new_sample_housing, btn_clear_housing]),
+        ]
+    )
     return
 
 
@@ -1879,8 +1785,6 @@ def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
     init_fig_housing.update_layout(
         margin=dict(l=4, r=3, t=80, b=10),
     )
-
-
 
     # Initial height calculation
     initial_height2 = calculate_figure_height(4)  # Start with 4 traces
@@ -1956,19 +1860,10 @@ def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
 
     # 4) Display everything
     return (
-        add_sample_housing,
         btn_clear_housing,
         btn_new_sample_housing,
-        clear_data_housing,
-        get_clicks_housing,
         get_fig_housing,
-        init_fig_housing,
-        initial_height2,
-        layout_housing,
         mu,
-        scatter_known,
-        set_clicks_housing,
-        set_fig_housing,
         sigma,
     )
 
@@ -1979,8 +1874,9 @@ def _(mo):
         r"""
         Heck yeah! This looks like a Gaussian process regression! Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
 
-        In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 500 samples from this posterior distrubtion? TODO: define posterior
+        In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 500 samples from this posterior distribution? 
         """
+        # TODO: define posterior
     )
     return
 
@@ -2017,11 +1913,7 @@ def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
         )
         # Plot the known data points in red (even higher zorder => on top of pink if overlapping)
         (
-            pd.DataFrame(
-                y.flatten(),
-                index=X.flatten(),
-                columns=["Known Data"]
-            )
+            pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Known Data"])
             .sort_index()
             .plot(ax=ax, style="o", color="red", zorder=20)
         )
@@ -2059,66 +1951,69 @@ def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
         add_posterior_samples(ax)
         return ax
 
-
     many = mo.ui.button(
         value=plot_baseline(),  # create the initial plot on load (pink + red)
         on_click=_regenerate_plot,
         label="Sample 500 Functions from Posterior",
-        kind="success"
+        kind="success",
     )
     many
-    return add_posterior_samples, many, plot_baseline
+    return (many,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        Remember what there blue lines are: they are samples from a multivariate gaussian conditioned on the known data points, and sampled at 500 evenly spaced points between 0 and 12. We used the complicated formula above to find the conditional mean vector and conditional covariance matrix, and then sampled from a distribution using that mean and covariance.
+    Remember what there blue lines are: they are samples from a multivariate gaussian conditioned on the known data points, and sampled at 500 evenly spaced points between 0 and 12. We used the complicated formula above to find the conditional mean vector and conditional covariance matrix, and then sampled from a distribution using that mean and covariance.
 
-        Below are some heatmaps of the _conditional_ covariance matrix and _conditional_ mean vector (conditioned on the known housing data) that specify the predictive multivariate gaussian distribution.
+    Below are some heatmaps of the _conditional_ covariance matrix and _conditional_ mean vector (conditioned on the known housing data) that specify the predictive multivariate gaussian distribution.
 
-        Think for a moment about why this conditional mean and covariance makes sense.
-        """
+    Think for a moment about why this conditional mean and covariance makes sense.
+    """
     )
     return
 
 
 @app.cell
 def _(X_test, pd, sigma, sns):
-    #@title
+    # @title
     ix = X_test.flatten().round(2)
-    plt1 = sns.heatmap(pd.DataFrame(sigma, index=ix, columns=ix)).set_title('Conditional Covariance Matrix')
+    plt1 = sns.heatmap(pd.DataFrame(sigma, index=ix, columns=ix)).set_title(
+        "Conditional Covariance Matrix"
+    )
     plt1
-    return ix, plt1
+    return (ix,)
 
 
 @app.cell
 def _(ix, mu, pd, sns, y):
-    plt2 = sns.heatmap(pd.DataFrame((mu * y.std() + y.mean()).reshape(-1,1), index=ix)).set_title('Conditional Mean Vector')
+    plt2 = sns.heatmap(pd.DataFrame((mu * y.std() + y.mean()).reshape(-1, 1), index=ix)).set_title(
+        "Conditional Mean Vector"
+    )
     plt2
-    return (plt2,)
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        ## Outro
+    ## Outro
 
-        You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:
+    You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:
 
-        - "Do you really have to sample 100s of functions to get the confidence intervals?"
-            - (You should already be able to figure out the answer to this!)
-        - "How do we choose a kernel function?" 
-        - "How do we choose the best parameters for the kernel function?" 
-        - "What if the training data is intrinsically noisy (the price of houses has some variance at a given location)
-          "
-        - "What if there are many features in my training data? E.g. Square footage of houses."
-        - "But I heard GPs are expensive to train?" 
+    - "Do you really have to sample 100s of functions to get the confidence intervals?"
+        - (You should already be able to figure out the answer to this!)
+    - "How do we choose a kernel function?" 
+    - "How do we choose the best parameters for the kernel function?" 
+    - "What if the training data is intrinsically noisy (the price of houses has some variance at a given location)
+      "
+    - "What if there are many features in my training data? E.g. Square footage of houses."
+    - "But I heard GPs are expensive to train?" 
 
-        then you should check out the resources below, which should be easier to understand now that you have the basics.
-        """
+    then you should check out the resources below, which should be easier to understand now that you have the basics.
+    """
     )
     return
 
@@ -2127,18 +2022,18 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## References
+    ## References
 
-        ### Tutorials and Guides
-        - **[Gaussian Process Tutorial](https://peterroelants.github.io/posts/gaussian-process-tutorial/)** - Really awesome set of blog posts that teaches GPs using Python. I basically took this post and made it more verbose. The other posts in the series go into more detail about the process of fitting a GP and optimizing the kernel and hyperparameters. 
+    ### Tutorials and Guides
+    - **[Gaussian Process Tutorial](https://peterroelants.github.io/posts/gaussian-process-tutorial/)** - Really awesome set of blog posts that teaches GPs using Python. I basically took this post and made it more verbose. The other posts in the series go into more detail about the process of fitting a GP and optimizing the kernel and hyperparameters. 
 
-        - **[Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/)** - More detailed, with beautiful interactive visualizations. Explores other non-RBF kernel functions more.
+    - **[Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/)** - More detailed, with beautiful interactive visualizations. Explores other non-RBF kernel functions more.
 
-        - **[Fitting Gaussian Process Models in Python](https://www.dominodatalab.com/blog/fitting-gaussian-process-models-python)** - Practical guide focused on implementing GPs using scikit-learn and other Python libraries.
+    - **[Fitting Gaussian Process Models in Python](https://www.dominodatalab.com/blog/fitting-gaussian-process-models-python)** - Practical guide focused on implementing GPs using scikit-learn and other Python libraries.
 
-        ### Advanced Reading
-        - **[Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/)** - _The book_ on GPs, with all the detail you'll ever need.
-        """
+    ### Advanced Reading
+    - **[Gaussian Processes for Machine Learning](http://gaussianprocess.org/gpml/chapters/)** - _The book_ on GPs, with all the detail you'll ever need.
+    """
     )
     return
 

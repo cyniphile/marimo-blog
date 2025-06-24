@@ -6,32 +6,27 @@
   - plots dynamic width
   - make legends better
 - make a gpt conversation deriving some that conditional distribution
-- side by side comparison proofread
 - rewrite beginning of the blog post ("distribution over functions?")
+  - read https://stats.stackexchange.com/questions/376141/what-is-a-distribution-over-functions
+  - remember linear regression with epsilon noise term iid, plot those at each point
+  - remember what functions are, remember what it is when we plot functions.
+  - interactive point adding
+  - review: is GP really "distribution over functions"? or a stochastic function over vectors?
+- side by side comparison proofread
 - https://docs.marimo.io/api/inputs/code_editor/
 - all todos
 
+- blog integration
+  - comments
+  - port other posts
+  - favicons, etc
 
 Low priority:
 - caching, etc to make better load time
   - https://docs.marimo.io/api/layouts/lazy/#marimo.lazy
 
 
-
-- blog integration
-  - port other posts
-  - comments
-  - favicons, etc
-
-
 first gaussian basics
-
-remember what functions are, remember what it is when we plot functions.
-- intdractive point adding
-
-- review: is GP really "distribution over functions"? or a stochastic function over vectors?
-remember linear regression with epsilon noise term iid, plot those at each point
-
 
 
 # Development

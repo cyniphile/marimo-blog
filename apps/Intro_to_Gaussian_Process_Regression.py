@@ -7,7 +7,6 @@ app = marimo.App()
 @app.cell
 def _():
     import marimo as mo
-
     return (mo,)
 
 
@@ -22,99 +21,36 @@ def _():
     import seaborn as sns
     from matplotlib import pyplot as plt
     from plotly import graph_objs as go
-    from wigglystuff import Matrix
 
-    plt.rcParams["font.family"] = ["sans-serif"]  # Use only sans-serif fonts
-    plt.rcParams["font.sans-serif"] = [
-        "Arial",
-        "DejaVu Sans",
-        "Helvetica",
-    ]  # Specify specific fonts
+    # plt.rcParams["font.family"] = ["sans-serif"]  # Use only sans-serif fonts
+    # plt.rcParams["font.sans-serif"] = [
+    #     "Arial",
+    #     "DejaVu Sans",
+    #     "Helvetica",
+    # ]  # Specify specific fonts
 
     np.random.seed(42)
-    return go, matplotlib, np, pd, plt, sns, sp
-
-
-@app.cell
-async def _(matplotlib):
-    import asyncio
-
-    import matplotlib.font_manager as fm
-
-    # Try to import Pyodide's fetch; if unavailable, fall back to requests
-    try:
-        from pyodide.http import pyfetch
-
-        async def fetch_font(url):
-            response = await pyfetch(url)
-            return await response.bytes()
-
-    except ImportError:
-        import requests
-
-        async def fetch_font(url):
-            # This is a synchronous call, wrapped for async compatibility
-            return requests.get(url).content
-
-    async def setup_custom_font():
-        # URL for DejaVu Sans TTF file on GitHub (raw link)
-        # url = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
-
-        # Alternatively, you could use:
-        # Noto Sans:
-        url = "https://github.com/googlefonts/noto-fonts/raw/main/unhinted/ttf/NotoSans/NotoSans-Regular.ttf"
-        # Roboto:   url = "https://github.com/google/roboto/raw/main/src/hinted/Roboto-Regular.ttf"
-
-        response = await fetch_font(url)
-        font_bytes = response
-
-        # Write the font file to Pyodide's in-memory filesystem
-        font_path = "/tmp/DejaVuSans.ttf"
-        with open(font_path, "wb") as f:
-            f.write(font_bytes)
-
-        # Register the font with Matplotlib
-        fm.fontManager.addfont(font_path)
-        prop = fm.FontProperties(fname=font_path)
-        font_name = prop.get_name()
-        matplotlib.rcParams["font.family"] = font_name
-
-        # Override the font search to return only our custom font
-        def only_my_font(*args, **kwargs):
-            return [font_path]
-
-        fm.findSystemFonts = only_my_font
-
-        # Clear the cached font list to force a rebuild using only our font
-        fm.fontManager.ttflist = []
-
-        print(f"Custom font '{font_name}' has been set up.")
-
-    # Run the setup asynchronously
-    await setup_custom_font()
-
-    return
+    return go, np, pd, plt, sns, sp
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        # The First Blog Post You Should Read about Gaussian Processes (With Interactive Plots) 
+    # The First Blog Post You Should Read about Gaussian Processes (With Interactive Plots) 
 
-        ## Why Read This Post?
-        Is this the 10th blog post you've read about Gaussian Processes and still don't quite understand them?
+    ## Why Read This Post?
+    Is this the 10th blog post you've read about Gaussian Processes and still don't quite understand them?
 
-        When I set out to learn about "Gaussian Processes" (really Gaussian Process Regression), I ended up jumping around between many different resources and it took hours before the core idea hit me. This post should get you to **core idea in ~30 minutes using interactive plots**.
+    When I set out to learn about "Gaussian Processes" (really Gaussian Process Regression), I ended up jumping around between many different resources and it took hours before the core idea hit me. This post should get you to **core idea in ~30 minutes using interactive plots**.
 
-        After that, I'd encourage you to read the references at the end for more detail and rigor. They'll now be more digestible.
+    After that, I'd encourage you to read the references at the end for more detail and rigor. They'll now be more digestible.
 
-        > Prerequisites: basic linear algebra and statistics.
-        > 
-        > If you know python/numpy you might find it helpful to look at the code under the hood. Just click the ellipses in the upper right corner.
-        >
-        """
-        # TODO: add example interactive plot here
+    > Prerequisites: basic linear algebra and statistics.
+    > 
+    > If you know python/numpy you might find it helpful to look at the code under the hood. Just click the ellipses in the upper right corner.
+    >
+    """
     )
     return
 
@@ -653,25 +589,40 @@ def _(mo):
 
 
 @app.cell
-def _():
-    # mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
-    # arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))
-    # x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
-    # df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
-    # x_sim = np.random.multivariate_normal(
-    #     np.array(arr.matrix).reshape(-1),
-    #     np.array(mat.matrix),
-    #     2500
-    # )
-    # df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
+def _(alt, arr, df_orig, mat, mo, np, pd):
+    x_sim = np.random.multivariate_normal(
+        np.array(arr.matrix).reshape(-1), 
+        np.array(mat.matrix), 
+        2500
+    )
+    df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
-    # chart_sim = (
-    #     alt.Chart(df_sim).mark_point().encode(x="x", y="y") +
-    #     alt.Chart(df_orig).mark_point(color="gray").encode(x="x", y="y")
-    # )
+    chart_sim = (
+        alt.Chart(df_sim).mark_point().encode(x="x", y="y") + 
+        alt.Chart(df_orig).mark_point(color="gray").encode(x="x", y="y")
+    )
 
-    # mo.vstack([arr, mat, chart_sim])
+    mo.vstack([
+        mo.md("""
+    ."""),
+        mo.hstack([arr, mat, chart_sim])
+    ])
     return
+
+
+@app.cell
+def _(Matrix, mo, np):
+    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
+    arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))
+    return arr, mat
+
+
+@app.cell
+def _(np, pd):
+    x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
+    df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
+
+    return (df_orig,)
 
 
 @app.cell(hide_code=True)
@@ -1385,7 +1336,6 @@ def _(mo, np, sns, sp):
     x_test = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
     rbf_output = pairwise_rbf(x_test, x_test, l=1)
 
-    # TODO: made this an editable / run code cell
     mo.show_code(sns.heatmap(rbf_output, annot=True))
     return (pairwise_rbf,)
 
@@ -2036,6 +1986,13 @@ def _(mo):
     """
     )
     return
+
+
+@app.cell
+def _():
+    from wigglystuff import Matrix
+    import altair as alt
+    return Matrix, alt
 
 
 @app.cell

@@ -1,5 +1,6 @@
 # TODO:
-- make this work: https://marimo.io/p/@marimo/interactive-matrices
+- polish up multivariate gaussian interaction 
+- some charts are still loading weirdly
 - make mobile optimized
   - plot titles cut off
   - side scrolling wide things

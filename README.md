@@ -1,4 +1,10 @@
 # TODO:
+- rewrite beginning of the blog post ("distribution over functions?")
+  - read https://stats.stackexchange.com/questions/376141/what-is-a-distribution-over-functions
+  - remember linear regression with epsilon noise term iid, plot those at each point
+  - remember what functions are, remember what it is when we plot functions.
+  - interactive point adding
+  - review: is GP really "distribution over functions"? or a stochastic function over vectors?
 - some charts are still loading weirdly
 - make mobile optimized
   - plot titles cut off
@@ -6,16 +12,8 @@
   - plots dynamic width
   - make legends better
 - make a gpt conversation deriving some that conditional distribution
-- rewrite beginning of the blog post ("distribution over functions?")
-  - read https://stats.stackexchange.com/questions/376141/what-is-a-distribution-over-functions
-  - remember linear regression with epsilon noise term iid, plot those at each point
-  - remember what functions are, remember what it is when we plot functions.
-  - interactive point adding
-  - review: is GP really "distribution over functions"? or a stochastic function over vectors?
-- side by side comparison proofread
-- https://docs.marimo.io/api/inputs/code_editor/
-- all todos
-
+- full proofread
+- all code todos
 - blog integration
   - comments
   - port other posts
@@ -24,10 +22,6 @@
 Low priority:
 - caching, etc to make better load time
   - https://docs.marimo.io/api/layouts/lazy/#marimo.lazy
-
-
-first gaussian basics
-
 
 # Development
 - Install `uv` with `pip install uv`

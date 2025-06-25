@@ -1,5 +1,4 @@
 # TODO:
-- polish up multivariate gaussian interaction 
 - some charts are still loading weirdly
 - make mobile optimized
   - plot titles cut off

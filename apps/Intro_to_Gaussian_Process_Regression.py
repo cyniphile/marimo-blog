@@ -7,6 +7,7 @@ app = marimo.App()
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -591,22 +592,37 @@ def _(mo):
 @app.cell
 def _(alt, arr, df_orig, mat, mo, np, pd):
     x_sim = np.random.multivariate_normal(
-        np.array(arr.matrix).reshape(-1), 
-        np.array(mat.matrix), 
-        2500
+        np.array(arr.matrix).reshape(-1), np.array(mat.matrix), 2500
     )
     df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
-    chart_sim = (
-        alt.Chart(df_sim).mark_point().encode(x="x", y="y") + 
-        alt.Chart(df_orig).mark_point(color="gray").encode(x="x", y="y")
-    )
 
-    mo.vstack([
-        mo.md("""
-    ."""),
-        mo.hstack([arr, mat, chart_sim])
-    ])
+    min_x, max_x = -10, 10
+    min_y, max_y  = -10, 10
+
+    chart_sim = (
+        alt.Chart(df_sim)
+        .mark_point()
+        .encode(
+            x=alt.X("x", scale=alt.Scale(domain=[min_x, max_x])),
+            y=alt.Y("y", scale=alt.Scale(domain=[min_y, max_y]))
+        )
+        .properties(width=400, height=300)
+        + alt.Chart(df_orig)
+        .mark_point(color="gray")
+        .encode(x="x", y="y")
+        .properties(width=400, height=300)
+    ).resolve_scale(x='shared', y='shared')
+
+    mo.vstack(
+        [
+            mo.md(
+                """
+    ."""
+            ),
+            mo.hstack([arr, mat, chart_sim]),
+        ]
+    )
     return
 
 
@@ -1990,8 +2006,9 @@ def _(mo):
 
 @app.cell
 def _():
-    from wigglystuff import Matrix
     import altair as alt
+    from wigglystuff import Matrix
+
     return Matrix, alt
 
 

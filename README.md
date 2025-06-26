@@ -1,20 +1,21 @@
 # TODO:
 - rewrite beginning of the blog post ("distribution over functions?")
-  - read https://stats.stackexchange.com/questions/376141/what-is-a-distribution-over-functions
+  - first review gaussian distribution
+    - add 3d gaussian?
   - remember linear regression with epsilon noise term iid, plot those at each point
   - remember what functions are, remember what it is when we plot functions.
-  - interactive point adding
-  - review: is GP really "distribution over functions"? or a stochastic function over vectors?
+    - plot points arbitrarily
 - some charts are still loading weirdly
 - make mobile optimized
   - plot titles cut off
   - side scrolling wide things
   - plots dynamic width
   - make legends better
-- make a gpt conversation deriving some that conditional distribution
+- make a gpt conversation deriving the conditional distribution
 - full proofread
 - all code todos
 - blog integration
+  - claude code
   - comments
   - port other posts
   - favicons, etc

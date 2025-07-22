@@ -1,9 +1,9 @@
 # TODO:
 - why are negative variances working in np.random.multivariate_normal?
-- some charts are still loading weirdly
+- double variance plot legend cut off
 - make mobile optimized
   - matrices can't be changed
-  - side scrolling wide things
+  - disable chart zooming
 - make a gpt conversation deriving the conditional distribution
 - full proofread
 - all code todos

@@ -878,7 +878,7 @@ def _(go, mo, np):
         value=0, on_click=add_sample_50d, label="New Sample", kind="success"
     )
     btn_connect_50d = mo.ui.button(
-        label="Connect Samples",
+        label="Connect Points",
         on_click=connect_samples_50d,
     )
     btn_clear_50d = mo.ui.button(
@@ -893,7 +893,7 @@ def _(mo):
         r"""
     Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
 
-    You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next.
+    You'll notice the above plot has a "Connect" button. If you click it, each variable in a given sample gets connected to the next.
 
     Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
 

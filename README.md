@@ -1,10 +1,8 @@
 # TODO:
 - some charts are still loading weirdly
 - make mobile optimized
-  - plot titles cut off
+  - matrices can't be changed
   - side scrolling wide things
-  - plots dynamic width
-  - make legends better
 - make a gpt conversation deriving the conditional distribution
 - full proofread
 - all code todos

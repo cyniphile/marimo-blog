@@ -1057,9 +1057,7 @@ def _(btn_clear_fuzzy, btn_new_sample_fuzzy, get_fig_fuzzy, mo):
 def _(go, mo, np, pairwise_rbf, slider_l):
     # 1) Create an initial figure
     init_scatter_fuzzy = go.Scatter(mode="markers")
-    init_layout_fuzzy = go.Layout(
-        title='Samples from a 50-D Gaussian Distribution with "Fuzzy" Covariance'
-    )
+    init_layout_fuzzy = go.Layout(title='Samples from a 50-D Gaussian <br>with "Fuzzy" Covariance')
     init_fig_fuzzy = go.Figure(data=[init_scatter_fuzzy], layout=init_layout_fuzzy)
     init_fig_fuzzy.update_layout(margin=dict(l=4, r=3, t=80, b=10), height=400)
 
@@ -1180,7 +1178,7 @@ def _(go, mo, np):
 
     # 1) Create a figure with an initial (empty) scatter trace
     init_scatter_real = go.Scatter(mode="markers")
-    init_layout_real = go.Layout(title="Samples from a Multivariate Gaussian at Multiples of Pi")
+    init_layout_real = go.Layout(title="Samples from a Multivariate Gaussian<br>at Multiples of Pi")
     init_fig_real = go.Figure(data=[init_scatter_real], layout=init_layout_real)
     init_fig_real.update_layout(margin=dict(l=4, r=3, t=80, b=10), height=400)
     # 2) Use Marimo state to keep track of the figure and click count
@@ -1253,7 +1251,7 @@ def _(go, mo, np):
     # 1) Create the initial figure
     init_scatter_50_real = go.Scatter(mode="markers")
     init_layout_50_real = go.Layout(
-        title="Samples from a 50-D Multivariate Gaussian at Real-Valued Indices"
+        title="Samples from a 50-D Multivariate Gaussian<br>at Real-Valued Indices"
     )
     init_fig_50_real = go.Figure(data=[init_scatter_50_real], layout=init_layout_50_real)
     init_fig_50_real.update_layout(margin=dict(l=4, r=3, t=80, b=10), height=400)
@@ -1838,7 +1836,7 @@ def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
 def _(mo):
     mo.md(
         r"""
-        Heck yeah! This looks like a Gaussian process regression! Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
+        Yeah baby. Now _this_ looks like a Gaussian process regression. Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
 
         In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 500 samples from this posterior distribution? 
         """

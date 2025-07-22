@@ -173,7 +173,10 @@ def _(button, clear_button, get_fig_A, get_fig_B, mo):
                         get_fig_A(),
                         config={"responsive": True, "displayModeBar": False, "staticPlot": True},
                     ),
-                    mo.ui.plotly(get_fig_B(), config={"responsive": True, "displayModeBar": False}),
+                    mo.ui.plotly(
+                        get_fig_B(),
+                        config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+                    ),
                 ]
             ),
             mo.hstack([button, clear_button]),
@@ -1164,7 +1167,10 @@ def _(mo):
 def _(btn_clear_real, btn_new_sample_real, get_fig_real, mo):
     mo.vstack(
         [
-            mo.ui.plotly(get_fig_real(), config={"responsive": True, "displayModeBar": False}),
+            mo.ui.plotly(
+                get_fig_real(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
             mo.hstack([btn_new_sample_real, btn_clear_real]),
         ]
     )
@@ -1234,7 +1240,10 @@ def _(mo):
 def _(btn_clear_50real, btn_new_sample_50real, get_fig_50real, mo):
     mo.vstack(
         [
-            mo.ui.plotly(get_fig_50real(), config={"responsive": True, "displayModeBar": False}),
+            mo.ui.plotly(
+                get_fig_50real(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
             mo.hstack([btn_new_sample_50real, btn_clear_50real]),
         ]
     )
@@ -1978,7 +1987,7 @@ def _(mo):
     - "What if there are many features in my training data? E.g. Square footage of houses."
     - "But I heard GPs are expensive to train?" 
 
-    then you should check out the resources below, which should be easier to understand now that you have the basics.
+    ...then you should check out the resources below, which should be easier to understand now that you have the basics.
     """
     )
     return

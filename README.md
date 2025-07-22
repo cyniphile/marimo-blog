@@ -1,10 +1,4 @@
 # TODO:
-- rewrite beginning of the blog post ("distribution over functions?")
-  - first review gaussian distribution
-    - add 3d gaussian?
-  - remember linear regression with epsilon noise term iid, plot those at each point
-  - remember what functions are, remember what it is when we plot functions.
-    - plot points arbitrarily
 - some charts are still loading weirdly
 - make mobile optimized
   - plot titles cut off
@@ -27,12 +21,13 @@ Low priority:
 # Development
 - Install `uv` with `pip install uv`
 - Install packages with `uv install`
-- Run marimo server `uv run marimo edit`
+- Run marimo server and watch for changes made in your editor  
+  - `uv run marimo edit --watch`
 
 1. Add your marimo files to the `notebooks/` or `apps/` directory
    1. `notebooks/` notebooks are exported with `--mode edit`
    2. `apps/` notebooks are exported with `--mode run`
-4. Go to repository **Settings > Pages** and change the "Source" dropdown to "GitHub Actions"
+2. Go to repository **Settings > Pages** and change the "Source" dropdown to "GitHub Actions"
 
 ## Including data or assets
 To include data or assets in your notebooks, add them to the `public/` directory.

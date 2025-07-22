@@ -19,3 +19,7 @@ dev = [
     "mypy>=1.15.0",
     "ruff>=0.9.6",
 ]
+
+
+[tool.marimo.runtime]
+watcher_on_save = "autorun"

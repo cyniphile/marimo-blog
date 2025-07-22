@@ -1,4 +1,5 @@
 # TODO:
+- why are negative variances working in np.random.multivariate_normal?
 - some charts are still loading weirdly
 - make mobile optimized
   - matrices can't be changed

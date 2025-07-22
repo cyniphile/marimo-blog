@@ -14,10 +14,8 @@ def _():
 @app.cell
 def _():
     # @title
-    import matplotlib
     import numpy as np
     import pandas as pd
-    import plotly
     import scipy as sp
     import seaborn as sns
     from matplotlib import pyplot as plt
@@ -423,7 +421,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    # Gaussians...and Multivariate Gaussians!
+    # Gaussians...and Multivariate Gaussians
 
     The Gaussian, the bell curve, the normal distribution, we've seen it before. It's defined by 
 
@@ -482,7 +480,7 @@ def _(go, mo, np):
         fig.data[0].x = x_new
         fig.update_layout(
             title=(
-                f"Normal Distribution Histogram (µ={mean_state():.2f}, "
+                f"Normal Distribution Histogram<br>(µ={mean_state():.2f}, "
                 f"σ={variance_state():.2f})"
             )
         )
@@ -608,8 +606,8 @@ def _(alt, arr, df_orig, mat, mo, np, pd):
 
 @app.cell
 def _(Matrix, mo, np):
-    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
-    arr = mo.ui.anywidget(Matrix(rows=2, cols=1, mirror=True, step=0.1))
+    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1, positive=True))
+    arr = mo.ui.anywidget(Matrix(rows=2, cols=1, mirror=True, step=0.1, positive=True))
     return arr, mat
 
 
@@ -627,7 +625,7 @@ def _(mo):
         r"""
     Note that if you change the diagonal elements, the variance of one or the other variable will change (look at the scale of axes). If you change the off-diagonal elements, the covariance between the two variables will change. 
 
-    You also probably saw that the matrix has to be symmetric and with positive diagonals. Why? Well think about what covariance is: its how two variables vary together. It doesn't make sense for Cov(X,Y) != Cov(Y,X). And it doesn't make sense for Cov(X,X) — that is, Var(X) — to be negative.
+    You also probably saw that the matrix has to be symmetric and with positive diagonals. Why? Well think about what covariance is: its how two variables vary together. It doesn't make sense for Cov(X,Y) != Cov(Y,X). And it doesn't make sense for Cov(X,X) — that is, Var(X) — to be negative (you'll get an error if you try).
 
     Also note that while the combined joint distribution changes form, each of the individual distributions is still a Gaussian. That is to say, the distribution of $X_1$ is still a gaussian, and the distribution of $X_2$ is still a Gaussian. The only thing that changes is the covariance between the two variables.
     """

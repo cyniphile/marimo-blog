@@ -248,7 +248,6 @@ def _(
         ),
         autosize=True,
         margin=dict(l=4, r=3, t=80, b=10),
-        width=300,
     )
     fig_A.update_xaxes(range=[-3, 3], fixedrange=True)
 

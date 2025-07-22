@@ -1,5 +1,5 @@
 # TODO:
-- why are negative variances working in np.random.multivariate_normal?
+- what is max covariance of a matrix given it's variance
 - double variance plot legend cut off
 - make mobile optimized
   - matrices can't be changed

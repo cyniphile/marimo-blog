@@ -578,9 +578,21 @@ def _(mo):
 
 @app.cell
 def _(alt, arr, df_orig, mat, mo, np, pd):
-    x_sim = np.random.multivariate_normal(
-        np.array(arr.matrix).reshape(-1), np.array(mat.matrix), 2500
-    )
+    try:
+        x_sim = np.random.multivariate_normal(
+            np.array(arr.matrix).reshape(-1), np.array(mat.matrix), 2500, check_valid="raise"
+        )
+        md = ""
+    except ValueError as e:
+        md = mo.md(
+            f"""
+            <div style="color: red; font-weight: bold;">
+            Error: {e}.
+            </div>
+            """
+        )
+        x_sim = df_orig.values  # Fallback to original data if error occurs
+
     df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
     min_x, max_x = -10, 10
@@ -600,7 +612,7 @@ def _(alt, arr, df_orig, mat, mo, np, pd):
         .properties(width=400, height=300)
     ).resolve_scale(x="shared", y="shared")
 
-    mo.vstack([mo.hstack([arr, mat]), chart_sim], align="center")
+    mo.vstack([mo.hstack([arr, mat]), chart_sim, md], align="center")
     return
 
 
@@ -613,7 +625,9 @@ def _(Matrix, mo, np):
 
 @app.cell
 def _(np, pd):
-    x_orig = np.random.multivariate_normal(np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500)
+    x_orig = np.random.multivariate_normal(
+        np.array([0, 0]), np.array([[1, 0], [0, 1]]), 2500, check_valid="raise"
+    )
     df_orig = pd.DataFrame({"x": x_orig[:, 0], "y": x_orig[:, 1]})
 
     return (df_orig,)

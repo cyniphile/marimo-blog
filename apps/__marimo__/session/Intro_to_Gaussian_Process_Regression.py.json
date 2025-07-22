@@ -45,12 +45,12 @@
     },
     {
       "id": "bkHC",
-      "code_hash": "84e9b3c932940c666ab66dbd27f283b8",
+      "code_hash": "6f10284eac51484bb13ae75c4c4c7c40",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"why-gaussian-process-regression\">Why Gaussian Process Regression?</h2>\n<!-- I've always been intrigued by Gaussian Processes regression. It has a certain air of mystery about it...one of those models for the cool kids. GPR is supposed to be \"beautiful\", but also pretty hard to understand. All I knew about it was the following:  -->\n\n<ol>\n<li>It's a non-linear regression model </li>\n<li>It also does built-in modeling of uncertainties (cool!)</li>\n</ol>\n<span class=\"paragraph\">The following plot from the sci-kit learn documentation shows the output of GP regression model. Note the beautifully curved uncertainty bands. Where does all this come from?</span>\n<span class=\"paragraph\"><img alt=\"\" src=\"https://scikit-learn.org/0.17/_images/plot_gp_regression_001.png\" /></span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"why-gaussian-process-regression\">Why Gaussian Process Regression?</h2>\n<ol>\n<li>It's a non-linear regression model </li>\n<li>It also does built-in modeling of uncertainties (cool)</li>\n</ol>\n<span class=\"paragraph\">The following plot from the sci-kit learn documentation shows the output of GP regression model. Note the beautifully curved uncertainty bands. Where does all this come from?</span>\n<span class=\"paragraph\"><img alt=\"\" src=\"https://scikit-learn.org/0.17/_images/plot_gp_regression_001.png\" /></span></span>"
           }
         }
       ],
@@ -58,12 +58,12 @@
     },
     {
       "id": "lEQa",
-      "code_hash": "2817005eeae071fba15d68beeea42f57",
+      "code_hash": "bdaefdc80d97c460019a179b276cdd12",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><!-- I was recently looking at a cool dataset: a list of about 30k different COVID antibodies, each one with a repeated measurement of how well it stuck to COVID spike particles. The better an antibody sticks, the better it is at fighting COVID (more or less). Importantly, each different antibody was measured for its binding strength three times, and the measurements were noisy. So we have a problem with:\n\n1. Nonlinear relationships \n1. Noisy data (uncertainty is important!) \n1. Dataset not huge.\n\nFinally I have a reason to learn about GPs (and level up how cool I am on Twitter)!  -->\n\n<h2 id=\"gp-regression-the-one-line-definition\">GP Regression: The One Line Definition</h2>\n<span class=\"paragraph\">Turns out GP regression can be described in one (somewhat loaded) line:</span>\n<span class=\"paragraph\"><strong>GP Regression: A Multivariate Gaussian Distribution over functions, conditioned on some training data.</strong></span>\n<span class=\"paragraph\">Hmm. Maybe not so terrible? But how does this connect to the idea of \"a nonlinear regression that models uncertainty\"?</span>\n<span class=\"paragraph\">Let's unpack this definition bit by bit, starting with \"distribution over functions\".</span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"gp-regression-the-one-line-definition\">GP Regression: The One Line Definition</h2>\n<span class=\"paragraph\">Turns out GP regression can be described in one (somewhat loaded) line:</span>\n<span class=\"paragraph\"><strong>GP Regression: A Multivariate Gaussian Distribution over functions, conditioned on some training data.</strong></span>\n<span class=\"paragraph\">Hmm. Maybe not so terrible? But how does this connect to the idea of \"a nonlinear regression that models uncertainty\"?</span>\n<span class=\"paragraph\">Let's unpack this definition bit by bit, starting with \"distribution over functions\".</span></span>"
           }
         }
       ],
@@ -402,12 +402,12 @@
     },
     {
       "id": "NCOB",
-      "code_hash": "a3b3e406a432976a1dd2d4cd26773536",
+      "code_hash": "c17980defc3ec8e6b1d5c05a7c645495",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Now let's take it to an extreme: a 50-D Gaussian! <marimo-tex class=\"arithmatex\">||(\\textbf{Y}_{50D} = [Y_1, Y_2, Y_3, \\dots, Y_{50}]^T||)</marimo-tex>, so every sample is a vector of 50 random values.</span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Now let's take it to an extreme: a 50-D Gaussian. <marimo-tex class=\"arithmatex\">||(\\textbf{Y}_{50D} = [Y_1, Y_2, Y_3, \\dots, Y_{50}]^T||)</marimo-tex>, so every sample is a vector of 50 random values.</span></span>"
           }
         }
       ],
@@ -441,12 +441,12 @@
     },
     {
       "id": "TXez",
-      "code_hash": "fe695a1b087a3b4fb8d0aa50d9a5f4e9",
+      "code_hash": "2139649612a4246898388d62f422c546",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?</span>\n<span class=\"paragraph\">You'll notice the above plot has a \"Connect Samples\" button. If you click it, each variable in a given sample gets connected to the next. Try it out!</span>\n<span class=\"paragraph\">Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?</span>\n<span class=\"paragraph\">If you thought \"functions\" then you are getting what I'm going for here. Each sample from the 50-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as </span>\n<marimo-tex class=\"arithmatex\">||[\nf(x) = Y_{x}\n||]</marimo-tex><span class=\"paragraph\">given a multivariate Gaussian <marimo-tex class=\"arithmatex\">||(Y = [Y_1, Y_2, Y_3, \\dots, Y_{x}]^T \\sim N(\\boldsymbol{\\mu}, \\Sigma)||)</marimo-tex>.</span>\n<span class=\"paragraph\">But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 50-D Gaussian specifies a <em>distribution over functions</em>...</span>\n<span class=\"paragraph\"><img src=\"https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg\" width=\"340\" height=\"200\" /></span>\n<span class=\"paragraph\"><em>Almost</em>. The 50-D Gaussian really only specifies a distribution over 50 discrete values, so it's not quite a distribution over functions <marimo-tex class=\"arithmatex\">||(f(x)||)</marimo-tex> that can take <em>any</em> value of <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>. Hold that thought for now, we'll return to this later. </span>\n<span class=\"paragraph\">But first you might have some questions. Remember, the above plot was made by taking a few samples from 50-D gaussian, <marimo-tex class=\"arithmatex\">||(\\textbf{Y}_{50D} \\sim N(\\boldsymbol{\\mu}, \\Sigma)||)</marimo-tex></span>\n<span class=\"paragraph\">But I didn't tell you what <marimo-tex class=\"arithmatex\">||(\\boldsymbol{\\mu}||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(\\Sigma||)</marimo-tex> were. Well, I actually used a mean vector of all zeros:</span>\n<marimo-tex class=\"arithmatex\">||[\n\\boldsymbol{\\mu} =  \\begin{bmatrix}\n0 \\\\\n0 \\\\\n\\vdots \\\\\n0\n\\end{bmatrix},\n||]</marimo-tex><span class=\"paragraph\">and for the covariance matrix I simply used the Identity matrix.</span>\n<marimo-tex class=\"arithmatex\">||[\n\\Sigma = \\begin{bmatrix}\n1 &amp; 0 &amp; \\dots &amp; 0 \\\\\n0 &amp; 1 &amp; \\dots &amp; 0 \\\\\n\\vdots &amp; \\vdots &amp; \\ddots &amp; \\vdots \\\\\n0 &amp; 0 &amp; \\dots &amp; 1\n\\end{bmatrix}.\n||]</marimo-tex><span class=\"paragraph\">Since this covariance matrix is really big, let's visualize it with a heatmap:</span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?</span>\n<span class=\"paragraph\">You'll notice the above plot has a \"Connect Samples\" button. If you click it, each variable in a given sample gets connected to the next.</span>\n<span class=\"paragraph\">Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?</span>\n<span class=\"paragraph\">If you thought \"functions\" then you are getting what I'm going for here. Each sample from the 50-D Gaussian is starting to look like some curve where, for any x-coordinate (which is just the index of the vector output of the multivariate gaussian) you can look up a y-value. So this kinda-sorta function can be defined as </span>\n<marimo-tex class=\"arithmatex\">||[\nf(x) = Y_{x}\n||]</marimo-tex><span class=\"paragraph\">given a multivariate Gaussian <marimo-tex class=\"arithmatex\">||(Y = [Y_1, Y_2, Y_3, \\dots, Y_{x}]^T \\sim N(\\boldsymbol{\\mu}, \\Sigma)||)</marimo-tex>.</span>\n<span class=\"paragraph\">But remember what each different colored curve is: it's a sample from a multivariate normal distribution. It's almost like the 50-D Gaussian specifies a <em>distribution over functions</em>...</span>\n<span class=\"paragraph\"><img src=\"https://i.kym-cdn.com/entries/icons/original/000/007/630/conspiracykeanu.jpg\" width=\"340\" height=\"200\" /></span>\n<span class=\"paragraph\"><em>Almost</em>. The 50-D Gaussian really only specifies a distribution over 50 discrete values, so it's not quite a distribution over functions <marimo-tex class=\"arithmatex\">||(f(x)||)</marimo-tex> that can take <em>any</em> value of <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>. Hold that thought for now, we'll return to this later. </span>\n<span class=\"paragraph\">But first you might have some questions. Remember, the above plot was made by taking a few samples from 50-D gaussian, <marimo-tex class=\"arithmatex\">||(\\textbf{Y}_{50D} \\sim N(\\boldsymbol{\\mu}, \\Sigma)||)</marimo-tex></span>\n<span class=\"paragraph\">But I didn't tell you what <marimo-tex class=\"arithmatex\">||(\\boldsymbol{\\mu}||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(\\Sigma||)</marimo-tex> were. Well, I actually used a mean vector of all zeros:</span>\n<marimo-tex class=\"arithmatex\">||[\n\\boldsymbol{\\mu} =  \\begin{bmatrix}\n0 \\\\\n0 \\\\\n\\vdots \\\\\n0\n\\end{bmatrix},\n||]</marimo-tex><span class=\"paragraph\">and for the covariance matrix I simply used the Identity matrix.</span>\n<marimo-tex class=\"arithmatex\">||[\n\\Sigma = \\begin{bmatrix}\n1 &amp; 0 &amp; \\dots &amp; 0 \\\\\n0 &amp; 1 &amp; \\dots &amp; 0 \\\\\n\\vdots &amp; \\vdots &amp; \\ddots &amp; \\vdots \\\\\n0 &amp; 0 &amp; \\dots &amp; 1\n\\end{bmatrix}.\n||]</marimo-tex><span class=\"paragraph\">Since this covariance matrix is really big, let's visualize it with a heatmap:</span></span>"
           }
         }
       ],
@@ -571,12 +571,12 @@
     },
     {
       "id": "yOPj",
-      "code_hash": "bb0ba0e094d02c39a9a47203fec86f05",
+      "code_hash": "85dd0f980bf6e84e40fd6efc1f05ab96",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Cool! They are now much smoother. This is because the variables near each other are more correlated, so nearby points are more likely to be similar. This smooths out the curves.</span>\n<span class=\"paragraph\">Now we can see that by changing the covariance matrix, we can control the shape of the functions that our multivariate normal distribution produces.</span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Cool, they are now much smoother. This is because the variables near each other are more correlated, so nearby points are more likely to be similar. This smooths out the curves.</span>\n<span class=\"paragraph\">Now we can see that by changing the covariance matrix, we can control the shape of the functions that our multivariate normal distribution produces.</span></span>"
           }
         }
       ],
@@ -662,12 +662,12 @@
     },
     {
       "id": "YWSi",
-      "code_hash": "2dbb3a42b8a5b6147bdfe2d88247036a",
+      "code_hash": "107ebe2d6384594a5e2563307b51a920",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Now we've truly got a distribution over functions!</span>\n<span class=\"paragraph\">If we want the distribution at <em>any</em> value <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>, we can just plug it in to the mean and covariance functions and voila! We just need to define a mean and valid covariance function that we like, and we can sample from a multivariate Gaussian at any value of <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex> we want. </span>\n<span class=\"paragraph\">By the way, \"covariance functions\" are usually referred to by a fancy name: <strong>kernel functions</strong>. Remember this plot of a covariance matrix from earlier?</span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Now we've truly got a distribution over functions.</span>\n<span class=\"paragraph\">If we want the distribution at <em>any</em> value <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>, we can just plug it in to the mean and covariance functions and voila! We just need to define a mean and valid covariance function that we like, and we can sample from a multivariate Gaussian at any value of <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex> we want. </span>\n<span class=\"paragraph\">By the way, \"covariance functions\" are usually referred to by a fancy name: <strong>kernel functions</strong>. Remember this plot of a covariance matrix from earlier?</span></span>"
           }
         }
       ],
@@ -753,12 +753,12 @@
     },
     {
       "id": "iXej",
-      "code_hash": "7e4504031a5a95f317bc5947283e49ef",
+      "code_hash": "366937bcb6f7ff1bb705681ab020094b",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"conditioning-on-data\">Conditioning on Data</h2>\n<span class=\"paragraph\">Wow, we've come a long way. Let's regroup here and remember our original definition of a Gaussian Process Regression.</span>\n<span class=\"paragraph\"><strong>GP Regression: <font color=\"#32a852\">A Multivariate Gaussian Distribution over functions</font>, conditioned on some training data.</strong></span>\n<blockquote>\n<span class=\"paragraph\">In fact this highlighted part above is the definition of a Gaussian Process. But we want \"Gaussian Process Regression\". (People sometimes use the two to mean the same thing, but technically GP is the distribution and GPR is the regression problem.)</span>\n</blockquote>\n<span class=\"paragraph\">We're more than half-way done! But we still need to condition it on some training data. Right now we're just sampling these pretty functions, but they are completely random. </span>\n<span class=\"paragraph\">Conditioning means we want the probability of some outcome given some data. Mathematically we write this as:</span>\n<marimo-tex class=\"arithmatex\">||[\np(y | x)\n||]</marimo-tex><span class=\"paragraph\">that is, the probability of some outcome <marimo-tex class=\"arithmatex\">||(y||)</marimo-tex> given some other data <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>. </span>\n<span class=\"paragraph\">Let's take a simple toy problem as a concrete example:</span>\n<span class=\"paragraph\">Say we are trying to predict the cost of a house along a particular road. At one end of the road, there is a nuclear power plant (yikes!). We have some data on the cost of some of the houses on this road, but we want to predict the cost of a house at any location. Let's look at the data first:</span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"conditioning-on-data\">Conditioning on Data</h2>\n<span class=\"paragraph\">Wow, we've come a long way. Let's regroup here and remember our original definition of a Gaussian Process Regression.</span>\n<span class=\"paragraph\"><strong>GP Regression: <font color=\"#32a852\">A Multivariate Gaussian Distribution over functions</font>, conditioned on some training data.</strong></span>\n<blockquote>\n<span class=\"paragraph\">In fact this highlighted part above is the definition of a Gaussian Process. But we want \"Gaussian Process Regression\". (People sometimes use the two to mean the same thing, but technically GP is the distribution and GPR is the regression problem.)</span>\n</blockquote>\n<span class=\"paragraph\">We're more than half-way done! But we still need to condition it on some training data. Right now we're just sampling these pretty functions, but they are completely random. </span>\n<span class=\"paragraph\">Conditioning means we want the probability of some outcome given some data. Mathematically we write this as:</span>\n<marimo-tex class=\"arithmatex\">||[\np(y | x)\n||]</marimo-tex><span class=\"paragraph\">that is, the probability of some outcome <marimo-tex class=\"arithmatex\">||(y||)</marimo-tex> given some other data <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>. </span>\n<span class=\"paragraph\">Let's take a simple toy problem as a concrete example:</span>\n<span class=\"paragraph\">Say we are trying to predict the cost of a house along a particular road. At one end of the road, there is a nuclear power plant (yikes). We have some data on the cost of some of the houses on this road, but we want to predict the cost of a house at any location. Let's look at the data first:</span></span>"
           }
         }
       ],
@@ -922,12 +922,12 @@
     },
     {
       "id": "LkGn",
-      "code_hash": "d565b0e8c35db7a54df18d44ada5b94d",
+      "code_hash": "e9389690ede7296527c000104a3b3fea",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"outro\">Outro</h2>\n<span class=\"paragraph\">You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:</span>\n<ul>\n<li>\"Do you really have to sample 100s of functions to get the confidence intervals?\"<ul>\n<li>(You should already be able to figure out the answer to this!)</li>\n</ul>\n</li>\n<li>\"How do we choose a kernel function?\" </li>\n<li>\"How do we choose the best parameters for the kernel function?\" </li>\n<li>\"What if the training data is intrinsically noisy (the price of houses has some variance at a given location)\n  \"</li>\n<li>\"What if there are many features in my training data? E.g. Square footage of houses.\"</li>\n<li>\"But I heard GPs are expensive to train?\" </li>\n</ul>\n<span class=\"paragraph\">then you should check out the resources below, which should be easier to understand now that you have the basics.</span></span>"
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"outro\">Outro</h2>\n<span class=\"paragraph\">You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:</span>\n<ul>\n<li>\"Do you really have to sample 100s of functions to get the confidence intervals?\"<ul>\n<li>(You should now be able to figure out the answer to this.)</li>\n</ul>\n</li>\n<li>\"How do we choose a kernel function?\" </li>\n<li>\"How do we choose the best parameters for the kernel function?\" </li>\n<li>\"What if the training data is intrinsically noisy (the price of houses has some variance at a given location)\n  \"</li>\n<li>\"What if there are many features in my training data? E.g. Square footage of houses.\"</li>\n<li>\"But I heard GPs are expensive to train?\" </li>\n</ul>\n<span class=\"paragraph\">then you should check out the resources below, which should be easier to understand now that you have the basics.</span></span>"
           }
         }
       ],

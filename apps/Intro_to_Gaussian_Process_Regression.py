@@ -62,10 +62,8 @@ def _(mo):
         r"""
     ## Why Gaussian Process Regression?
 
-    <!-- I've always been intrigued by Gaussian Processes regression. It has a certain air of mystery about it...one of those models for the cool kids. GPR is supposed to be "beautiful", but also pretty hard to understand. All I knew about it was the following:  -->
-
     1. It's a non-linear regression model 
-    1. It also does built-in modeling of uncertainties (cool!)
+    1. It also does built-in modeling of uncertainties (cool)
 
     The following plot from the sci-kit learn documentation shows the output of GP regression model. Note the beautifully curved uncertainty bands. Where does all this come from?
 
@@ -79,14 +77,6 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    <!-- I was recently looking at a cool dataset: a list of about 30k different COVID antibodies, each one with a repeated measurement of how well it stuck to COVID spike particles. The better an antibody sticks, the better it is at fighting COVID (more or less). Importantly, each different antibody was measured for its binding strength three times, and the measurements were noisy. So we have a problem with:
-
-    1. Nonlinear relationships 
-    1. Noisy data (uncertainty is important!) 
-    1. Dataset not huge.
-
-    Finally I have a reason to learn about GPs (and level up how cool I am on Twitter)!  -->
-
     ## GP Regression: The One Line Definition
     Turns out GP regression can be described in one (somewhat loaded) line:
 
@@ -831,7 +821,7 @@ def _(go, mo, np):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
-        r"""Now let's take it to an extreme: a 50-D Gaussian! $\textbf{Y}_{50D} = [Y_1, Y_2, Y_3, \dots, Y_{50}]^T$, so every sample is a vector of 50 random values."""
+        r"""Now let's take it to an extreme: a 50-D Gaussian. $\textbf{Y}_{50D} = [Y_1, Y_2, Y_3, \dots, Y_{50}]^T$, so every sample is a vector of 50 random values."""
     )
     return
 
@@ -905,7 +895,7 @@ def _(mo):
         r"""
     Cool, so now we can visualize samples from a 50-D Gaussian in this kinda of weird way. How is this useful? And how does this relate to a Gaussian Process regression?
 
-    You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next. Try it out!
+    You'll notice the above plot has a "Connect Samples" button. If you click it, each variable in a given sample gets connected to the next.
 
     Do these connected samples remind you of anything? Maybe a certain class of elementary mathematical objects?
 
@@ -1103,7 +1093,7 @@ def _(go, mo, np, pairwise_rbf, slider_l):
 def _(mo):
     mo.md(
         r"""
-    Cool! They are now much smoother. This is because the variables near each other are more correlated, so nearby points are more likely to be similar. This smooths out the curves.
+    Cool, they are now much smoother. This is because the variables near each other are more correlated, so nearby points are more likely to be similar. This smooths out the curves.
 
     Now we can see that by changing the covariance matrix, we can control the shape of the functions that our multivariate normal distribution produces.
     """
@@ -1302,7 +1292,7 @@ def _(go, mo, np):
 def _(mo):
     mo.md(
         r"""
-    Now we've truly got a distribution over functions!
+    Now we've truly got a distribution over functions.
 
     If we want the distribution at _any_ value $x$, we can just plug it in to the mean and covariance functions and voila! We just need to define a mean and valid covariance function that we like, and we can sample from a multivariate Gaussian at any value of $x$ we want. 
 
@@ -1538,7 +1528,7 @@ def _(mo):
 
     Let's take a simple toy problem as a concrete example:
 
-    Say we are trying to predict the cost of a house along a particular road. At one end of the road, there is a nuclear power plant (yikes!). We have some data on the cost of some of the houses on this road, but we want to predict the cost of a house at any location. Let's look at the data first:
+    Say we are trying to predict the cost of a house along a particular road. At one end of the road, there is a nuclear power plant (yikes). We have some data on the cost of some of the houses on this road, but we want to predict the cost of a house at any location. Let's look at the data first:
     """
     )
     return
@@ -1968,7 +1958,7 @@ def _(mo):
     You should now have the core ideas of Gaussian processes regression. If you still have some questions, like:
 
     - "Do you really have to sample 100s of functions to get the confidence intervals?"
-        - (You should already be able to figure out the answer to this!)
+        - (You should now be able to figure out the answer to this.)
     - "How do we choose a kernel function?" 
     - "How do we choose the best parameters for the kernel function?" 
     - "What if the training data is intrinsically noisy (the price of houses has some variance at a given location)

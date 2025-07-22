@@ -596,40 +596,31 @@ def _(alt, arr, df_orig, mat, mo, np, pd):
     )
     df_sim = pd.DataFrame({"x": x_sim[:, 0], "y": x_sim[:, 1]})
 
-
     min_x, max_x = -10, 10
-    min_y, max_y  = -10, 10
+    min_y, max_y = -10, 10
 
     chart_sim = (
         alt.Chart(df_sim)
         .mark_point()
         .encode(
             x=alt.X("x", scale=alt.Scale(domain=[min_x, max_x])),
-            y=alt.Y("y", scale=alt.Scale(domain=[min_y, max_y]))
+            y=alt.Y("y", scale=alt.Scale(domain=[min_y, max_y])),
         )
         .properties(width=400, height=300)
         + alt.Chart(df_orig)
         .mark_point(color="gray")
         .encode(x="x", y="y")
         .properties(width=400, height=300)
-    ).resolve_scale(x='shared', y='shared')
+    ).resolve_scale(x="shared", y="shared")
 
-    mo.vstack(
-        [
-            mo.md(
-                """
-    ."""
-            ),
-            mo.hstack([arr, mat, chart_sim]),
-        ]
-    )
+    mo.vstack([mo.hstack([arr, mat]), chart_sim], align="center")
     return
 
 
 @app.cell
 def _(Matrix, mo, np):
     mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1))
-    arr = mo.ui.anywidget(Matrix(rows=1, cols=2, mirror=True, step=0.1))
+    arr = mo.ui.anywidget(Matrix(rows=2, cols=1, mirror=True, step=0.1))
     return arr, mat
 
 
@@ -779,7 +770,9 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""So now each time we sample from a bivariate normal distribution, we get a vector of two numbers, which we plot as two connected points. Now let's look at a 3-D Gaussian,  $\textbf{Y}_{3D} = [Y_1, Y_2, Y_3]^T$,""")
+    mo.md(
+        r"""So now each time we sample from a bivariate normal distribution, we get a vector of two numbers, which we plot as two connected points. Now let's look at a 3-D Gaussian,  $\textbf{Y}_{3D} = [Y_1, Y_2, Y_3]^T$,"""
+    )
     return
 
 
@@ -838,7 +831,9 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""Now let's take it to an extreme: a 50-D Gaussian! $\textbf{Y}_{50D} = [Y_1, Y_2, Y_3, \dots, Y_{50}]^T$, so every sample is a vector of 50 random values.""")
+    mo.md(
+        r"""Now let's take it to an extreme: a 50-D Gaussian! $\textbf{Y}_{50D} = [Y_1, Y_2, Y_3, \dots, Y_{50}]^T$, so every sample is a vector of 50 random values."""
+    )
     return
 
 
@@ -968,7 +963,9 @@ def _(np, sns):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""This means that each of the variables in our multivariate normal distribution are.....????""")
+    mo.md(
+        r"""This means that each of the variables in our multivariate normal distribution are.....????"""
+    )
     return
 
 
@@ -1228,7 +1225,9 @@ def _(go, mo, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""But now that we've defined our mean and covariance functions, we can sample from a multivariate Gaussian at any value of $x$ we want. For example, let's sample at 50 evenly spaced real values of $x$ between -1 and 1. All we do is plug these values into our mean and covariance functions, and then sample from the resulting multivariate Gaussian.""")
+    mo.md(
+        r"""But now that we've defined our mean and covariance functions, we can sample from a multivariate Gaussian at any value of $x$ we want. For example, let's sample at 50 evenly spaced real values of $x$ between -1 and 1. All we do is plug these values into our mean and covariance functions, and then sample from the resulting multivariate Gaussian."""
+    )
     return
 
 
@@ -1358,7 +1357,9 @@ def _(mo, np, sns, sp):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""Using this kernel function, lets sample from a multivariate Gaussian at 50 evenly spaced real values of $x$ between -10 and 10. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions.""")
+    mo.md(
+        r"""Using this kernel function, lets sample from a multivariate Gaussian at 50 evenly spaced real values of $x$ between -10 and 10. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions."""
+    )
     return
 
 

@@ -1,5 +1,4 @@
 # TODO:
-- what is max covariance of a matrix given it's variance
 - double variance plot legend cut off
 - make mobile optimized
   - matrices can't be changed
@@ -7,15 +6,17 @@
 - make a gpt conversation deriving the conditional distribution
 - full proofread
 - all code todos
+Lower priority:
+- what is max covariance of a matrix given it's variance
+- caching, etc to make better load time
+  - https://docs.marimo.io/api/layouts/lazy/#marimo.lazy
 - blog integration
   - claude code
   - comments
   - port other posts
   - favicons, etc
 
-Low priority:
-- caching, etc to make better load time
-  - https://docs.marimo.io/api/layouts/lazy/#marimo.lazy
+
 
 # Development
 - Install `uv` with `pip install uv`

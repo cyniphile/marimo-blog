@@ -1447,16 +1447,17 @@ def _(go, mo, np, pairwise_rbf):
     fig_cov = go.Figure()
     # Create a 50×50 heatmap; rotate it so indexing matches your original code
     z = np.rot90(init_cov)
+    xa_rounded = xa.flatten()  # round for better x-axis labels
     heatmap_init = go.Heatmap(
         z=z,
-        x=np.arange(z.shape[1]),  # 0..49
-        y=np.arange(z.shape[0]),  # 0..49
+        x=xa_rounded,
+        y=xa_rounded,
         showscale=False,
     )
     fig_cov.add_trace(heatmap_init)
     # Make it "square" in data coordinates
-    fig_cov.update_xaxes(range=[0, 49])
-    fig_cov.update_yaxes(range=[0, 49], scaleanchor="x", scaleratio=1)  # tie y-axis scale to x-axis
+    # fig_cov.update_xaxes(range=[0, 49])
+    # fig_cov.update_yaxes(range=[0, 49], scaleanchor="x", scaleratio=1)  # tie y-axis scale to x-axis
     fig_cov.update_layout(
         title="Covariance Matrix",
         width=350,

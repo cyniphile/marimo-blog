@@ -1,14 +1,13 @@
 # TODO:
-- double variance plot legend cut off
-- make mobile optimized
-  - matrices can't be changed
-  - disable chart zooming
+- matrices can't be changed mobile
 - make a gpt conversation deriving the conditional distribution
 - full proofread
 - all code todos
 Lower priority:
 - what is max covariance of a matrix given it's variance
 - caching, etc to make better load time
+  - https://docs.marimo.io/guides/exporting/#embed-marimo-outputs-in-html-using-islands
+  - https://docs.marimo.io/guides/publishing/from_code_snippets/
   - https://docs.marimo.io/api/layouts/lazy/#marimo.lazy
 - blog integration
   - claude code

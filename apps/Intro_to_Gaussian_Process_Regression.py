@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.14.6"
+__generated_with = "0.14.13"
 app = marimo.App()
 
 
@@ -121,7 +121,7 @@ def _(np, plt, sns):
 def _(mo):
     mo.md(
         # TODO: reindex to be better, alpha and beta
-        # TODO: rememver, when we draw a function, we're just plotting a lot of points and connecting them together
+        # TODO: remember, when we draw a function, we're just plotting a lot of points and connecting them together
         r"""
         Even though the data on the left is much more noisy, both linear regressions model the data with the sample simple line. There's no measure of uncertainty. Let's try to add some.
 
@@ -215,10 +215,10 @@ def _(
     # Figure for Plot A (left figure)
     fig_A = go.Figure()
     fig_A.update_layout(
-        title_text="a",
+        title_text="A",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.29,
+            entrywidth=0.6,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
@@ -245,10 +245,10 @@ def _(
     # Figure for Plot B (right figure)
     fig_B = go.Figure()
     fig_B.update_layout(
-        title_text="b",
+        title_text="B",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.29,
+            entrywidth=0.6,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
@@ -729,7 +729,15 @@ def _(mo):
 
 @app.cell
 def _(btn_clear_2d, btn_new_sample_2d, get_fig_2d, mo):
-    mo.vstack([get_fig_2d(), mo.hstack([btn_new_sample_2d, btn_clear_2d])])
+    mo.vstack(
+        [
+            mo.ui.plotly(
+                get_fig_2d(),
+                config={"responsive": True, "displayModeBar": False, "staticPlot": True},
+            ),
+            mo.hstack([btn_new_sample_2d, btn_clear_2d]),
+        ]
+    )
     return
 
 
@@ -1158,8 +1166,17 @@ def _(mo):
 
 
         """
-        # TODO: make this interactive where you can put in whatever samples you want. Also. show covariance matrix
+        # TODO: make this interactive where you can put in whatever samples you want.
     )
+    return
+
+
+@app.cell
+def _(k, np, pd, sns, x_specific):
+    cov_df = pd.DataFrame(
+        np.round(k(x_specific), 4), index=np.round(x_specific, 4), columns=np.round(x_specific, 4)
+    )
+    sns.heatmap(cov_df).set_title("Covariance Function at Multiples of Pi")
     return
 
 
@@ -1181,8 +1198,8 @@ def _(btn_clear_real, btn_new_sample_real, get_fig_real, mo):
 def _(go, mo, np):
     # Define the index points, mean function, and covariance function
     x_specific = np.array([-np.pi, np.pi, 2 * np.pi])
-    _m = lambda x: x
-    _k = lambda x: np.diag(x**2)
+    m = lambda x: x
+    k = lambda x: np.diag(x**2)
 
     # 1) Create a figure with an initial (empty) scatter trace
     init_scatter_real = go.Scatter(mode="markers")
@@ -1197,8 +1214,8 @@ def _(go, mo, np):
     def add_sample_real(_):
         fig_real = get_fig_real()
         # Build covariance and mean
-        cov = _k(x_specific)
-        mean = _m(x_specific)
+        cov = k(x_specific)
+        mean = m(x_specific)
         # Draw one sample from the multivariate normal
         y = np.random.multivariate_normal(mean=mean, cov=cov, size=1)[0]
 
@@ -1225,7 +1242,7 @@ def _(go, mo, np):
     btn_clear_real = mo.ui.button(
         value=get_clicks_real(), on_click=clear_data_real, label="Clear", kind="danger"
     )
-    return btn_clear_real, btn_new_sample_real, get_fig_real
+    return btn_clear_real, btn_new_sample_real, get_fig_real, k, x_specific, m
 
 
 @app.cell(hide_code=True)
@@ -1233,6 +1250,15 @@ def _(mo):
     mo.md(
         r"""But now that we've defined our mean and covariance functions, we can sample from a multivariate Gaussian at any value of $x$ we want. For example, let's sample at 50 evenly spaced real values of $x$ between -1 and 1. All we do is plug these values into our mean and covariance functions, and then sample from the resulting multivariate Gaussian."""
     )
+    return
+
+
+@app.cell
+def _(k, np, pd, sns, x_real_big):
+    _cov_df = pd.DataFrame(
+        np.round(k(x_real_big), 4), index=np.round(x_real_big, 4), columns=np.round(x_real_big, 4)
+    )
+    sns.heatmap(_cov_df).set_title("Covariance Function at 50\nEvenly-Spaced Real Values")
     return
 
 
@@ -1251,13 +1277,10 @@ def _(btn_clear_50real, btn_new_sample_50real, get_fig_50real, mo):
 
 
 @app.cell
-def _(go, mo, np):
+def _(go, k, mo, np, m):
     # We assume you've already defined:
     x_real_big = np.linspace(-1, 1, 50)
-    # m = lambda x: x
     # k = lambda x: np.diag(x**2)
-    m = lambda x: x
-    k = lambda x: np.diag(x**2)
 
     # 1) Create the initial figure
     init_scatter_50_real = go.Scatter(mode="markers")
@@ -1306,7 +1329,7 @@ def _(go, mo, np):
     )
 
     btn_clear_50real = mo.ui.button(label="Clear", on_click=clear_data_50real, kind="danger")
-    return btn_clear_50real, btn_new_sample_50real, get_fig_50real
+    return btn_clear_50real, btn_new_sample_50real, get_fig_50real, x_real_big
 
 
 @app.cell(hide_code=True)
@@ -1404,7 +1427,7 @@ def _(go, mo, np, pairwise_rbf):
     #################################################################
 
     xa = np.linspace(-1, 1, 50).reshape(-1, 1)
-    init_cov = pairwise_rbf(xa, xa, l=0.5)  # initial lengthscale
+    init_cov = pairwise_rbf(xa, xa, l=0.5)  # initial length scale
 
     #################################################################
     # 3) Build the two separate Plotly figures
@@ -1442,7 +1465,7 @@ def _(go, mo, np, pairwise_rbf):
     )
 
     #################################################################
-    # 4) Store the figures and relevant parameters in Miarmo state
+    # 4) Store the figures and relevant parameters in Marimo state
     #################################################################
 
     get_fig_samples, set_fig_samples = mo.state(fig_samples)
@@ -1457,7 +1480,7 @@ def _(go, mo, np, pairwise_rbf):
 
     def on_slider_change(new_l):
         """
-        1) Update the stored lengthscale
+        1) Update the stored length scale
         2) Recompute the covariance
         3) Update the heatmap in fig_cov
         """
@@ -1752,7 +1775,7 @@ def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
         x=X.T[0], y=y.T[0], mode="markers", marker=dict(color="red", size=16), name="Known Data"
     )
     layout_housing = go.Layout(
-        title="Samples from a Gaussian Process Conditioned on Known Housing Data",
+        title="Samples from a Gaussian Process<br>Conditioned on Known Housing Data",
         xaxis_title="Distance from the Nuclear Power Plant (miles)",
         yaxis_title="Cost of a house ($)",
     )

@@ -1128,45 +1128,42 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ### Making these "functions" into Functions
-        We've been throwing around the word "functions" a lot now, but we still never resolved the problem that these samples are really just 50-D vectors. Sure we can connect the points with little lines, but that's not the same as a function. How do we get a distribution over true functions?
+    ### Making these "functions" into Functions
+    We've been throwing around the word "functions" a lot now, but we still never resolved the problem that these samples are really just 50-D vectors. Sure we can connect the points with little lines, but that's not the same as a function. How do we get a distribution over true functions?
 
-        The answer lies in how we define the covariance and mean of our multivariate Gaussian. So far we've been manually inputting some mean vector and covariance matrix. Since these are objects with discrete, finite elements, we can't really think of the distributions they define as functions. But what if we could redefine these objects (the mean and covariance) as functions? 
+    The answer lies in how we define the covariance and mean of our multivariate Gaussian. So far we've been manually inputting some mean vector and covariance matrix. Since these are objects with discrete, finite elements, we can't really think of the distributions they define as functions. But what if we could redefine these objects (the mean and covariance) as functions? 
 
-        Mathematically:
+    Mathematically:
 
-        $$
-        \boldsymbol{\mu} = m(\textbf{x}) \\
-        \Sigma = k(\textbf{x, x})
-        $$
+    $$
+    \boldsymbol{\mu} = m(\textbf{x}) \\
+    \Sigma = k(\textbf{x, x})
+    $$
 
-        Now for whatever $x$ we are interested in, we can sample from a multivariate Gaussian with mean $m(\textbf{x})$ and covariance $k(\textbf{x, x})$. This is one of those mathematical tricks that's so simple it's hard to understand, or maybe feels like cheating, so let's go through an example. 
+    Now for whatever $x$ we are interested in, we can sample from a multivariate Gaussian with mean $m(\textbf{x})$ and covariance $k(\textbf{x, x})$. This is one of those mathematical tricks that's so simple it's hard to understand, or maybe feels like cheating, so let's go through an example. 
 
-        Say we want to sample from a few specific real number $\textbf{x} = [-\pi, \pi, 2\pi]^T$ (some multiples of pi, as in 3.141...). First let's define a mean function $m(\textbf{x})$. We can use anything we like, so let's so something really simple: $m(\textbf{x}) = \textbf{x}$. 
+    Say we want to sample from a few specific real number $\textbf{x} = [-\pi, \pi, 2\pi]^T$ (some multiples of pi, as in 3.141...). First let's define a mean function $m(\textbf{x})$. We can use anything we like, so let's so something really simple: $m(\textbf{x}) = \textbf{x}$. 
 
-        For the covariance function $k(\textbf{x, x})$, we need a function of x that generates a symmetric matrix with a positive diagonal (otherwise it would not be a valid covariance). Again let's just do something really simple: $k(\textbf{x}, \textbf{x}) = \operatorname{diag}(\textbf{x} \odot \textbf{x} )$, where we take $\odot$ to mean the element-wise product of $\textbf{x}$ with $\textbf{x}$.
+    For the covariance function $k(\textbf{x, x})$, we need a function of x that generates a symmetric matrix with a positive diagonal (otherwise it would not be a valid covariance). Again let's just do something really simple: $k(\textbf{x}, \textbf{x}) = \operatorname{diag}(\textbf{x} \odot \textbf{x} )$, where we take $\odot$ to mean the element-wise product of $\textbf{x}$ with $\textbf{x}$.
 
-        > You maybe be wondering, "why define the covariance function as $k(\textbf{x, x})$ instead of simply $k(\textbf{x})$?". The reason is that covariance functions in general calculate a covariance between two vectors that are not necessarily the same. Here we are just calculating the covariance of $\textbf{x}$ with itself, but this will not always be the case...
+    > You maybe be wondering, "why define the covariance function as $k(\textbf{x, x})$ instead of simply $k(\textbf{x})$?". The reason is that covariance functions in general calculate a covariance between two vectors that are not necessarily the same. Here we are just calculating the covariance of $\textbf{x}$ with itself, but this will not always be the case...
 
-        So if we put out test vector into these functions we get:
+    So if we put out test vector into these functions we get:
 
-        $$
-        \boldsymbol{\mu} = m(\textbf{x}) = \textbf{x} = [-\pi, \pi, 2\pi]^T\\
-        $$
+    $$
+    \boldsymbol{\mu} = m(\textbf{x}) = \textbf{x} = [-\pi, \pi, 2\pi]^T\\
+    $$
 
-        $$
-        \Sigma = k(\textbf{x}, \textbf{x}) = \operatorname{diag}(\textbf{x}\odot\textbf{x}) = \begin{bmatrix}
-        (-\pi)^2 & 0 & 0 \\
-        0 & (\pi)^2 & 0 \\
-        0 & 0 & (2\pi)^2
-        \end{bmatrix}
-        $$
+    $$
+    \Sigma = k(\textbf{x}, \textbf{x}) = \operatorname{diag}(\textbf{x}\odot\textbf{x}) = \begin{bmatrix}
+    (-\pi)^2 & 0 & 0 \\
+    0 & (\pi)^2 & 0 \\
+    0 & 0 & (2\pi)^2
+    \end{bmatrix}
+    $$
 
-        Now we can sample from a multivariate Gaussian at these specific values of $x$:
-
-
-        """
-        # TODO: make this interactive where you can put in whatever samples you want.
+    Now we can sample from a multivariate Gaussian at these specific values of $x$:
+    """
     )
     return
 
@@ -1242,7 +1239,7 @@ def _(go, mo, np):
     btn_clear_real = mo.ui.button(
         value=get_clicks_real(), on_click=clear_data_real, label="Clear", kind="danger"
     )
-    return btn_clear_real, btn_new_sample_real, get_fig_real, k, x_specific, m
+    return btn_clear_real, btn_new_sample_real, get_fig_real, k, m, x_specific
 
 
 @app.cell(hide_code=True)
@@ -1277,7 +1274,7 @@ def _(btn_clear_50real, btn_new_sample_50real, get_fig_50real, mo):
 
 
 @app.cell
-def _(go, k, mo, np, m):
+def _(go, k, m, mo, np):
     # We assume you've already defined:
     x_real_big = np.linspace(-1, 1, 50)
     # k = lambda x: np.diag(x**2)
@@ -1373,17 +1370,43 @@ def _(mo):
 
 
 @app.cell
-def _(mo, np, sns, sp):
-    # Example output for an RBF kernel, given a simple vector x_test
+def _(mo, np, sp):
+    # The RBF kernel, implemented in pythong with numpy
     def pairwise_rbf(xa, xb, l=5.0):
         sq_norm = (-0.5 / l**2) * sp.spatial.distance.cdist(xa, xb, "sqeuclidean")
         return np.exp(sq_norm)
 
-    x_test = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
-    rbf_output = pairwise_rbf(x_test, x_test, l=1)
-
-    mo.show_code(sns.heatmap(rbf_output, annot=True))
+    mo.show_code()
     return (pairwise_rbf,)
+
+
+@app.cell
+def _(mo):
+    code = """
+
+    # Try editing these to be whatever you want.
+    # Note you can add as may points as you like!
+    points = [1.549, 2, 3, 4, 5, 6]
+
+    #=========================================
+    # The rest of this code feeds these points into the pairwise_rbf function
+    # and plots the resulting covariance matrix
+
+    x_test =np.array(points).reshape(-1, 1) # Transpose
+    # You can change the value of l to see how it changes the covariance matrix
+    rbf_output = pairwise_rbf(x_test, x_test, l=1)
+    plot = sns.heatmap(rbf_output, annot=True, xticklabels=points, yticklabels=points )
+    """
+    code_editor = mo.ui.code_editor(value=code)
+    code_editor
+    return (code_editor,)
+
+
+@app.cell
+def _(code_editor, plot):
+    exec(code_editor.value)
+    plot
+    return
 
 
 @app.cell(hide_code=True)
@@ -1871,11 +1894,10 @@ def _(X, X_test, calculate_figure_height, go, gp_posterior, mo, np, y):
 def _(mo):
     mo.md(
         r"""
-        Yeah baby. Now _this_ looks like a Gaussian process regression. Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
+    Yeah baby. Now _this_ looks like a Gaussian process regression. Clearly the samples from the distribution are conditioned on known data, because all the functions we sample pass through the known data points. But in between the known data points the functions are free to somewhat randomly vary, giving us an idea of the uncertainty. How smoothly the functions vary is determined by the covariance function, which in this case is the RBF kernel.
 
-        In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 500 samples from this posterior distribution? 
-        """
-        # TODO: define posterior
+    In the plot below, I reveal the true underlying function I used to generate this "housing data" (pink). What if we take 500 samples from this posterior distribution?
+    """
     )
     return
 

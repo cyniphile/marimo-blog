@@ -94,9 +94,9 @@ def _(mo):
         r"""
     ## Prequel: Distributions over Functions
 
-    We all know linear regression; it has the form $y = \beta_0 + \beta_1 x$. We have some data $x$ and $y$, and we want to find the $\beta_0$ and $\beta_1$ that describe a line of best fit. We can do this using OLS (ordinary least squares), and we end up with a linear function $f(x) = \beta_0 + \beta_1 x$, that for any $x$ gives us a prediction for $y$.
+    We all know linear regression. Given some data, we assume it has the form $y = \beta_0 + \beta_1 x + \epsilon$. We have some data $x$ and $y$, and we want to find the $\hat{\beta_0}$ and $\hat{\beta_1}$ ("^" means "estimated") that describe a line of best fit. We can do this using OLS (ordinary least squares), and we end up with a linear function $f(x) = \hat{\beta_0} + \hat{\beta_1} x$, that for any $x$ gives us a prediction for $y$.
 
-    But what if we want some notion of the uncertainty of our prediction?
+    Note that we don't model $\epsilon$; what if we want some notion of the uncertainty in our predictions?
 
     For example, look at the two plots below:
     """
@@ -218,13 +218,13 @@ def _(
         title_text="A",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.6,
+            entrywidth=0.8,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
             y=-0.2,
             xanchor="center",
-            x=0.5,
+            x=0.4,
             bgcolor="white",
             bordercolor="LightGrey",
             borderwidth=0,
@@ -248,13 +248,13 @@ def _(
         title_text="B",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.6,
+            entrywidth=0.8,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
             y=-0.2,
             xanchor="center",
-            x=0.5,
+            x=0.4,
             bgcolor="white",
             bordercolor="LightGrey",
             borderwidth=0,
@@ -284,7 +284,7 @@ def _(
         y=y_noise,
         mode="markers",
         marker=dict(size=10, color=colors_subplot1[0]),
-        name="Noisy Data",
+        name="Hi Noise Data",
         legendgroup="Plot A",
         showlegend=True,
     )
@@ -293,7 +293,7 @@ def _(
         y=line_A,
         mode="lines",
         line=dict(color=colors_subplot1[1]),
-        name="True Fit Noisy",
+        name="True Fit Hi Noise",
         legendgroup="Plot A",
         showlegend=True,
     )

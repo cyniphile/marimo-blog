@@ -1371,7 +1371,7 @@ def _(mo):
 
 @app.cell
 def _(mo, np, sp):
-    # The RBF kernel, implemented in pythong with numpy
+    # The RBF kernel, implemented in python with numpy
     def pairwise_rbf(xa, xb, l=5.0):
         sq_norm = (-0.5 / l**2) * sp.spatial.distance.cdist(xa, xb, "sqeuclidean")
         return np.exp(sq_norm)
@@ -1386,15 +1386,15 @@ def _(mo):
 
     # Try editing these to be whatever you want.
     # Note you can add as may points as you like!
-    points = [1.549, 2, 3, 4, 5, 6]
+    points = [1.549, 2, 3, 4, 5, 6, 10]
+    # You can change the value of l to see how it changes the covariance matrix
+    l = 1
 
     #=========================================
     # The rest of this code feeds these points into the pairwise_rbf function
     # and plots the resulting covariance matrix
-
     x_test =np.array(points).reshape(-1, 1) # Transpose
-    # You can change the value of l to see how it changes the covariance matrix
-    rbf_output = pairwise_rbf(x_test, x_test, l=1)
+    rbf_output = pairwise_rbf(x_test, x_test, l=l)
     plot = sns.heatmap(rbf_output, annot=True, xticklabels=points, yticklabels=points )
     """
     code_editor = mo.ui.code_editor(value=code)
@@ -1412,7 +1412,7 @@ def _(code_editor, plot):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
-        r"""Using this kernel function, lets sample from a multivariate Gaussian at 50 evenly spaced real values of $x$ between -10 and 10. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions."""
+        r"""Using this kernel function, lets sample from a multivariate Gaussian at 50 evenly spaced real values of $x$ between -1 and 1. But this time you can adjust the slider to change the value of the kernel's $l$ parameter and see how it changes the shape of the covariance matrix and the resulting distribution over functions."""
     )
     return
 

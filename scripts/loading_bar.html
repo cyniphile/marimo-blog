@@ -1,0 +1,107 @@
+<!-- top bar -->
+<div id="loading-screen" aria-hidden="true">
+  <div id="loading-bar"></div>
+</div>
+
+<style>
+  #loading-screen {
+    position: fixed; top: 0; left: 0;
+    height: 6px; width: 100%;
+    background: #eee;
+    z-index: 99999;
+    opacity: 1; transition: opacity 200ms ease;
+    pointer-events: none;
+  }
+  /* Start explicitly at 0% and force the transition; use !important to override globals */
+  #loading-bar {
+    height: 100%;
+    width: 0% !important;
+    transition: width 20s linear !important;
+    background: #4caf50;
+  }
+  /* Only snap to full when WE add the class on the container */
+  #loading-screen.is-done #loading-bar {
+    transition: none !important;
+    width: 100% !important;
+  }
+  .fade-out { opacity: 0; }
+</style>
+
+<script>
+(function () {
+  const screen = document.getElementById('loading-screen');
+  const bar = document.getElementById('loading-bar');
+  if (!screen || !bar) return;
+
+  const TIMEOUT_MS = 20000;
+  const MIN_SHOW_MS = 300;
+  let startedAt = 0, finished = false;
+
+  function startBar() {
+    finished = false;
+    screen.classList.remove('is-done', 'fade-out');
+
+    // Make sure our starting point is visible and painted at 0%
+    bar.style.setProperty('transition', 'width 20s linear', 'important');
+    bar.style.setProperty('width', '0%', 'important');
+
+    // Force a reflow so the browser commits width=0% before we change it.
+    // This is key to ensure the transition actually animates.
+    void bar.offsetWidth;
+
+    // Next frame: grow to 100%
+    requestAnimationFrame(() => {
+      startedAt = performance.now();
+      bar.style.setProperty('width', '100%', 'important');
+      // Diagnostics: are transitions disabled?
+      const cs = getComputedStyle(bar);
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      console.log('[loadingbar] started. transitionDuration=', cs.transitionDuration,
+                  ' reducedMotion=', reduced);
+    });
+  }
+
+  function finishBar(reason) {
+    if (finished) return;
+    finished = true;
+    const elapsed = performance.now() - startedAt;
+    const delay = Math.max(0, MIN_SHOW_MS - elapsed);
+
+    // Snap bar to full and fade out
+    screen.classList.add('is-done');
+    setTimeout(() => {
+      screen.classList.add('fade-out');
+      setTimeout(() => screen.remove(), 220);
+    }, delay);
+  }
+
+  // Start immediately
+  startBar();
+
+  // Stop when the first .marimo-cell appears (or timeout)
+  function waitForFirst(selector) {
+    return new Promise((resolve) => {
+      const found = document.querySelector(selector);
+      if (found) {
+        // wait 5 seconds before resolving, to ensure the loading bar is visible
+        console.log('[loadingbar] found first cell immediately');
+        setTimeout(() => resolve(found), 5000);
+        return;
+      }
+      const obs = new MutationObserver(() => {
+        const el = document.querySelector(selector);
+        if (el) { obs.disconnect(); resolve(el); }
+      });
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+    });
+  }
+  const firstCell = waitForFirst('marimo-ui-element');
+  const timeout = new Promise((resolve) => setTimeout(resolve, TIMEOUT_MS));
+
+  Promise.race([firstCell, timeout]).then(() => finishBar('cell-or-timeout'));
+
+  // BFCache restore
+  window.addEventListener('pageshow', (e) => { if (e.persisted) startBar(); });
+})();
+</script>
+

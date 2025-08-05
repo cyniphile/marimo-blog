@@ -29,6 +29,16 @@ def export_html_wasm(notebook_path: str, output_dir: str, as_app: bool = False) 
 
         cmd.extend([notebook_path, "-o", output_file])
         subprocess.run(cmd, capture_output=True, text=True, check=True)
+        # append the contents of loading_bar.html to the <body> of the exported HTML
+        with open(output_file, "r+", encoding="utf-8") as f:
+            content = f.read()
+            loading_bar_path = os.path.join(os.path.dirname(__file__), "loading_bar.html")
+            with open(loading_bar_path, "r", encoding="utf-8") as loading_file:
+                loading_bar_content = loading_file.read()
+            content = content.replace("</body>", f"{loading_bar_content}</body>")
+            f.seek(0)
+            f.write(content)
+            f.truncate()
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error exporting {notebook_path}:")

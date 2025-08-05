@@ -218,7 +218,7 @@ def _(
         title_text="A",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.9,
+            entrywidth=0.8,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
@@ -248,7 +248,7 @@ def _(
         title_text="B",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.9,
+            entrywidth=0.8,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",

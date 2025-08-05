@@ -16,7 +16,7 @@
   #loading-bar {
     height: 100%;
     width: 0% !important;
-    transition: width 80s linear !important;
+    transition: width 100s linear !important;
     background: #4caf50;
   }
   /* Only snap to full when WE add the class on the container */
@@ -33,7 +33,7 @@
   const bar = document.getElementById('loading-bar');
   if (!screen || !bar) return;
 
-  const TIMEOUT_MS = 80000;
+  const TIMEOUT_MS = 100000;
   const MIN_SHOW_MS = 300;
   let startedAt = 0, finished = false;
 

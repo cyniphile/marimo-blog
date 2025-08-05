@@ -1009,7 +1009,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    No variable has any covariance with any other, so you than think of this multivariate Gaussian as simply 50 separate Gaussians, each with mean = 0 and variance 1. This is why the curves we plotted above are so all over the place: each point is randomly bouncing up and down with no influence from its neighbors.
+    No variable has any covariance with any other, so you can think of this multivariate Gaussian as simply 50 separate Gaussians, each with mean = 0 and variance 1. This is why the curves we plotted above are so all over the place: each point is randomly bouncing up and down with no influence from its neighbors.
 
     What if we add some non-zero values to the covariance matrix that are off-diagonal? 
 

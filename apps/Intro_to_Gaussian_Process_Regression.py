@@ -218,7 +218,7 @@ def _(
         title_text="A",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.8,
+            entrywidth=0.9,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
@@ -248,7 +248,7 @@ def _(
         title_text="B",
         height=calculate_figure_height(2),
         legend=dict(
-            entrywidth=0.8,
+            entrywidth=0.9,
             entrywidthmode="fraction",
             orientation="h",
             yanchor="bottom",
@@ -350,7 +350,7 @@ def _(
                 y=line_data_A,
                 mode="lines",
                 line=dict(color=colors_subplot1[color_idx_A]),
-                name=f"$B_{{0a}}: {beta_0_rand[0]:.2f}, B_{{1a}}: {beta_1_rand[0]:.2f}$",
+                name=f"$B_{{0a}}: {beta_0_rand[0]:.1f}, B_{{1a}}: {beta_1_rand[0]:.1f}$",
                 legendgroup="Plot A",
             )
         )
@@ -363,7 +363,7 @@ def _(
                 y=line_data_B,
                 mode="lines",
                 line=dict(color=colors_subplot2[color_idx_B]),
-                name=f"$B_{{0b}}: {beta_0_rand2[0]:.2f}, B_{{1b}}: {beta_1_rand2[0]:.2f}$",
+                name=f"$B_{{0b}}: {beta_0_rand2[0]:.1f}, B_{{1b}}: {beta_1_rand2[0]:.1f}$",
                 legendgroup="Plot B",
             )
         )

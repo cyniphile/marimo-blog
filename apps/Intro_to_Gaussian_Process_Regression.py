@@ -468,7 +468,7 @@ def _(go, mo, np):
     # 2. Store the figure and the slider states
     get_fig_hist, set_fig_hist = mo.state(fig_hist)
     fig_hist.update_layout(
-        title="Normal Distribution Histogram (µ=0.00, σ=1.00)",
+        title="Normal Distribution Histogram<br>(µ=0.00, σ=1.00)",
         xaxis=dict(title="Value", range=[START, END], fixedrange=True),
         yaxis=dict(title="Count", range=[0, int(SIZE * 0.1)], fixedrange=True),
         margin=dict(l=4, r=3, t=80, b=10),

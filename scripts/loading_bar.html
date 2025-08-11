@@ -16,7 +16,7 @@
   #loading-bar {
     height: 100%;
     width: 0% !important;
-    transition: width 120s linear !important;
+    transition: width 1200000s linear !important;
     background: #4caf50;
   }
   /* Only snap to full when WE add the class on the container */
@@ -42,7 +42,7 @@
     screen.classList.remove('is-done', 'fade-out');
 
     // Make sure our starting point is visible and painted at 0%
-    bar.style.setProperty('transition', 'width 20s linear', 'important');
+    bar.style.setProperty('transition', 'width 60s linear', 'important');
     bar.style.setProperty('width', '0%', 'important');
 
     // Force a reflow so the browser commits width=0% before we change it.

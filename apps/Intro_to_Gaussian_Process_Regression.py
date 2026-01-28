@@ -1,3 +1,15 @@
+# /// script
+# dependencies = [
+#   "seaborn",
+#   "wigglystuff",
+#   "altair",
+#   "numpy",
+#   "pandas",
+#   "scipy",
+#   "matplotlib",
+#   "plotly",
+# ]
+# ///
 import marimo
 
 __generated_with = "0.19.6"

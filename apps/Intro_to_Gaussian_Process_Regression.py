@@ -1,12 +1,10 @@
 # /// script
 # dependencies = [
-#   "seaborn",
 #   "wigglystuff",
 #   "altair",
 #   "numpy",
 #   "pandas",
 #   "scipy",
-#   "matplotlib",
 #   "plotly",
 # ]
 # ///
@@ -19,6 +17,7 @@ app = marimo.App()
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -28,19 +27,48 @@ def _():
     import numpy as np
     import pandas as pd
     import scipy as sp
-    import seaborn as sns
-    from matplotlib import pyplot as plt
     from plotly import graph_objs as go
 
-    # plt.rcParams["font.family"] = ["sans-serif"]  # Use only sans-serif fonts
-    # plt.rcParams["font.sans-serif"] = [
-    #     "Arial",
-    #     "DejaVu Sans",
-    #     "Helvetica",
-    # ]  # Specify specific fonts
-
     np.random.seed(42)
-    return go, np, pd, plt, sns, sp
+    return go, np, pd, sp
+
+
+@app.cell
+def _(go):
+    # Helper function to create Plotly heatmaps (replaces seaborn.heatmap)
+    def plotly_heatmap(data, title="", xticklabels=None, yticklabels=None, annot=False):
+        """Create a Plotly heatmap figure."""
+        if hasattr(data, 'values'):
+            z = data.values
+            x = list(data.columns) if xticklabels is None else xticklabels
+            y = list(data.index) if yticklabels is None else yticklabels
+        else:
+            z = data
+            x = xticklabels if xticklabels is not None else list(range(len(data[0])))
+            y = yticklabels if yticklabels is not None else list(range(len(data)))
+
+        # Convert to strings so Plotly treats them as categorical (equal-sized squares)
+        x = [str(val) for val in x]
+        y = [str(val) for val in y]
+
+        fig = go.Figure(data=go.Heatmap(
+            z=z,
+            x=x,
+            y=y,
+            colorscale='Viridis',
+            showscale=True,
+            text=z if annot else None,
+            texttemplate='%{text:.2f}' if annot else None,
+            hovertemplate='x: %{x}<br>y: %{y}<br>value: %{z:.4f}<extra></extra>',
+        ))
+        fig.update_layout(
+            title=title,
+            xaxis=dict(side='bottom', type='category'),
+            yaxis=dict(autorange='reversed', type='category'),
+            margin=dict(l=60, r=20, t=50, b=60),
+        )
+        return fig
+    return (plotly_heatmap,)
 
 
 @app.cell(hide_code=True)
@@ -108,15 +136,31 @@ def _(mo):
 
 
 @app.cell
-def _(np, plt, sns):
-    _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+def _(go, mo, np):
+    from plotly.subplots import make_subplots
     x_reg = np.linspace(-3, 3, 10)
     NOISE_VARIANCE = 1
     y_noise = x_reg + np.random.normal(0, NOISE_VARIANCE, 10)
     LOW_NOISE_VARIANCE = 0.1
     y_low_noise = x_reg + np.random.normal(0, LOW_NOISE_VARIANCE, 10)
-    sns.regplot(x=x_reg, y=y_noise, ax=ax1, ci=None, color="red").set_title("A")
-    sns.regplot(x=x_reg, y=y_low_noise, ax=ax2, ci=None).set_title("B")
+
+    # Create regression plots with Plotly
+    fig_reg = make_subplots(rows=1, cols=2, subplot_titles=("A", "B"))
+
+    # Compute OLS for plot A
+    slope_a, intercept_a = np.polyfit(x_reg, y_noise, 1)
+    fit_y_a = slope_a * x_reg + intercept_a
+    fig_reg.add_trace(go.Scatter(x=x_reg, y=y_noise, mode='markers', marker=dict(color='red'), showlegend=False), row=1, col=1)
+    fig_reg.add_trace(go.Scatter(x=x_reg, y=fit_y_a, mode='lines', line=dict(color='red'), showlegend=False), row=1, col=1)
+
+    # Compute OLS for plot B
+    slope_b, intercept_b = np.polyfit(x_reg, y_low_noise, 1)
+    fit_y_b = slope_b * x_reg + intercept_b
+    fig_reg.add_trace(go.Scatter(x=x_reg, y=y_low_noise, mode='markers', marker=dict(color='blue'), showlegend=False), row=1, col=2)
+    fig_reg.add_trace(go.Scatter(x=x_reg, y=fit_y_b, mode='lines', line=dict(color='blue'), showlegend=False), row=1, col=2)
+
+    fig_reg.update_layout(height=350, margin=dict(l=40, r=20, t=40, b=40))
+    mo.ui.plotly(fig_reg)
     return LOW_NOISE_VARIANCE, NOISE_VARIANCE, x_reg, y_low_noise, y_noise
 
 
@@ -457,7 +501,8 @@ def _(go, mo, np):
     END = 10
     x = np.random.normal(0, 1, size=SIZE)
     hist_trace = go.Histogram(
-        x=x, xbins=dict(start=START, end=END, size=0.1)  # whatever bin width you want
+        x=x,
+        xbins=dict(start=START, end=END, size=0.1),  # whatever bin width you want
     )
     fig_hist = go.Figure(hist_trace)
     # 2. Store the figure and the slider states
@@ -478,8 +523,7 @@ def _(go, mo, np):
         fig.data[0].x = x_new
         fig.update_layout(
             title=(
-                f"Normal Distribution Histogram<br>(µ={mean_state():.2f}, "
-                f"σ={variance_state():.2f})"
+                f"Normal Distribution Histogram<br>(µ={mean_state():.2f}, σ={variance_state():.2f})"
             )
         )
         set_fig_hist(fig)  # store the updated figure
@@ -951,9 +995,9 @@ def _(mo):
 
 
 @app.cell
-def _(np, sns):
+def _(mo, np, plotly_heatmap):
     # @title
-    sns.heatmap(np.identity(50))
+    mo.ui.plotly(plotly_heatmap(np.identity(50), title="Identity Matrix (50x50)"))
     return
 
 
@@ -1004,11 +1048,11 @@ def _(mo):
 
 
 @app.cell
-def _(np, pairwise_rbf, pd, slider_l, sns):
+def _(mo, np, pairwise_rbf, pd, plotly_heatmap, slider_l):
     _xa = np.arange(0, 50, 1).reshape(1, -1).T
     _xb = np.arange(0, 50, 1).reshape(1, -1).T
     C = pd.DataFrame(pairwise_rbf(_xa, _xb, slider_l.value))
-    sns.heatmap(C).set_title(f"$ℓ$={slider_l.value}")
+    mo.ui.plotly(plotly_heatmap(C, title=f"ℓ={slider_l.value}"))
     return (C,)
 
 
@@ -1145,11 +1189,11 @@ def _(mo):
 
 
 @app.cell
-def _(k, np, pd, sns, x_specific):
+def _(k, mo, np, pd, plotly_heatmap, x_specific):
     cov_df = pd.DataFrame(
         np.round(k(x_specific), 4), index=np.round(x_specific, 4), columns=np.round(x_specific, 4)
     )
-    sns.heatmap(cov_df).set_title("Covariance Function at Multiples of Pi")
+    mo.ui.plotly(plotly_heatmap(cov_df, title="Covariance Function at Multiples of Pi"))
     return
 
 
@@ -1227,11 +1271,11 @@ def _(mo):
 
 
 @app.cell
-def _(k, np, pd, sns, x_real_big):
+def _(k, mo, np, pd, plotly_heatmap, x_real_big):
     _cov_df = pd.DataFrame(
         np.round(k(x_real_big), 4), index=np.round(x_real_big, 4), columns=np.round(x_real_big, 4)
     )
-    sns.heatmap(_cov_df).set_title("Covariance Function at 50\nEvenly-Spaced Real Values")
+    mo.ui.plotly(plotly_heatmap(_cov_df, title="Covariance Function at 50<br>Evenly-Spaced Real Values"))
     return
 
 
@@ -1318,8 +1362,8 @@ def _(mo):
 
 
 @app.cell
-def _(C, slider_l, sns):
-    sns.heatmap(C).set_title(f"$ℓ$={slider_l.value}")
+def _(C, mo, plotly_heatmap, slider_l):
+    mo.ui.plotly(plotly_heatmap(C, title=f"ℓ={slider_l.value}"))
     return
 
 
@@ -1336,7 +1380,7 @@ def _(mo):
 
     where $||\textbf{x} - \textbf{x}||^2$ is the element-wise squared difference matrix between each element of $x$ with each other element, and $ℓ$ is an adjustable parameter.
 
-    No need to worry about the math here too closely. The important thing to note is that the RBF kernel is a function of $\textbf{x}$ that generates a positive semidefinite matrix. It's covariance function, a.k.a. kernel, and it happens to be one of the most useful kernels in the real-world.
+    No need to worry about the math here too closely. The important thing to note is that the RBF kernel is a function of $\textbf{x}$ that generates a positive semidefinite matrix. It's a covariance function, a.k.a. kernel, and it happens to be one of the most useful kernels in the real-world.
     """)
     return
 
@@ -1355,29 +1399,29 @@ def _(mo, np, sp):
 @app.cell
 def _(mo):
     code = """
+# Try editing these to be whatever you want.
+# Note you can add as may points as you like!
+points = [1.549, 2, 3, 4, 5, 6, 10]
+# You can change the value of l to see how it changes the covariance matrix
+l = 1
 
-    # Try editing these to be whatever you want.
-    # Note you can add as may points as you like!
-    points = [1.549, 2, 3, 4, 5, 6, 10]
-    # You can change the value of l to see how it changes the covariance matrix
-    l = 1
-
-    #=========================================
-    # The rest of this code feeds these points into the pairwise_rbf function
-    # and plots the resulting covariance matrix
-    x_test =np.array(points).reshape(-1, 1) # Transpose
-    rbf_output = pairwise_rbf(x_test, x_test, l=l)
-    plot = sns.heatmap(rbf_output, annot=True, xticklabels=points, yticklabels=points )
-    """
+#=========================================
+# The rest of this code feeds these points into the pairwise_rbf function
+# and plots the resulting covariance matrix
+x_test = np.array(points).reshape(-1, 1)
+rbf_output = pairwise_rbf(x_test, x_test, l=l)
+plot = plotly_heatmap(rbf_output, annot=True, xticklabels=points, yticklabels=points)
+"""
     code_editor = mo.ui.code_editor(value=code)
     code_editor
     return (code_editor,)
 
 
 @app.cell
-def _(code_editor, plot):
-    exec(code_editor.value)
-    plot
+def _(code_editor, mo, np, pairwise_rbf, plotly_heatmap):
+    _locals = {"np": np, "pairwise_rbf": pairwise_rbf, "plotly_heatmap": plotly_heatmap}
+    exec(code_editor.value, _locals)
+    mo.ui.plotly(_locals.get("plot"))
     return
 
 
@@ -1573,7 +1617,7 @@ def _(mo):
 
 
 @app.cell
-def _(np, pd):
+def _(go, mo, np, pd):
     # @title
     X = np.array(
         [
@@ -1619,7 +1663,16 @@ def _(np, pd):
     X_test = np.linspace(DOMAIN[0], DOMAIN[1], 50).reshape(1, -1).T
     df = pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Cost of a house"]).sort_index()
     df.index.name = "Distance from the Nuclear Power Plant (miles)"
-    df.plot(style="o", color="red")
+    # Plot with Plotly instead of pandas/matplotlib
+    fig_housing = go.Figure(data=go.Scatter(
+        x=df.index, y=df["Cost of a house"], mode='markers', marker=dict(color='red')
+    ))
+    fig_housing.update_layout(
+        xaxis_title="Distance from the Nuclear Power Plant (miles)",
+        yaxis_title="Cost of a house",
+        margin=dict(l=60, r=20, t=40, b=60),
+    )
+    mo.ui.plotly(fig_housing)
     return X, X_axis, X_test, y, y_true
 
 
@@ -1677,7 +1730,7 @@ def _(mo):
 
     The one wrinkle here is the covariance function. For the off-diagonal elements, we need to use the covariance function between the unknown data and the known data. So _now_ we see why the kernel function is written as $k(\textbf{x}, \textbf{x})$; in this case we need to compute the covariance between two different vectors of data to fill in the off-diagonal blocks of the covariance matrix above.
 
-    Now question is can we massage the beast above into a probability distribution conditioned on the known data? Like so:
+    Can we massage the beast above into a probability distribution conditioned on the known data? Like so:
 
     $p(\textbf{c} | \textbf{x}, \textbf{c}_{\text{known}}, \textbf{x}_{\text{known}}) \sim ???$
 
@@ -1731,6 +1784,7 @@ def _(pairwise_rbf, sp):
         mu_2__1 = (sigma_21 @ sp.linalg.inv(sigma_11) @ y_train).flatten()
         sigma_2__1 = sigma_22 - sigma_21 @ sp.linalg.inv(sigma_11) @ sigma_12
         return (mu_2__1, sigma_2__1)
+
     return (gp_posterior,)
 
 
@@ -1866,83 +1920,72 @@ def _(mo):
 
 
 @app.cell
-def _(many):
-    many.value
+def _(get_many_fig, many, mo):
+    mo.vstack([mo.ui.plotly(get_many_fig()), many])
     return
 
 
 @app.cell
-def _(X, X_axis, X_test, gp_posterior, mo, np, pd, y, y_true):
-    # Suppose these are already defined somewhere in your code:
-    # X, y, X_test, y_true, X_axis
-    # gp_posterior(...) -> returns (mu, sigma)
-
-    def plot_baseline():
-        """
-        Plots only:
-          - The underlying (true) function in pink (#ff54e0).
-          - The known data points in red circles.
-          - X-axis and Y-axis labels.
-        Returns the Matplotlib axes object.
-        """
-        # Plot the pink underlying function (higher zorder => on top)
-        ax = (
-            pd.DataFrame(
-                y_true.flatten(),
-                index=X_axis.flatten(),
-                columns=["Underlying Function"],
-            )
-            .sort_index()
-            .plot(color="#ff54e0", linewidth=2, zorder=10)
+def _(X, X_axis, X_test, go, gp_posterior, mo, np, y, y_true):
+    # Create initial figure with baseline (true function + known data)
+    def create_baseline_fig():
+        fig = go.Figure()
+        # True underlying function (pink)
+        sorted_idx = np.argsort(X_axis.flatten())
+        fig.add_trace(go.Scatter(
+            x=X_axis.flatten()[sorted_idx],
+            y=y_true.flatten()[sorted_idx],
+            mode='lines',
+            line=dict(color='#ff54e0', width=2),
+            name='Underlying Function'
+        ))
+        # Known data points (red)
+        fig.add_trace(go.Scatter(
+            x=X.flatten(),
+            y=y.flatten(),
+            mode='markers',
+            marker=dict(color='red', size=8),
+            name='Known Data'
+        ))
+        fig.update_layout(
+            xaxis_title="Distance from Nuclear Power Plant (miles)",
+            yaxis_title="Price",
+            margin=dict(l=60, r=20, t=40, b=60),
+            height=400,
         )
-        # Plot the known data points in red (even higher zorder => on top of pink if overlapping)
-        (
-            pd.DataFrame(y.flatten(), index=X.flatten(), columns=["Known Data"])
-            .sort_index()
-            .plot(ax=ax, style="o", color="red", zorder=20)
-        )
-        ax.set_xlabel("Distance from Nuclear Power Plant (miles)")
-        ax.set_ylabel("Price")
-        return ax
+        return fig
 
-    def add_posterior_samples(ax):
-        """
-        Generates 1000 posterior samples from the Gaussian process
-        and plots them on the provided axes in blue with alpha=0.01,
-        but with a lower zorder to keep them behind the pink/red lines.
-        """
+    # State for the figure
+    get_many_fig, set_many_fig = mo.state(create_baseline_fig())
+
+    def add_posterior_samples(_):
+        """Add 500 posterior samples to the plot."""
+        fig = get_many_fig()
         # Normalize y
         _y_norm = (y - y.mean()) / y.std()
         mu_1, sigma_1 = gp_posterior(_y_norm, X, X_test, l=1)
-
-        # Draw the 1000 samples
+        # Draw 500 samples
         y_hat = np.random.multivariate_normal(mu_1, sigma_1, size=500) * y.std() + y.mean()
-
-        # Plot them with lower zorder so they're behind the baseline
-        (
-            pd.DataFrame(y_hat.T, index=X_test.flatten())
-            .sort_index()
-            .plot(ax=ax, alpha=0.01, legend=False, color="blue", zorder=1)
-        )
-
-    def _regenerate_plot(ax):
-        """
-        Called on button click to re-generate the plot:
-          1) Plot the baseline (pink + known data).
-          2) Add the 1000 posterior samples (blue, behind).
-        Returns the final axes object for chaining if needed.
-        """
-        add_posterior_samples(ax)
-        return ax
+        sorted_idx = np.argsort(X_test.flatten())
+        x_sorted = X_test.flatten()[sorted_idx]
+        # Add each sample as a trace
+        for i in range(y_hat.shape[0]):
+            fig.add_trace(go.Scatter(
+                x=x_sorted,
+                y=y_hat[i][sorted_idx],
+                mode='lines',
+                line=dict(color='blue', width=1),
+                opacity=0.02,
+                showlegend=False,
+            ))
+        set_many_fig(fig)
 
     many = mo.ui.button(
-        value=plot_baseline(),  # create the initial plot on load (pink + red)
-        on_click=_regenerate_plot,
+        on_click=add_posterior_samples,
         label="Sample 500 Functions from Posterior",
         kind="success",
     )
-    many
-    return (many,)
+    return (get_many_fig, many)
 
 
 @app.cell(hide_code=True)
@@ -1958,22 +2001,21 @@ def _(mo):
 
 
 @app.cell
-def _(X_test, pd, sigma, sns):
+def _(X_test, mo, pd, plotly_heatmap, sigma):
     # @title
     ix = X_test.flatten().round(2)
-    plt1 = sns.heatmap(pd.DataFrame(sigma, index=ix, columns=ix)).set_title(
-        "Conditional Covariance Matrix"
-    )
-    plt1
+    cov_fig = plotly_heatmap(pd.DataFrame(sigma, index=ix, columns=ix), title="Conditional Covariance Matrix")
+    mo.ui.plotly(cov_fig)
     return (ix,)
 
 
 @app.cell
-def _(ix, mu, pd, sns, y):
-    plt2 = sns.heatmap(pd.DataFrame((mu * y.std() + y.mean()).reshape(-1, 1), index=ix)).set_title(
-        "Conditional Mean Vector"
+def _(ix, mo, mu, pd, plotly_heatmap, y):
+    mean_fig = plotly_heatmap(
+        pd.DataFrame((mu * y.std() + y.mean()).reshape(-1, 1), index=ix),
+        title="Conditional Mean Vector"
     )
-    plt2
+    mo.ui.plotly(mean_fig)
     return
 
 
@@ -2020,6 +2062,7 @@ def _(mo):
 def _():
     import altair as alt
     from wigglystuff import Matrix
+
     return Matrix, alt
 
 

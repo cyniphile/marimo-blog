@@ -63,12 +63,14 @@ def _(go):
         ))
         fig.update_layout(
             title=title,
-            xaxis=dict(side='bottom', type='category'),
-            yaxis=dict(autorange='reversed', type='category'),
+            xaxis=dict(side='bottom', type='category', constrain='domain'),
+            yaxis=dict(autorange='reversed', type='category', scaleanchor='x', constrain='domain'),
             margin=dict(l=60, r=20, t=50, b=60),
         )
         return fig
-    return (plotly_heatmap,)
+
+    PLOTLY_CONFIG = {"responsive": True, "displayModeBar": False, "staticPlot": True}
+    return plotly_heatmap, PLOTLY_CONFIG
 
 
 @app.cell(hide_code=True)
@@ -136,7 +138,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, mo, np):
+def _(PLOTLY_CONFIG, go, mo, np):
     from plotly.subplots import make_subplots
     x_reg = np.linspace(-3, 3, 10)
     NOISE_VARIANCE = 1
@@ -160,7 +162,7 @@ def _(go, mo, np):
     fig_reg.add_trace(go.Scatter(x=x_reg, y=fit_y_b, mode='lines', line=dict(color='blue'), showlegend=False), row=1, col=2)
 
     fig_reg.update_layout(height=350, margin=dict(l=40, r=20, t=40, b=40))
-    mo.ui.plotly(fig_reg)
+    mo.ui.plotly(fig_reg, config=PLOTLY_CONFIG)
     return LOW_NOISE_VARIANCE, NOISE_VARIANCE, x_reg, y_low_noise, y_noise
 
 
@@ -995,9 +997,9 @@ def _(mo):
 
 
 @app.cell
-def _(mo, np, plotly_heatmap):
+def _(PLOTLY_CONFIG, mo, np, plotly_heatmap):
     # @title
-    mo.ui.plotly(plotly_heatmap(np.identity(50), title="Identity Matrix (50x50)"))
+    mo.ui.plotly(plotly_heatmap(np.identity(50), title="Identity Matrix (50x50)"), config=PLOTLY_CONFIG)
     return
 
 
@@ -1048,11 +1050,11 @@ def _(mo):
 
 
 @app.cell
-def _(mo, np, pairwise_rbf, pd, plotly_heatmap, slider_l):
+def _(PLOTLY_CONFIG, mo, np, pairwise_rbf, pd, plotly_heatmap, slider_l):
     _xa = np.arange(0, 50, 1).reshape(1, -1).T
     _xb = np.arange(0, 50, 1).reshape(1, -1).T
     C = pd.DataFrame(pairwise_rbf(_xa, _xb, slider_l.value))
-    mo.ui.plotly(plotly_heatmap(C, title=f"ℓ={slider_l.value}"))
+    mo.ui.plotly(plotly_heatmap(C, title=f"ℓ={slider_l.value}"), config=PLOTLY_CONFIG)
     return (C,)
 
 
@@ -1189,11 +1191,11 @@ def _(mo):
 
 
 @app.cell
-def _(k, mo, np, pd, plotly_heatmap, x_specific):
+def _(PLOTLY_CONFIG, k, mo, np, pd, plotly_heatmap, x_specific):
     cov_df = pd.DataFrame(
         np.round(k(x_specific), 4), index=np.round(x_specific, 4), columns=np.round(x_specific, 4)
     )
-    mo.ui.plotly(plotly_heatmap(cov_df, title="Covariance Function at Multiples of Pi"))
+    mo.ui.plotly(plotly_heatmap(cov_df, title="Covariance Function at Multiples of Pi"), config=PLOTLY_CONFIG)
     return
 
 
@@ -1271,11 +1273,11 @@ def _(mo):
 
 
 @app.cell
-def _(k, mo, np, pd, plotly_heatmap, x_real_big):
+def _(PLOTLY_CONFIG, k, mo, np, pd, plotly_heatmap, x_real_big):
     _cov_df = pd.DataFrame(
         np.round(k(x_real_big), 4), index=np.round(x_real_big, 4), columns=np.round(x_real_big, 4)
     )
-    mo.ui.plotly(plotly_heatmap(_cov_df, title="Covariance Function at 50<br>Evenly-Spaced Real Values"))
+    mo.ui.plotly(plotly_heatmap(_cov_df, title="Covariance Function at 50<br>Evenly-Spaced Real Values"), config=PLOTLY_CONFIG)
     return
 
 
@@ -1362,8 +1364,8 @@ def _(mo):
 
 
 @app.cell
-def _(C, mo, plotly_heatmap, slider_l):
-    mo.ui.plotly(plotly_heatmap(C, title=f"ℓ={slider_l.value}"))
+def _(C, PLOTLY_CONFIG, mo, plotly_heatmap, slider_l):
+    mo.ui.plotly(plotly_heatmap(C, title=f"ℓ={slider_l.value}"), config=PLOTLY_CONFIG)
     return
 
 
@@ -1418,10 +1420,10 @@ plot = plotly_heatmap(rbf_output, annot=True, xticklabels=points, yticklabels=po
 
 
 @app.cell
-def _(code_editor, mo, np, pairwise_rbf, plotly_heatmap):
+def _(PLOTLY_CONFIG, code_editor, mo, np, pairwise_rbf, plotly_heatmap):
     _locals = {"np": np, "pairwise_rbf": pairwise_rbf, "plotly_heatmap": plotly_heatmap}
     exec(code_editor.value, _locals)
-    mo.ui.plotly(_locals.get("plot"))
+    mo.ui.plotly(_locals.get("plot"), config=PLOTLY_CONFIG)
     return
 
 
@@ -1617,7 +1619,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, mo, np, pd):
+def _(PLOTLY_CONFIG, go, mo, np, pd):
     # @title
     X = np.array(
         [
@@ -1672,7 +1674,7 @@ def _(go, mo, np, pd):
         yaxis_title="Cost of a house",
         margin=dict(l=60, r=20, t=40, b=60),
     )
-    mo.ui.plotly(fig_housing)
+    mo.ui.plotly(fig_housing, config=PLOTLY_CONFIG)
     return X, X_axis, X_test, y, y_true
 
 
@@ -1920,8 +1922,8 @@ def _(mo):
 
 
 @app.cell
-def _(get_many_fig, many, mo):
-    mo.vstack([mo.ui.plotly(get_many_fig()), many])
+def _(PLOTLY_CONFIG, get_many_fig, many, mo):
+    mo.vstack([mo.ui.plotly(get_many_fig(), config=PLOTLY_CONFIG), many])
     return
 
 
@@ -2001,21 +2003,21 @@ def _(mo):
 
 
 @app.cell
-def _(X_test, mo, pd, plotly_heatmap, sigma):
+def _(PLOTLY_CONFIG, X_test, mo, pd, plotly_heatmap, sigma):
     # @title
     ix = X_test.flatten().round(2)
     cov_fig = plotly_heatmap(pd.DataFrame(sigma, index=ix, columns=ix), title="Conditional Covariance Matrix")
-    mo.ui.plotly(cov_fig)
+    mo.ui.plotly(cov_fig, config=PLOTLY_CONFIG)
     return (ix,)
 
 
 @app.cell
-def _(ix, mo, mu, pd, plotly_heatmap, y):
+def _(PLOTLY_CONFIG, ix, mo, mu, pd, plotly_heatmap, y):
     mean_fig = plotly_heatmap(
         pd.DataFrame((mu * y.std() + y.mean()).reshape(-1, 1), index=ix),
         title="Conditional Mean Vector"
     )
-    mo.ui.plotly(mean_fig)
+    mo.ui.plotly(mean_fig, config=PLOTLY_CONFIG)
     return
 
 

@@ -1,6 +1,5 @@
 # /// script
 # dependencies = [
-#   "wigglystuff",
 #   "altair",
 #   "numpy",
 #   "pandas",
@@ -622,7 +621,7 @@ def _(mo):
 def _(alt, arr, df_orig, mat, mo, np, pd):
     try:
         x_sim = np.random.multivariate_normal(
-            np.array(arr.matrix).reshape(-1), np.array(mat.matrix), 2500, check_valid="raise"
+            np.asarray(arr.value).reshape(-1), np.asarray(mat.value), 2500, check_valid="raise"
         )
         md = ""
     except ValueError as e:
@@ -659,9 +658,9 @@ def _(alt, arr, df_orig, mat, mo, np, pd):
 
 
 @app.cell
-def _(Matrix, mo, np):
-    mat = mo.ui.anywidget(Matrix(matrix=np.eye(2), mirror=True, step=0.1, positive=True))
-    arr = mo.ui.anywidget(Matrix(rows=2, cols=1, mirror=True, step=0.1, positive=True))
+def _(mo, np):
+    mat = mo.ui.matrix(np.eye(2), symmetric=True, step=0.1, min_value=0)
+    arr = mo.ui.matrix([0.0, 0.0], step=0.1, min_value=0)
     return arr, mat
 
 
@@ -2063,9 +2062,8 @@ def _(mo):
 @app.cell
 def _():
     import altair as alt
-    from wigglystuff import Matrix
 
-    return Matrix, alt
+    return (alt,)
 
 
 @app.cell
